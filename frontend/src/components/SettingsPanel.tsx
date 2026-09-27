@@ -28,6 +28,7 @@ import { devicePacksApi, mapsApi, type ApiError, type DevicePack } from '@/api/c
 import { cn } from '@/lib/cn';
 import { Select } from '@/components/ui/Select';
 import { ConfirmDialog } from '@/components/shell/ConfirmDialog';
+import { LANGUAGE_OPTIONS, useTranslation, type MessageKey } from '@/i18n';
 import {
   type DistributionMode,
   applyRuntimeProfile,
@@ -43,13 +44,13 @@ const SPEED_OPTIONS = [0.5, 1, 2, 4, 8].map((s) => ({ value: String(s), label: `
 
 type Section = 'general' | 'runtime' | 'nos' | 'devices' | 'packs' | 'account';
 
-const SECTIONS: { key: Section; label: string; icon: typeof Cpu }[] = [
-  { key: 'general', label: 'General', icon: Monitor },
-  { key: 'runtime', label: 'Runtime', icon: Wifi },
-  { key: 'nos', label: 'Network OS', icon: Package },
-  { key: 'devices', label: 'Device Types', icon: Radio },
-  { key: 'packs', label: 'Device Packs', icon: Boxes },
-  { key: 'account', label: 'Account', icon: Cpu },
+const SECTIONS: { key: Section; labelKey: MessageKey; icon: typeof Cpu }[] = [
+  { key: 'general', labelKey: 'settings.general', icon: Monitor },
+  { key: 'runtime', labelKey: 'settings.runtime', icon: Wifi },
+  { key: 'nos', labelKey: 'settings.networkOs', icon: Package },
+  { key: 'devices', labelKey: 'settings.deviceTypes', icon: Radio },
+  { key: 'packs', labelKey: 'settings.devicePacks', icon: Boxes },
+  { key: 'account', labelKey: 'settings.account', icon: Cpu },
 ];
 
 /** Built-in NOS list (read-only display). */
@@ -68,13 +69,14 @@ const BUILTIN_NOS = [
 ];
 
 export function SettingsPanel() {
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<Section>('general');
 
   return (
     <div className="flex h-full">
       {/* Sidebar */}
       <nav className="w-40 shrink-0 border-r border-fg/10 py-3">
-        {SECTIONS.map(({ key, label, icon: Icon }) => (
+        {SECTIONS.map(({ key, labelKey, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setActiveSection(key)}
@@ -86,7 +88,7 @@ export function SettingsPanel() {
             )}
           >
             <Icon className="h-4 w-4 shrink-0" />
-            {label}
+            {t(labelKey)}
           </button>
         ))}
       </nav>
@@ -303,6 +305,7 @@ function RuntimeSection() {
 /* ---------- General ---------- */
 
 function GeneralSection() {
+  const { locale, setLocale, t } = useTranslation();
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);
   const simSpeed = useUiStore((s) => s.simSpeed);
@@ -310,13 +313,23 @@ function GeneralSection() {
 
   return (
     <div className="space-y-6">
-      <SectionHeading>Appearance</SectionHeading>
+      <SectionHeading>{t('settings.appearance')}</SectionHeading>
 
-      <Row label="Theme" description="Light or Dark interface.">
+      <Row label={t('settings.language')} description={t('settings.languageDescription')}>
+        <Select
+          aria-label={t('settings.language')}
+          value={locale}
+          onChange={(value) => setLocale(value as typeof locale)}
+          options={LANGUAGE_OPTIONS}
+          className="w-44"
+        />
+      </Row>
+
+      <Row label={t('settings.theme')} description={t('settings.themeDescription')}>
         <div className="flex flex-wrap gap-2">
           {([
-            { key: 'dark', label: 'Dark', icon: Moon },
-            { key: 'light', label: 'Light', icon: Sun },
+            { key: 'dark', label: t('settings.dark'), icon: Moon },
+            { key: 'light', label: t('settings.light'), icon: Sun },
           ] as const).map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -336,11 +349,11 @@ function GeneralSection() {
         </div>
       </Row>
 
-      <SectionHeading>Simulation</SectionHeading>
+      <SectionHeading>{t('settings.simulation')}</SectionHeading>
 
-      <Row label="Default speed" description="Simulation speed multiplier applied on play.">
+      <Row label={t('settings.defaultSpeed')} description={t('settings.defaultSpeedDescription')}>
         <Select
-          aria-label="Default simulation speed"
+          aria-label={t('settings.defaultSpeedAria')}
           value={String(simSpeed)}
           onChange={(v) => setSimSpeed(Number(v))}
           options={SPEED_OPTIONS}
@@ -348,10 +361,10 @@ function GeneralSection() {
         />
       </Row>
 
-      <SectionHeading>Offline Map</SectionHeading>
+      <SectionHeading>{t('settings.offlineMap')}</SectionHeading>
       <OfflineMapSection />
 
-      <SectionHeading>About</SectionHeading>
+      <SectionHeading>{t('settings.about')}</SectionHeading>
       <div className="rounded-lg border border-fg/10 bg-fg/5 px-4 py-3 text-sm text-fg/60">
         <p className="font-medium text-fg/80">NetGeo v{__APP_VERSION__} Alpha</p>
         <p className="mt-0.5 text-xs">

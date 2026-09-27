@@ -18,8 +18,10 @@ import { OnboardingModal, ONBOARDING_KEY } from '@/components/OnboardingModal';
 import { FirstRunMapSetup } from '@/components/FirstRunMapSetup';
 import { AddressingWizard } from '@/components/lab/AddressingWizard';
 import { IconLibraryModal } from '@/components/icons/IconLibraryModal';
+import { useTranslation } from '@/i18n';
 
 export function ModalLayer() {
+  const { t } = useTranslation();
   const activeModal = useUiStore((s) => s.activeModal);
   const openModal = useUiStore((s) => s.openModal);
   const closeModal = useUiStore((s) => s.closeModal);
@@ -61,7 +63,7 @@ export function ModalLayer() {
 
   if (activeModal === 'settings')
     return (
-      <ModalScrim label="Settings" onClose={closeModal} className="max-w-3xl">
+      <ModalScrim label={t('nav.settings')} onClose={closeModal} className="max-w-3xl">
         <div className="h-[70vh]">
           <SettingsPanel />
         </div>

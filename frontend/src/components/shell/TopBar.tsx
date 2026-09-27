@@ -23,6 +23,7 @@ import { HScrollToolbar } from '@/components/shell/HScrollToolbar';
 import { GROUPS, isGroupActive, activateMember, type RailMember } from '@/components/shell/NavigationRail';
 import { useWindowChrome, WindowButtons } from '@/components/shell/NativeTitleBar';
 import { cn } from '@/lib/cn';
+import { useTranslation } from '@/i18n';
 
 /** Stops a mousedown from bubbling to the header's native-chrome drag
  * handler — the "no-drag on interactive elements" half of the drag contract
@@ -50,6 +51,7 @@ function NetGeoMark() {
  * Hidden entirely when the active group has only one member (Projects).
  */
 function SubNavStrip() {
+  const { t } = useTranslation();
   const viewMode = useUiStore((s) => s.viewMode);
   const activeModal = useUiStore((s) => s.activeModal);
 
@@ -61,7 +63,7 @@ function SubNavStrip() {
   return (
     <div
       role="tablist"
-      aria-label={`${group.label} sections`}
+      aria-label={`${t(group.labelKey)} ${t('topbar.sections')}`}
       className="flex shrink-0 items-center gap-0.5 rounded-lg border border-fg/10 bg-fg/5 p-0.5"
     >
       {group.members.map((m) => {
@@ -72,9 +74,9 @@ function SubNavStrip() {
             key={m.key}
             role="tab"
             aria-selected={active}
-            aria-label={m.label}
+            aria-label={t(m.labelKey)}
             onClick={() => activateMember(m)}
-            title={m.label}
+            title={t(m.labelKey)}
             className={cn(
               'flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors',
               active ? 'bg-accent/20 text-accent' : 'text-fg/55 hover:bg-fg/8 hover:text-fg/90',
@@ -86,7 +88,7 @@ function SubNavStrip() {
                 whitespace-nowrap and the tablist could shrink below its
                 content width) — the accessible name survives via
                 aria-label/title above regardless of whether this renders. */}
-            <span className="hidden whitespace-nowrap 2xl:inline">{m.label}</span>
+            <span className="hidden whitespace-nowrap 2xl:inline">{t(m.labelKey)}</span>
           </button>
         );
       })}
@@ -95,6 +97,7 @@ function SubNavStrip() {
 }
 
 export function TopBar({ projectName, conn }: TopBarProps) {
+  const { t } = useTranslation();
   const chrome = useWindowChrome();
   const theme = useUiStore((s) => s.theme);
   const toggleTheme = useUiStore((s) => s.toggleTheme);
@@ -157,9 +160,9 @@ export function TopBar({ projectName, conn }: TopBarProps) {
         <span className="hidden font-display text-sm tracking-tight sm:inline">NetGeo</span>
         <span className="text-fg/25">/</span>
         <span className="max-w-20 truncate text-xs font-normal text-fg/70 2xl:max-w-[160px]">{projectName}</span>
-        <span className={cn('hidden items-center gap-1 text-[11px] 2xl:inline-flex', dirty ? 'text-warning' : 'text-success')} title={dirty ? 'Unsaved local changes' : 'All changes saved'}>
+        <span className={cn('hidden items-center gap-1 text-[11px] 2xl:inline-flex', dirty ? 'text-warning' : 'text-success')} title={dirty ? t('topbar.unsavedTitle') : t('topbar.savedTitle')}>
           {dirty ? <span className="h-1.5 w-1.5 rounded-full bg-warning" /> : <Check className="h-3.5 w-3.5" />}
-          {dirty ? 'Unsaved' : 'Saved'}
+          {dirty ? t('topbar.unsaved') : t('topbar.saved')}
         </span>
       </div>
 
@@ -181,10 +184,10 @@ export function TopBar({ projectName, conn }: TopBarProps) {
         <button
           onClick={() => openModal('command')}
           className="flex h-8 w-8 items-center justify-center rounded-lg border border-fg/10 bg-fg/5 text-left text-xs text-fg/40 transition-colors hover:border-fg/20 hover:bg-fg/8 xl:w-28 xl:justify-start xl:gap-2 xl:px-3 2xl:w-64"
-          aria-label="Open command palette"
+          aria-label={t('topbar.openCommand')}
         >
           <Search className="h-3.5 w-3.5 shrink-0" />
-          <span className="hidden flex-1 truncate xl:inline">Search…</span>
+          <span className="hidden flex-1 truncate xl:inline">{t('topbar.search')}</span>
           <kbd className="hidden shrink-0 rounded border border-fg/15 px-1.5 py-0.5 font-mono text-[10px] 2xl:inline">⌘K</kbd>
         </button>
 
@@ -195,8 +198,8 @@ export function TopBar({ projectName, conn }: TopBarProps) {
           <button
             onClick={() => projectId && openModal('addressingWizard')}
             disabled={!projectId}
-            aria-label="Open the auto-addressing wizard"
-            title="Auto-address: preview and apply a dual-stack IP plan"
+            aria-label={t('topbar.autoAddress')}
+            title={t('topbar.autoAddressTitle')}
             className={cn(
               'grid h-8 w-8 place-items-center rounded-md transition-colors',
               'text-fg/60 hover:bg-fg/10 hover:text-fg disabled:opacity-40',
@@ -217,7 +220,7 @@ export function TopBar({ projectName, conn }: TopBarProps) {
 
           <button
             onClick={toggleTheme}
-            aria-label="Toggle theme"
+            aria-label={t('topbar.toggleTheme')}
             className="grid h-8 w-8 place-items-center rounded-md text-fg/60 hover:bg-fg/10 hover:text-fg"
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -253,7 +256,7 @@ export function TopBar({ projectName, conn }: TopBarProps) {
             <div className={cn('glass-strong absolute right-0 top-10 min-w-[160px] overflow-hidden rounded-lg border border-fg/15 shadow-glass-lg animate-fade-in', zc.popover)}>
               <div className="border-b border-fg/10 px-3 py-2">
                 <p className="text-xs font-medium text-fg/80">{username}</p>
-                <p className="text-[10px] text-fg/40">Local account</p>
+                <p className="text-[10px] text-fg/40">{t('topbar.localAccount')}</p>
               </div>
               <button
                 onClick={() => {
@@ -262,7 +265,7 @@ export function TopBar({ projectName, conn }: TopBarProps) {
                 }}
                 className="flex w-full items-center gap-2 px-3 py-2 text-xs text-danger/80 hover:bg-danger/10 hover:text-danger"
               >
-                <LogOut className="h-3.5 w-3.5" /> Sign out
+                <LogOut className="h-3.5 w-3.5" /> {t('topbar.signOut')}
               </button>
             </div>
           )}

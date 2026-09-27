@@ -52,14 +52,15 @@ import { useUiStore, type ViewMode } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import { RAIL_BOTTOM_CLEAR, RAIL_TOP_CLEAR } from '@/theme/shell';
+import { useTranslation, type MessageKey } from '@/i18n';
 
 export type RailMember =
-  | { key: string; label: string; icon: LucideIcon; view: ViewMode }
-  | { key: string; label: string; icon: LucideIcon; action: 'scenarios' };
+  | { key: string; labelKey: MessageKey; icon: LucideIcon; view: ViewMode }
+  | { key: string; labelKey: MessageKey; icon: LucideIcon; action: 'scenarios' };
 
 export interface RailGroup {
   key: string;
-  label: string;
+  labelKey: MessageKey;
   icon: LucideIcon;
   /** First member is the group's primary — what a rail click navigates to. */
   members: [RailMember, ...RailMember[]];
@@ -70,43 +71,43 @@ export interface RailGroup {
 export const GROUPS: RailGroup[] = [
   {
     key: 'projects',
-    label: 'Projects',
+    labelKey: 'nav.projects',
     icon: FolderKanban,
-    members: [{ key: 'projects', label: 'Projects', icon: FolderKanban, view: 'projects' }],
+    members: [{ key: 'projects', labelKey: 'nav.projects', icon: FolderKanban, view: 'projects' }],
   },
   {
     key: 'design',
-    label: 'Design',
+    labelKey: 'nav.design',
     icon: Network,
     members: [
-      { key: 'topology', label: 'Topology', icon: Network, view: 'topology' },
-      { key: 'plant', label: 'Physical Plant', icon: Server, view: 'plant' },
-      { key: 'config', label: 'Config Center', icon: FileCode2, view: 'config' },
+      { key: 'topology', labelKey: 'nav.topology', icon: Network, view: 'topology' },
+      { key: 'plant', labelKey: 'nav.plant', icon: Server, view: 'plant' },
+      { key: 'config', labelKey: 'nav.config', icon: FileCode2, view: 'config' },
     ],
   },
   {
     key: 'map',
-    label: 'Map',
+    labelKey: 'nav.map',
     icon: MapIcon,
-    members: [{ key: 'map', label: 'Map', icon: MapIcon, view: 'map' }],
+    members: [{ key: 'map', labelKey: 'nav.map', icon: MapIcon, view: 'map' }],
   },
   {
     key: 'simulate',
-    label: 'Simulate',
+    labelKey: 'nav.simulate',
     icon: Boxes,
     members: [
-      { key: 'twin', label: 'Digital Twin', icon: Boxes, view: 'twin' },
-      { key: 'edu', label: 'Education Lab', icon: GraduationCap, view: 'edu' },
-      { key: 'labs', label: 'Labs', icon: FlaskConical, action: 'scenarios' },
+      { key: 'twin', labelKey: 'nav.twin', icon: Boxes, view: 'twin' },
+      { key: 'edu', labelKey: 'nav.education', icon: GraduationCap, view: 'edu' },
+      { key: 'labs', labelKey: 'nav.labs', icon: FlaskConical, action: 'scenarios' },
     ],
   },
   {
     key: 'operate',
-    label: 'Operate',
+    labelKey: 'nav.operate',
     icon: Siren,
     members: [
-      { key: 'problems', label: 'Problem Center', icon: Siren, view: 'problems' },
-      { key: 'reports', label: 'Reports Center', icon: FileBarChart2, view: 'reports' },
+      { key: 'problems', labelKey: 'nav.problems', icon: Siren, view: 'problems' },
+      { key: 'reports', labelKey: 'nav.reports', icon: FileBarChart2, view: 'reports' },
     ],
   },
 ];
@@ -127,9 +128,10 @@ export function activateMember(member: RailMember): void {
   ui.openModal('scenarios');
 }
 
-const SETTINGS = { key: 'settings', label: 'Settings', icon: Settings2 };
+const SETTINGS = { key: 'settings', labelKey: 'nav.settings' as const, icon: Settings2 };
 
 export function NavigationRail() {
+  const { t } = useTranslation();
   const viewMode = useUiStore((s) => s.viewMode);
   const activeModal = useUiStore((s) => s.activeModal);
 
@@ -164,7 +166,7 @@ export function NavigationRail() {
     >
       <nav
         ref={chassisRef}
-        aria-label="Primary"
+        aria-label={t('nav.primary')}
         className={cn(
           'rail-chassis pointer-events-auto relative flex w-full min-h-0 max-h-full flex-col items-center gap-1 overflow-hidden rounded-xl border py-4',
           zc.workspace,
@@ -206,7 +208,7 @@ export function NavigationRail() {
               <RailButton
                 key={group.key}
                 icon={group.icon}
-                label={group.label}
+                label={t(group.labelKey)}
                 active={isGroupActive(group, viewMode)}
                 onClick={() => activateMember(group.members[0])}
               />
@@ -219,7 +221,7 @@ export function NavigationRail() {
           <div className="w-full shrink-0 px-2">
             <RailButton
               icon={SETTINGS.icon}
-              label={SETTINGS.label}
+              label={t(SETTINGS.labelKey)}
               active={activeModal === 'settings'}
               onClick={() => useUiStore.getState().openModal('settings')}
             />
