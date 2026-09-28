@@ -24,6 +24,7 @@ import { useMapStore } from '@/store/mapStore';
 import type { MapTileKey } from '@/config/mapTiles';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useTranslation } from '@/i18n';
 
 const LAYERS: { key: MapTileKey; label: string; icon: typeof Satellite }[] = [
   { key: 'satellite', label: 'Satellite', icon: Satellite },
@@ -47,6 +48,7 @@ export interface MapLayerSwitcherProps {
 }
 
 export function MapLayerSwitcher({ tileStatus = 'ready', offline = null }: MapLayerSwitcherProps) {
+  const { t } = useTranslation();
   const mapLayer = useMapStore((s) => s.mapLayer);
   const setMapLayer = useMapStore((s) => s.setMapLayer);
 
@@ -55,9 +57,9 @@ export function MapLayerSwitcher({ tileStatus = 'ready', offline = null }: MapLa
       <div
         className="glass-strong flex gap-1 rounded-xl border border-fg/15 p-1 shadow-glass-lg"
         role="group"
-        aria-label="Map layer"
+        aria-label={t('map.layer')}
       >
-        {LAYERS.map(({ key, label, icon: Icon }) => {
+        {LAYERS.map(({ key, icon: Icon }) => {
           const active = mapLayer === key;
           return (
             <button
@@ -70,7 +72,7 @@ export function MapLayerSwitcher({ tileStatus = 'ready', offline = null }: MapLa
               )}
             >
               <Icon className="h-3.5 w-3.5" />
-              {label}
+              {key === 'satellite' ? t('map.satellite') : t('map.street')}
             </button>
           );
         })}
@@ -84,7 +86,7 @@ export function MapLayerSwitcher({ tileStatus = 'ready', offline = null }: MapLa
           role="status"
           className="glass-strong rounded-md border border-fg/15 px-2 py-0.5 text-[11px] font-medium text-fg/55"
         >
-          Offline{offline.region ? ` · ${offline.region}` : ''}
+          {t('map.offline')}{offline.region ? ` · ${offline.region}` : ''}
         </span>
       )}
       {tileStatus !== 'ready' && (
@@ -100,8 +102,8 @@ export function MapLayerSwitcher({ tileStatus = 'ready', offline = null }: MapLa
           {tileStatus === 'error'
             ? offline
               ? 'Area di luar cakupan peta offline'
-              : 'Tiles unavailable'
-            : 'Loading tiles…'}
+              : t('map.tilesUnavailable')
+            : t('map.loadingTiles')}
         </span>
       )}
     </div>

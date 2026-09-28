@@ -11,8 +11,10 @@ import { labApi, type LabMode } from '@/api/client';
 import { useLabStore } from '@/store/labStore';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
+import { useTranslation } from '@/i18n';
 
 export function ModeSwitch() {
+  const { t } = useTranslation();
   const projectId = useUiStore((s) => s.projectId);
   const mode = useLabStore((s) => s.mode);
   const setMode = useLabStore((s) => s.setMode);
@@ -40,21 +42,21 @@ export function ModeSwitch() {
     <div
       className="flex shrink-0 items-center rounded-md border border-fg/10 bg-fg/5 p-0.5"
       role="group"
-      aria-label="Lab mode"
+      aria-label={t('mode.lab')}
     >
       <ModeButton
         active={mode === 'realtime'}
         onClick={() => pick('realtime')}
         icon={Clock}
-        label="Realtime"
-        title="Realtime: actions run the lab to completion"
+        label={t('mode.realtime')}
+        title={t('mode.realtimeHint')}
       />
       <ModeButton
         active={mode === 'simulation'}
         onClick={() => pick('simulation')}
         icon={ListVideo}
-        label="Simulation"
-        title="Simulation: step through every event in the ledger"
+        label={t('mode.simulation')}
+        title={t('mode.simulationHint')}
       />
     </div>
   );

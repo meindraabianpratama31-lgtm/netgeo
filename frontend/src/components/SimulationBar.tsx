@@ -9,11 +9,13 @@ import { simApi } from '@/api/client';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
 import { Select } from '@/components/ui/Select';
+import { useTranslation } from '@/i18n';
 
 const SPEEDS = [0.5, 1, 2, 4, 8];
 const SPEED_OPTIONS = SPEEDS.map((s) => ({ value: String(s), label: `${s}×` }));
 
 export function SimulationBar() {
+  const { t } = useTranslation();
   const { simState, simSpeed, setSimState, setSimSpeed, projectId } = useUiStore();
 
   const guarded = (nextState: typeof simState, fn: () => Promise<unknown>) => {
@@ -41,18 +43,18 @@ export function SimulationBar() {
 
   return (
     <div className="flex items-center gap-1 rounded-md border border-fg/10 bg-fg/5 px-1 py-0.5">
-      <CtrlButton label={running ? 'Pause' : 'Play'} onClick={running ? onPause : onPlay} active={running}>
+      <CtrlButton label={running ? t('sim.pause') : t('sim.play')} onClick={running ? onPause : onPlay} active={running}>
         {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
       </CtrlButton>
-      <CtrlButton label="Step" onClick={onStep}>
+      <CtrlButton label={t('sim.step')} onClick={onStep}>
         <StepForward className="h-4 w-4" />
       </CtrlButton>
-      <CtrlButton label="Stop" onClick={onStop}>
+      <CtrlButton label={t('sim.stop')} onClick={onStop}>
         <Square className="h-4 w-4" />
       </CtrlButton>
 
       <Select
-        aria-label="Simulation speed"
+        aria-label={t('sim.speed')}
         value={String(simSpeed)}
         onChange={(v) => setSimSpeed(Number(v))}
         options={SPEED_OPTIONS}
