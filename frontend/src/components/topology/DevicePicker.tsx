@@ -26,6 +26,7 @@ import { placeDevice } from '@/lib/placeDevice';
 import { zc } from '@/theme/z';
 import type { NodeKind } from '@/api/types';
 import { cn } from '@/lib/cn';
+import { useTranslation } from '@/i18n';
 
 const KIND_ICON: Record<NodeKind, typeof Router> = {
   router: Router,
@@ -61,6 +62,7 @@ function pushRecent(key: string): void {
 }
 
 export function DevicePicker() {
+  const { t } = useTranslation();
   const open = useUiStore((s) => s.activeModal === 'devicePicker');
   const pickerPos = useTopoUiStore((s) => s.pickerPos);
   const closePicker = useTopoUiStore((s) => s.closePicker);
@@ -104,7 +106,7 @@ export function DevicePicker() {
       className={cn('fixed inset-0 grid place-items-start justify-center pt-[12vh]', zc.modal)}
       role="dialog"
       aria-modal="true"
-      aria-label="Add device"
+      aria-label={t('topology.addDevice')}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) closePicker();
       }}
@@ -127,13 +129,13 @@ export function DevicePicker() {
                 if (first) pick(first);
               }
             }}
-            placeholder="Search devices, templates, vendors…"
-            aria-label="Search devices"
+            placeholder={t('picker.search')}
+            aria-label={t('picker.searchAria')}
             className="w-full bg-transparent text-sm text-fg/90 placeholder:text-fg/35 outline-none"
           />
           <button
             onClick={closePicker}
-            aria-label="Close"
+            aria-label={t('picker.close')}
             className="grid h-6 w-6 shrink-0 place-items-center rounded text-fg/40 hover:bg-fg/10 hover:text-fg/80"
           >
             <X className="h-4 w-4" />
@@ -144,7 +146,7 @@ export function DevicePicker() {
           {/* Recent */}
           {!query && recent.length > 0 && (
             <section>
-              <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-fg/35">Recent</h3>
+              <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-fg/35">{t('picker.recent')}</h3>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {recent.map((d) => (
                   <DeviceButton key={`r-${d.key}`} device={d} onPick={pick} />
@@ -172,12 +174,12 @@ export function DevicePicker() {
           })}
 
           {query && deviceCatalog.every((g) => g.devices.every((d) => !matches(d))) && (
-            <p className="px-1 py-6 text-center text-sm text-fg/40">No device matches “{q}”.</p>
+            <p className="px-1 py-6 text-center text-sm text-fg/40">{t('picker.noMatch', { query: q })}</p>
           )}
         </div>
 
         <div className="shrink-0 border-t border-fg/8 px-3.5 py-2 text-[10px] text-fg/30">
-          Enter to add the first match · Esc to close
+          {t('picker.hint')}
         </div>
       </div>
     </div>

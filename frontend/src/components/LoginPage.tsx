@@ -13,6 +13,8 @@ import { useAuthStore } from '@/store/authStore';
 import { applyTheme } from '@/theme/tokens';
 import { useWindowChrome, WindowButtons, BrandGlyph } from '@/components/shell/NativeTitleBar';
 import { cn } from '@/lib/cn';
+import { LANGUAGE_OPTIONS, useTranslation } from '@/i18n';
+import { Select } from '@/components/ui/Select';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -28,6 +30,7 @@ function BrandMark({ className }: { className?: string }) {
 }
 
 export function LoginPage() {
+  const { locale, setLocale, t } = useTranslation();
   const chrome = useWindowChrome();
   const login = useAuthStore((s) => s.login);
   const setup = useAuthStore((s) => s.setup);
@@ -116,6 +119,15 @@ export function LoginPage() {
         </div>
       )}
 
+      <div className="absolute right-4 top-12 z-10 w-44" onMouseDown={(event) => event.stopPropagation()}>
+        <Select
+          aria-label={t('settings.language')}
+          value={locale}
+          onChange={(value) => setLocale(value as typeof locale)}
+          options={LANGUAGE_OPTIONS}
+        />
+      </div>
+
       {/* Decorative blobs */}
       <div
         className="pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-20 blur-3xl"
@@ -136,7 +148,7 @@ export function LoginPage() {
             </div>
             <h1 className="text-xl font-semibold text-fg">NetGeo</h1>
             <p className="mt-1 text-sm text-fg/50">
-              {isSetup ? 'First-run setup — create your admin account' : 'Network Simulation Platform'}
+              {isSetup ? t('login.firstRun') : t('login.platform')}
             </p>
           </div>
 
@@ -145,7 +157,7 @@ export function LoginPage() {
             {/* Username */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium uppercase tracking-wide text-fg/50">
-                Username
+                {t('login.username')}
               </label>
               <div className="relative">
                 <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg/35" />
@@ -169,7 +181,7 @@ export function LoginPage() {
             {/* Password */}
             <div className="space-y-1.5">
               <label className="block text-xs font-medium uppercase tracking-wide text-fg/50">
-                {isSetup ? 'New password' : 'Password'}
+                {isSetup ? t('login.newPassword') : t('login.password')}
               </label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg/35" />
@@ -191,14 +203,14 @@ export function LoginPage() {
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-fg/35 hover:text-fg/60"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {passwordTooShort && (
                 <p className="text-xs text-danger">
-                  At least {MIN_PASSWORD_LENGTH} characters.
+                  {t('login.minCharacters', { count: MIN_PASSWORD_LENGTH })}
                 </p>
               )}
             </div>
@@ -207,7 +219,7 @@ export function LoginPage() {
             {isSetup && (
               <div className="space-y-1.5">
                 <label className="block text-xs font-medium uppercase tracking-wide text-fg/50">
-                  Confirm password
+                  {t('login.confirmPassword')}
                 </label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg/35" />
@@ -226,7 +238,7 @@ export function LoginPage() {
                   />
                 </div>
                 {passwordsMismatch && (
-                  <p className="text-xs text-danger">Passwords do not match.</p>
+                  <p className="text-xs text-danger">{t('login.passwordMismatch')}</p>
                 )}
               </div>
             )}
@@ -257,20 +269,20 @@ export function LoginPage() {
                 <LogIn className="h-4 w-4" />
               )}
               {loading
-                ? isSetup ? 'Creating account…' : 'Signing in…'
-                : isSetup ? 'Create account & sign in' : 'Sign in'}
+                ? isSetup ? t('login.creating') : t('login.signingIn')
+                : isSetup ? t('login.createAndSignIn') : t('login.signIn')}
             </button>
 
             <p className="text-center text-[11px] text-fg/25">
               {isSetup
-                ? 'This one-time setup secures your NetGeo instance'
-                : 'Sign in with your NetGeo account'}
+                ? t('login.setupHint')
+                : t('login.signInHint')}
             </p>
           </form>
         </div>
 
         <p className="mt-6 text-center text-xs text-fg/20">
-          NetGeo v{__APP_VERSION__} &mdash; Network Simulation Platform
+          NetGeo v{__APP_VERSION__} &mdash; {t('login.platform')}
         </p>
       </div>
     </div>

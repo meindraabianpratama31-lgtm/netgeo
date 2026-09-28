@@ -45,6 +45,7 @@ import { placeDevice } from '@/lib/placeDevice';
 import { mediaForIfaceTypes } from '@/lib/cableMedia';
 import { linkStatusColors, nodeColors } from '@/theme/tokens';
 import type { IfaceType, LinkModel, LinkType, NodeModel } from '@/api/types';
+import { useTranslation } from '@/i18n';
 import { cn } from '@/lib/cn';
 
 const nodeTypes = { device: DeviceNode };
@@ -60,6 +61,7 @@ const EDGE_DASH: Record<LinkType, string | undefined> = {
 };
 
 export function TopologyCanvas({ topLeftExtra }: { topLeftExtra?: ReactNode } = {}) {
+  const { t } = useTranslation();
   const rfRef = useRef<ReactFlowInstance<Node<DeviceNodeData>, Edge> | null>(null);
   const nodesMap = useTopologyStore((s) => s.nodes);
   const linksMap = useTopologyStore((s) => s.links);
@@ -600,12 +602,12 @@ export function TopologyCanvas({ topLeftExtra }: { topLeftExtra?: ReactNode } = 
               <button
                 onClick={onAutoLayout}
                 disabled={rfNodes.length === 0}
-                title="Auto-layout (hierarki) — repositions every node, cannot be undone"
-                aria-label="Auto-layout hierarchy"
+                title={t('topology.autoLayoutHint')}
+                aria-label={t('topology.autoLayout')}
                 className="glass flex shrink-0 items-center gap-1.5 rounded-lg border border-fg/10 px-2.5 py-1.5 text-xs font-medium text-fg/70 shadow-glass hover:bg-fg/10 hover:text-fg/90 disabled:pointer-events-none disabled:opacity-40"
               >
                 <Waypoints className="h-3.5 w-3.5" />
-                Auto-layout
+                {t('topology.autoLayout')}
               </button>
             </div>
           </div>
@@ -665,6 +667,7 @@ function CanvasToolbar({
   onLocate: (n: NodeModel) => void;
   onAddDevice: () => void;
 }) {
+  const { t } = useTranslation();
   const [q, setQ] = useState('');
   const query = q.trim().toLowerCase();
 
@@ -696,14 +699,14 @@ function CanvasToolbar({
             if (e.key === 'Enter' && matches[0]) pick(matches[0]);
             if (e.key === 'Escape') setQ('');
           }}
-          placeholder={nodes ? 'Find device or IP…' : 'No devices yet'}
-          aria-label="Find device on canvas"
+          placeholder={nodes ? t('topology.find') : t('topology.noDevices')}
+          aria-label={t('topology.findAria')}
           className="w-full bg-transparent text-xs text-fg/90 placeholder:text-fg/35 outline-none"
         />
         {q ? (
           <button
             onClick={() => setQ('')}
-            aria-label="Clear search"
+            aria-label={t('topology.clearSearch')}
             className="grid h-5 w-5 shrink-0 place-items-center rounded text-fg/40 hover:bg-fg/10 hover:text-fg/70"
           >
             <X className="h-3.5 w-3.5" />
@@ -711,8 +714,8 @@ function CanvasToolbar({
         ) : (
           <button
             onClick={onAddDevice}
-            aria-label="Add device"
-            title="Add device"
+            aria-label={t('topology.addDevice')}
+            title={t('topology.addDevice')}
             className="grid h-5 w-5 shrink-0 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg/90"
           >
             <Plus className="h-4 w-4" />
@@ -723,7 +726,7 @@ function CanvasToolbar({
       {query && (
         <ul className="glass mt-1.5 max-h-56 overflow-auto rounded-lg border border-fg/10 py-1 shadow-glass ng-scroll">
           {matches.length === 0 ? (
-            <li className="px-3 py-2 text-xs text-fg/40">No match for “{q}”</li>
+            <li className="px-3 py-2 text-xs text-fg/40">{t('topology.noMatch', { query: q })}</li>
           ) : (
             matches.map((n) => (
               <li key={n.id}>

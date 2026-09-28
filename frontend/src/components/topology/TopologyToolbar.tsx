@@ -17,8 +17,10 @@ import { useTopoUiStore } from '@/store/topoUiStore';
 import { useTopologyStore } from '@/store/topologyStore';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useTranslation } from '@/i18n';
 
 export function TopologyToolbar() {
+  const { t } = useTranslation();
   const tool = useTopoUiStore((s) => s.tool);
   const setTool = useTopoUiStore((s) => s.setTool);
   const openPicker = useTopoUiStore((s) => s.openPicker);
@@ -26,26 +28,26 @@ export function TopologyToolbar() {
   const selectedNodeId = useTopologyStore((s) => s.selectedNodeId);
   const selectedLinkId = useTopologyStore((s) => s.selectedLinkId);
   const hasSelection = Boolean(selectedNodeId || selectedLinkId);
-  const deleteLabel = selectedNodeId ? 'Delete device' : selectedLinkId ? 'Delete link' : 'Delete';
+  const deleteLabel = selectedNodeId ? t('topology.deleteDevice') : selectedLinkId ? t('topology.deleteLink') : t('topology.delete');
 
   return (
     <div className={cn('pointer-events-auto absolute bottom-4 left-4 flex items-center gap-1', zc.workspace)}>
       <div className="glass flex items-center gap-1 rounded-full border border-fg/12 p-1 shadow-glass">
         <button
           onClick={() => openPicker()}
-          aria-label="Add device"
-          title="Add device (A)"
+          aria-label={t('topology.addDevice')}
+          title={`${t('topology.addDevice')} (A)`}
           className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-2 text-xs font-medium text-accent-fg transition-colors hover:bg-accent-soft"
         >
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Add</span>
+          <span className="hidden sm:inline">{t('topology.add')}</span>
         </button>
 
         <span className="mx-0.5 h-6 w-px bg-fg/10" aria-hidden />
 
-        <ToolButton active={tool === 'select'} onClick={() => setTool('select')} icon={MousePointer2} label="Select" hint="Select (V)" />
-        <ToolButton active={tool === 'link'} onClick={() => setTool('link')} icon={Spline} label="Link" hint="Link mode (L) — drag between device ports" />
-        <ToolButton active={false} onClick={() => {}} icon={GroupIcon} label="Group" hint="Grouping — coming in a later phase" disabled />
+        <ToolButton active={tool === 'select'} onClick={() => setTool('select')} icon={MousePointer2} label={t('topology.select')} hint={t('topology.selectHint')} />
+        <ToolButton active={tool === 'link'} onClick={() => setTool('link')} icon={Spline} label={t('topology.link')} hint={t('topology.linkHint')} />
+        <ToolButton active={false} onClick={() => {}} icon={GroupIcon} label={t('topology.group')} hint={t('topology.groupHint')} disabled />
 
         <span className="mx-0.5 h-6 w-px bg-fg/10" aria-hidden />
 
@@ -53,7 +55,7 @@ export function TopologyToolbar() {
           onClick={() => deleteSelected?.()}
           disabled={!hasSelection}
           aria-label={deleteLabel}
-          title={hasSelection ? `${deleteLabel} (Delete/Backspace)` : 'Select a device or link to delete'}
+          title={hasSelection ? `${deleteLabel} (Delete/Backspace)` : t('topology.deleteHint')}
           className={cn(
             'flex items-center gap-1.5 rounded-full px-2.5 py-2 text-xs transition-colors',
             hasSelection
@@ -62,7 +64,7 @@ export function TopologyToolbar() {
           )}
         >
           <Trash2 className="h-4 w-4" />
-          <span className="hidden md:inline">Delete</span>
+          <span className="hidden md:inline">{t('topology.delete')}</span>
         </button>
       </div>
     </div>

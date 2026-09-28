@@ -26,9 +26,16 @@ describe('translations', () => {
     expect(translate('ar', 'nav.settings')).toBe('الإعدادات');
   });
 
+  it('interpolates variables in translated feature text', () => {
+    expect(translate('id', 'status.nodesLinks', { nodes: 3, links: 2 })).toBe('3 node · 2 tautan');
+    expect(translate('es', 'topology.noMatch', { query: 'router' })).toBe('Sin resultados para “router”');
+    expect(translate('ar', 'login.minCharacters', { count: 8 })).toBe('8 أحرف على الأقل.');
+  });
+
   it('persists the selected locale and applies Arabic RTL direction', () => {
     useLocaleStore.getState().setLocale('ar');
     expect(localStorage.getItem('netgeo.locale')).toBe('ar');
+    expect(document.cookie).toContain('netgeo_locale=ar');
     expect(document.documentElement.lang).toBe('ar');
     expect(document.documentElement.dir).toBe('rtl');
 
