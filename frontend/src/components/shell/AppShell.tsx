@@ -13,6 +13,7 @@ import { useUiStore } from '@/store/uiStore';
 import { useLabStore } from '@/store/labStore';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { cn } from '@/lib/cn';
+import { useTranslation } from '@/i18n';
 import { RAIL_INSET } from '@/theme/shell';
 import { TopBar } from './TopBar';
 import { NavigationRail } from './NavigationRail';
@@ -72,6 +73,7 @@ const ReportsWorkspace = lazy(() =>
 );
 
 export function AppShell({ projectName, conn }: { projectName: string; conn: ConnState }) {
+  const { t } = useTranslation();
   const viewMode = useUiStore((s) => s.viewMode);
   const simMode = useLabStore((s) => s.mode) === 'simulation';
   const drawerHosted = viewMode === 'topology' || viewMode === 'map';
@@ -128,7 +130,7 @@ export function AppShell({ projectName, conn }: { projectName: string; conn: Con
       <div className="relative flex min-h-0 flex-1">
         <NavigationRail />
 
-        <main className="relative min-w-0 flex-1 overflow-hidden" aria-label="Workspace">
+        <main className="relative min-w-0 flex-1 overflow-hidden" aria-label={t('app.workspace')}>
           {/* Reserved-space contract for the rail: a positioned wrapper, not
               padding, on <main>. Padding only offsets normal-flow children —
               every workspace here is `absolute inset-0` (or similar), and an

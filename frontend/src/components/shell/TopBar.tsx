@@ -246,7 +246,7 @@ export function TopBar({ projectName, conn }: TopBarProps) {
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => (userMenuOpen ? closeModal() : openModal('userMenu'))}
-            aria-label="User menu"
+            aria-label={t('topbar.userMenu')}
             className="grid h-8 w-8 place-items-center rounded-full bg-accent/25 text-xs font-semibold text-accent transition-colors hover:bg-accent/40"
           >
             {username?.[0]?.toUpperCase() ?? '?'}

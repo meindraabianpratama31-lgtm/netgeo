@@ -100,6 +100,7 @@ import { DeviceLibraryModal } from './DeviceLibraryModal';
 import { Layers as LayersIcon, AlertTriangle } from 'lucide-react';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
+import { useTranslation } from '@/i18n';
 import { zc } from '@/theme/z';
 import { CHROME_INSET } from '@/theme/shell';
 
@@ -2121,6 +2122,7 @@ function MapClickHandler({
 /* Signal legend                                                               */
 /* -------------------------------------------------------------------------- */
 function SignalLegend() {
+  const { t } = useTranslation();
   const rainRate = useMapStore((s) => s.rainRate);
   const checkingLos = useMapStore((s) => s.checkingLos);
   const triggerLosCheck = useMapStore((s) => s.triggerLosCheck);
@@ -2151,24 +2153,24 @@ function SignalLegend() {
         {checkingLos ? (
           <>
             <span className="inline-block h-2.5 w-2.5 animate-spin rounded-full border-2 border-fg/30 border-t-fg/80" />
-            Checking LOS…
+            {t('map.checkingLos')}
           </>
         ) : (
-          'Check Line of Sight'
+          t('map.checkLos')
         )}
       </button>
 
       {/* Signal legend */}
       <div className="glass-strong rounded-xl border border-fg/15 px-3 py-2 shadow-glass">
         <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-fg/60">
-          Signal Quality
+          {t('map.signalQuality')}
         </p>
         <div className="flex flex-col gap-0.5">
           {[
-            { label: 'Strong', color: '#34C759', range: '> −55 dBm' },
-            { label: 'Good',   color: '#A3E635', range: '−55 to −70' },
-            { label: 'Fair',   color: '#FFCC00', range: '−70 to −80' },
-            { label: 'Weak',   color: '#FF453A', range: '< −80 dBm' },
+            { label: t('map.strong'), color: '#34C759', range: '> −55 dBm' },
+            { label: t('map.good'), color: '#A3E635', range: '−55 to −70' },
+            { label: t('map.fair'), color: '#FFCC00', range: '−70 to −80' },
+            { label: t('map.weak'), color: '#FF453A', range: '< −80 dBm' },
           ].map(({ label, color, range }) => (
             <div key={label} className="flex items-center gap-2">
               <span className="h-2 w-5 rounded-sm" style={{ background: color }} />
@@ -2181,13 +2183,13 @@ function SignalLegend() {
         <div className="my-1.5 border-t border-fg/10" />
 
         <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-fg/60">
-          LOS Status
+          {t('map.losStatus')}
         </p>
         <div className="flex flex-col gap-0.5">
           {[
-            { label: 'Clear', dash: 'solid', color: '#34C759' },
-            { label: 'Partial', dash: 'dashed', color: '#FFCC00' },
-            { label: 'Blocked', dash: 'dotted', color: '#FF453A' },
+            { label: t('map.clear'), dash: 'solid', color: '#34C759' },
+            { label: t('map.partial'), dash: 'dashed', color: '#FFCC00' },
+            { label: t('map.blocked'), dash: 'dotted', color: '#FF453A' },
           ].map(({ label, dash, color }) => (
             <div key={label} className="flex items-center gap-2">
               <span
@@ -2237,11 +2239,12 @@ const TOOL_HINTS: Record<string, string> = {
 };
 
 function ToolHint() {
+  const { t } = useTranslation();
   const tool = useMapStore((s) => s.tool);
   return (
     <div className={cn('pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2', zc.workspace)}>
       <div className="rounded-full border border-fg/15 bg-recess/55 px-4 py-1.5 text-xs text-fg/55 shadow-glass backdrop-blur">
-        {TOOL_HINTS[tool] ?? ''}
+        {tool === 'select' ? t('map.selectHint') : (TOOL_HINTS[tool] ?? '')}
       </div>
     </div>
   );
@@ -2285,14 +2288,15 @@ function WeatherBar() {
 /* GIS layer panel toggle (top-right, above the gradient legend)               */
 /* -------------------------------------------------------------------------- */
 function GisLayerToggle() {
+  const { t } = useTranslation();
   const open = useMapStore((s) => s.gisPanelOpen);
   const togglePanel = useMapStore((s) => s.toggleGisPanel);
   return (
     <button
       onClick={() => togglePanel()}
-      aria-label="Toggle GIS layers"
+      aria-label={t('map.toggleGis')}
       aria-pressed={open}
-      title="GIS layers"
+      title={t('map.gisLayers')}
       className={cn(
         'pointer-events-auto grid h-9 w-9 place-items-center rounded-lg border border-fg/15 shadow-glass backdrop-blur transition-colors',
         open ? 'bg-accent/25 text-accent' : 'bg-recess/55 text-fg/70 hover:text-fg',
@@ -2307,14 +2311,15 @@ function GisLayerToggle() {
 /* UISP-style Weak↔Strong gradient legend (top-right)                          */
 /* -------------------------------------------------------------------------- */
 function GradientLegend() {
+  const { t } = useTranslation();
   return (
     <div className={cn('pointer-events-none absolute right-4 top-28', zc.workspace)}>
       <div className="glass-strong rounded-xl border border-fg/15 px-3 py-2 shadow-glass">
         <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-fg/60">
-          Signal Strength
+          {t('map.signalStrength')}
         </p>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-fg/60">Weak</span>
+          <span className="text-[10px] text-fg/60">{t('map.weak')}</span>
           <span
             className="h-2.5 w-28 rounded-full"
             style={{
@@ -2322,7 +2327,7 @@ function GradientLegend() {
                 'linear-gradient(90deg, #FF453A 0%, #FFCC00 40%, #A3E635 70%, #34C759 100%)',
             }}
           />
-          <span className="text-[10px] text-fg/60">Strong</span>
+          <span className="text-[10px] text-fg/60">{t('map.strong')}</span>
         </div>
       </div>
     </div>

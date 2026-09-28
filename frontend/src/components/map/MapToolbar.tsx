@@ -24,6 +24,7 @@ import { useMapStore, rainRateLabel, type MapTool } from '@/store/mapStore';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import { CHROME_INSET } from '@/theme/shell';
+import { useTranslation } from '@/i18n';
 
 interface ToolItem {
   tool: MapTool;
@@ -79,6 +80,7 @@ const TOOL_GROUPS: ToolGroup[] = [
 ];
 
 export function MapToolbar() {
+  const { t } = useTranslation();
   const tool    = useMapStore((s) => s.tool);
   const setTool = useMapStore((s) => s.setTool);
   const selectedId   = useMapStore((s) => s.selectedDeviceId);
@@ -99,8 +101,8 @@ export function MapToolbar() {
             action, so it stays its own standalone button. */}
         <button
           onClick={() => setTool(SELECT_TOOL.tool)}
-          title={SELECT_TOOL.label}
-          aria-label={SELECT_TOOL.label}
+          title={t('map.select')}
+          aria-label={t('map.select')}
           aria-pressed={tool === SELECT_TOOL.tool}
           className={cn(
             'group relative grid h-10 w-10 place-items-center rounded-lg transition-all duration-fast',
@@ -114,7 +116,7 @@ export function MapToolbar() {
         >
           <SELECT_TOOL.icon className="h-5 w-5" />
           <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md border border-hairline bg-panel-2 px-2 py-1 text-[11px] text-fg/90 opacity-0 shadow transition-opacity group-hover:opacity-100">
-            {SELECT_TOOL.label}
+            {t('map.select')}
           </span>
         </button>
 
@@ -131,8 +133,8 @@ export function MapToolbar() {
           return (
             <div key={group.id} className="group relative">
               <button
-                title={activeChild?.label ?? group.label}
-                aria-label={activeChild ? `${group.label}: ${activeChild.label}` : group.label}
+                title={group.id === 'place' ? t('map.place') : group.id === 'rf-planning' ? t('map.rfPlanning') : t('map.measure')}
+                aria-label={group.id === 'place' ? t('map.place') : group.id === 'rf-planning' ? t('map.rfPlanning') : t('map.measure')}
                 aria-haspopup="true"
                 className={cn(
                   'relative grid h-10 w-10 place-items-center rounded-lg transition-all duration-fast',
@@ -153,7 +155,7 @@ export function MapToolbar() {
               <div className="pointer-events-auto absolute left-[calc(100%+10px)] top-1/2 hidden -translate-y-1/2 group-hover:block group-focus-within:block">
                 <div className="glass-strong flex flex-col gap-0.5 rounded-lg border border-fg/15 p-1.5 shadow-glass-lg">
                   <p className="px-1.5 pb-0.5 text-[9px] font-semibold uppercase tracking-wide text-fg/45">
-                    {group.label}
+                    {group.id === 'place' ? t('map.place') : group.id === 'rf-planning' ? t('map.rfPlanning') : t('map.measure')}
                   </p>
                   {group.tools.map(({ tool: t, icon: SubIcon, label, color: c }) => (
                     <button
@@ -182,8 +184,8 @@ export function MapToolbar() {
         <div className="my-0.5 border-t border-fg/10" />
         <button
           onClick={handleDelete}
-          title="Delete selected device"
-          aria-label="Delete selected device"
+          title={t('map.deleteDevice')}
+          aria-label={t('map.deleteDevice')}
           disabled={!selectedId}
           className={cn(
             'grid h-10 w-10 place-items-center rounded-lg transition-all duration-fast',
@@ -202,7 +204,7 @@ export function MapToolbar() {
         <div className="group relative">
           <button
             title={`Rain: ${rainRateLabel(rainRate)} (${rainRate} mm/hr)`}
-            aria-label="Rain rate control"
+            aria-label={t('map.rainControl')}
             className={cn(
               'grid h-10 w-10 place-items-center rounded-lg transition-all duration-fast',
               rainRate > 0
@@ -219,10 +221,10 @@ export function MapToolbar() {
             <div className="glass-strong rounded-lg border border-fg/15 p-3 shadow-glass-lg">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-fg/50">
-                  Rain Rate
+                  {t('map.rainRate')}
                 </span>
                 <span className="font-mono text-xs text-info">
-                  {rainRate === 0 ? 'Clear' : `${rainRate} mm/hr`}
+                  {rainRate === 0 ? t('map.clear') : `${rainRate} mm/hr`}
                 </span>
               </div>
               <input
@@ -233,9 +235,9 @@ export function MapToolbar() {
                 className="w-full"
               />
               <div className="mt-1 flex justify-between text-[9px] text-fg/30">
-                <span>Clear</span>
-                <span>Drizzle</span>
-                <span>Heavy</span>
+                <span>{t('map.clear')}</span>
+                <span>{t('map.drizzle')}</span>
+                <span>{t('map.heavy')}</span>
               </div>
               <p className="mt-1.5 text-center text-[10px] text-fg/45">
                 {rainRateLabel(rainRate)}
