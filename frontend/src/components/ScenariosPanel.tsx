@@ -9,8 +9,10 @@ import { ListChecks, Play } from 'lucide-react';
 import { scenariosApi } from '@/api/client';
 import { useUiStore } from '@/store/uiStore';
 import type { Scenario } from '@/api/types';
+import { useUiText } from '@/i18n/uiText';
 
 export function ScenariosPanel() {
+  const u = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [loading, setLoading] = useState(false);
@@ -22,17 +24,17 @@ export function ScenariosPanel() {
     scenariosApi
       .list(projectId)
       .then(setScenarios)
-      .catch((e) => setError(e?.message ?? 'Failed to load scenarios'))
+      .catch((e) => setError(e?.message ?? u('Failed to load scenarios')))
       .finally(() => setLoading(false));
   }, [projectId]);
 
-  if (loading) return <Centered>Loading scenarios…</Centered>;
+  if (loading) return <Centered>{u('Loading scenarios…')}</Centered>;
   if (error) return <Centered tone="danger">{error}</Centered>;
   if (scenarios.length === 0)
     return (
       <Centered>
         <ListChecks className="mx-auto mb-2 h-8 w-8" />
-        No scenarios yet for this project.
+        {u('No scenarios yet for this project.')}
       </Centered>
     );
 
@@ -44,9 +46,9 @@ export function ScenariosPanel() {
             <h4 className="text-sm font-medium text-fg/90">{sc.name}</h4>
             <button
               className="flex items-center gap-1 rounded bg-accent px-2 py-1 text-xs text-accent-fg hover:bg-accent-soft"
-              aria-label={`Run scenario ${sc.name}`}
+              aria-label={u('Run scenario {name}', { name: sc.name })}
             >
-              <Play className="h-3 w-3" /> Run
+              <Play className="h-3 w-3" /> {u('Run')}
             </button>
           </div>
           <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-fg/60">

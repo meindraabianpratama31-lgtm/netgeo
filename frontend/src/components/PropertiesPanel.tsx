@@ -18,6 +18,7 @@ import { semantic } from '@/theme/tokens';
 import { frontPortList } from '@/components/rack/DeviceFaceplate';
 import { PortStrip, PoeBudget, LinksTable, ConfigTabs } from '@/components/DeviceConsoleSections';
 import type { Interface, NodeMode, Nos } from '@/api/types';
+import { useUiText } from '@/i18n/uiText';
 
 const BUILTIN_NOS: { value: string; label: string }[] = [
   { value: 'forgeos', label: 'NetGeo OS' },
@@ -44,6 +45,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function PropertiesPanel() {
+  const u = useUiText();
   const node = useTopologyStore((s) => s.selectedNode());
   const upsertNode = useTopologyStore((s) => s.upsertNode);
   const openDrawer = useUiStore((s) => s.openDrawer);
@@ -81,9 +83,9 @@ export function PropertiesPanel() {
       <div className="grid h-full place-items-center p-6 text-center">
         <div className="space-y-3 text-fg/40">
           <Cpu className="mx-auto h-9 w-9 opacity-60" />
-          <p className="text-sm font-medium">No device selected</p>
+          <p className="text-sm font-medium">{u('No device selected')}</p>
           <p className="text-xs leading-relaxed">
-            Click a node on the canvas to inspect and edit its properties.
+            {u('Click a node on the canvas to inspect and edit its properties.')}
           </p>
         </div>
       </div>
@@ -96,7 +98,7 @@ export function PropertiesPanel() {
     setPatchError(null);
     void nodesApi.update(node.id, p).catch((e) => {
       console.error('Failed to save node change', node.id, e);
-      setPatchError('Failed to save this change to the server. It may not persist.');
+      setPatchError(u('Failed to save this change to the server. It may not persist.'));
     });
   };
 
@@ -130,7 +132,7 @@ export function PropertiesPanel() {
     ...BUILTIN_NOS,
     ...(customNos.length > 0
       ? [
-          { value: '__sep__', label: '— Custom NOS —', disabled: true } as {
+          { value: '__sep__', label: u('— Custom NOS —'), disabled: true } as {
             value: string;
             label: string;
             disabled?: boolean;
@@ -162,18 +164,18 @@ export function PropertiesPanel() {
         </div>
       </div>
 
-      <Field label="Product Model">
+      <Field label={u('Product Model')}>
         <Select
-          aria-label="Product model"
+          aria-label={u('Product Model')}
           value={deviceTypeId}
           onChange={(v) => patch({ device_type_id: v || null })}
-          placeholder="Select product model…"
+          placeholder={u('Select product model…')}
           options={(deviceTypesQ.data ?? []).map((dt) => ({ value: dt.id, label: dt.name }))}
           className="w-full"
         />
       </Field>
 
-      <Field label="Hostname">
+      <Field label={u('Hostname')}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -182,18 +184,18 @@ export function PropertiesPanel() {
         />
       </Field>
 
-      <Field label="Site">
+      <Field label={u('Site')}>
         <Select
-          aria-label="Site"
+          aria-label={u('Site')}
           value={node.site_id ?? ''}
           onChange={(v) => patch({ site_id: v || null })}
-          placeholder="No site"
+          placeholder={u('No site')}
           options={(sitesQ.data ?? []).map((s) => ({ value: s.id, label: s.name }))}
           className="w-full"
         />
       </Field>
 
-      <Field label="Location (lat, lon)">
+      <Field label={u('Location (lat, lon)')}>
         <div className="relative">
           <MapPin className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-fg/35" />
           <input
@@ -222,14 +224,14 @@ export function PropertiesPanel() {
       <div className="grid grid-cols-2 gap-2">
         <Field label="NOS">
           <Select
-            aria-label="Network OS"
+            aria-label={u('Network OS')}
             value={node.nos}
             onChange={(v) => patch({ nos: v as Nos })}
             options={nosOptions}
             className="w-full"
           />
         </Field>
-        <Field label="Mode">
+        <Field label={u('Mode')}>
           <div className="flex rounded-md border border-fg/10 bg-recess/20 p-0.5">
             {(['sim', 'emul'] as NodeMode[]).map((m) => (
               <button
@@ -248,14 +250,14 @@ export function PropertiesPanel() {
         </Field>
       </div>
 
-      <Field label="Status">
+      <Field label={u('Status')}>
         <span className="inline-flex items-center gap-1.5 rounded-md bg-fg/5 px-2.5 py-1 text-xs text-fg/80">
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: statusColor }} />
           {effectiveStatus}
         </span>
       </Field>
 
-      <Field label="Icon">
+      <Field label={u('Icon')}>
         <button
           onClick={() => openModal('iconLibrary')}
           className="flex w-full items-center gap-2 rounded-md border border-fg/10 bg-recess/20 px-2 py-1.5 text-sm text-fg/80 outline-none transition-colors hover:border-accent/40 hover:text-fg"
@@ -266,9 +268,9 @@ export function PropertiesPanel() {
             <ImageIcon className="h-4 w-4 shrink-0 text-fg/45" />
           )}
           <span className="truncate">
-            {assignedIcon ? assignedIcon.name.replace(/\.[^.]+$/, '') : 'Default (kind icon)'}
+            {assignedIcon ? assignedIcon.name.replace(/\.[^.]+$/, '') : u('Default (kind icon)')}
           </span>
-          <span className="ml-auto text-[11px] text-fg/40">Change</span>
+          <span className="ml-auto text-[11px] text-fg/40">{u('Change')}</span>
         </button>
       </Field>
 
@@ -287,13 +289,13 @@ export function PropertiesPanel() {
           className="flex flex-1 items-center justify-center gap-2 rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-soft"
         >
           <RefreshCw className="h-4 w-4" />
-          Generate config
+          {u('Generate config')}
         </button>
 
         {customNos.length > 0 && (
           <button
             onClick={() => openModal('settings')}
-            title="Manage custom NOS in Settings"
+            title={u('Manage custom NOS in Settings')}
             className="flex items-center justify-center rounded-md border border-fg/10 bg-fg/5 px-2.5 py-2 text-fg/50 transition-colors hover:border-accent/40 hover:text-accent"
           >
             <Settings2 className="h-4 w-4" />

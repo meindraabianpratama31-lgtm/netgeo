@@ -12,6 +12,7 @@ import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useUiText } from '@/i18n/uiText';
 
 export function ModalScrim({
   label,
@@ -24,6 +25,7 @@ export function ModalScrim({
   children: ReactNode;
   className?: string;
 }) {
+  const u = useUiText();
   return (
     <div
       className={cn('fixed inset-0 grid place-items-center p-4', zc.modal)}
@@ -41,7 +43,7 @@ export function ModalScrim({
       >
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label={u('Close')}
           className="absolute right-3 top-3 z-10 grid h-7 w-7 place-items-center rounded-md text-fg/45 hover:bg-fg/10 hover:text-fg"
         >
           <X className="h-4 w-4" />

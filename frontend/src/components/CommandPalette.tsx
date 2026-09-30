@@ -28,6 +28,7 @@ import type { NodeModel } from '@/api/types';
 import { geocode, type GeoResult } from '@/services/geocodeService';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useUiText } from '@/i18n/uiText';
 
 interface Command {
   id: string;
@@ -55,6 +56,7 @@ function mgmtIp(node: NodeModel): string | undefined {
 }
 
 export function CommandPalette() {
+  const u = useUiText();
   const open = useUiStore((s) => s.activeModal === 'command');
   const closeModal = useUiStore((s) => s.closeModal);
   const setViewMode = useUiStore((s) => s.setViewMode);
@@ -123,32 +125,32 @@ export function CommandPalette() {
 
   const commands: Command[] = useMemo(() => {
     const nav: Command[] = [
-      { id: 'go-topology', title: 'Go to Topology', hint: 'Navigate', run: () => setViewMode('topology') },
-      { id: 'go-map', title: 'Go to Map', hint: 'Navigate', run: () => setViewMode('map') },
+      { id: 'go-topology', title: u('Go to Topology'), hint: u('Navigate'), run: () => setViewMode('topology') },
+      { id: 'go-map', title: u('Go to Map'), hint: u('Navigate'), run: () => setViewMode('map') },
       // RF/Fiber have no rail/sub-nav entry (S8 NAV-02 — map is the single
       // rail surface); this palette entry plus auto-open-on-deploy and the
       // /rf, /fiber deep links are their only doors in.
-      { id: 'go-rf', title: 'Go to RF Planning', hint: 'Navigate', run: () => setViewMode('rf') },
-      { id: 'go-fiber', title: 'Go to Fiber / FTTH', hint: 'Navigate', run: () => setViewMode('fiber') },
-      { id: 'go-plant', title: 'Go to Physical Plant', hint: 'Navigate', run: () => setViewMode('plant') },
-      { id: 'add-device', title: 'Add device…', hint: 'Action', run: () => openPicker() },
+      { id: 'go-rf', title: u('Go to RF Planning'), hint: u('Navigate'), run: () => setViewMode('rf') },
+      { id: 'go-fiber', title: u('Go to Fiber / FTTH'), hint: u('Navigate'), run: () => setViewMode('fiber') },
+      { id: 'go-plant', title: u('Go to Physical Plant'), hint: u('Navigate'), run: () => setViewMode('plant') },
+      { id: 'add-device', title: u('Add device…'), hint: u('Action'), run: () => openPicker() },
       {
         id: 'run-sim',
-        title: 'Run simulation',
-        hint: 'Action',
+        title: u('Run simulation'),
+        hint: u('Action'),
         run: () => {
           if (!projectId) return;
           setSimState('running');
           void simApi.start({ project_id: projectId, realtime: true }).catch(() => setSimState('idle'));
         },
       },
-      { id: 'open-cli', title: 'Open CLI / Console', hint: 'Action', run: () => openDrawerTab('console') },
-      { id: 'open-diag', title: 'Open Diagnostics', hint: 'Action', run: () => openDrawerTab('diagnostics') },
-      { id: 'open-ledger', title: 'Open Event Ledger', hint: 'Action', run: () => openDrawerTab('ledger') },
-      { id: 'open-racks', title: 'Open Physical Plant', hint: 'Action', run: () => setViewMode('plant') },
-      { id: 'open-config', title: 'Export / View config', hint: 'Action', run: () => openDrawerTab('config') },
-      { id: 'fit', title: 'Fit topology', hint: 'View', run: () => fit?.() },
-      { id: 'settings', title: 'Open Settings', hint: 'Action', run: () => openModal('settings') },
+      { id: 'open-cli', title: u('Open CLI / Console'), hint: u('Action'), run: () => openDrawerTab('console') },
+      { id: 'open-diag', title: u('Open Diagnostics'), hint: u('Action'), run: () => openDrawerTab('diagnostics') },
+      { id: 'open-ledger', title: u('Open Event Ledger'), hint: u('Action'), run: () => openDrawerTab('ledger') },
+      { id: 'open-racks', title: u('Open Physical Plant'), hint: u('Action'), run: () => setViewMode('plant') },
+      { id: 'open-config', title: u('Export / View config'), hint: u('Action'), run: () => openDrawerTab('config') },
+      { id: 'fit', title: u('Fit topology'), hint: u('View'), run: () => fit?.() },
+      { id: 'settings', title: u('Open Settings'), hint: u('Action'), run: () => openModal('settings') },
     ];
 
     const query = q.trim().toLowerCase();
@@ -162,7 +164,7 @@ export function CommandPalette() {
         if (subseq(n.name, query) || (ip && ip.toLowerCase().includes(query))) {
           deviceMatches.push({
             id: `dev-${n.id}`,
-            title: `Go to ${n.name}`,
+            title: u('Go to {name}', { name: n.name }),
             hint: ip ?? n.kind,
             run: () => {
               setViewMode('topology');
@@ -183,13 +185,13 @@ export function CommandPalette() {
     if (trimmed) {
       if (geoQuery === trimmed && geoResults !== null) {
         if (geoResults.length === 0) {
-          locationCommands.push({ id: 'geo-empty', title: 'No matching places', hint: 'Location', run: () => {} });
+          locationCommands.push({ id: 'geo-empty', title: u('No matching places'), hint: u('Location'), run: () => {} });
         }
         geoResults.forEach((r, i) => {
           locationCommands.push({
             id: `geo-${i}`,
-            title: `Fly to ${r.label}`,
-            hint: 'Location',
+            title: u('Fly to {place}', { place: r.label }),
+            hint: u('Location'),
             run: () => {
               setViewMode('map');
               useMapStore.getState().setSearchResult(r);
@@ -199,8 +201,8 @@ export function CommandPalette() {
       } else {
         locationCommands.push({
           id: 'search-location',
-          title: geoLoading ? `Searching "${trimmed}"…` : `Search "${trimmed}" as a location`,
-          hint: 'Location',
+          title: geoLoading ? u('Searching “{query}”…', { query: trimmed }) : u('Search “{query}” as a location', { query: trimmed }),
+          hint: u('Location'),
           keepOpen: true,
           run: () => {
             if (!geoLoading) runGeoSearch(trimmed);
@@ -211,7 +213,7 @@ export function CommandPalette() {
 
     return [...staticMatches, ...deviceMatches, ...locationCommands];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, nodes, setViewMode, openPicker, projectId, setSimState, openModal, fit, select, geoQuery, geoResults, geoLoading]);
+  }, [q, nodes, setViewMode, openPicker, projectId, setSimState, openModal, fit, select, geoQuery, geoResults, geoLoading, u]);
 
   if (!open) return null;
 
@@ -226,7 +228,7 @@ export function CommandPalette() {
       className={cn('fixed inset-0 grid place-items-start justify-center pt-[14vh]', zc.modal)}
       role="dialog"
       aria-modal="true"
-      aria-label="Command palette"
+      aria-label={u('Command palette')}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) close();
       }}
@@ -256,8 +258,8 @@ export function CommandPalette() {
                 run(commands[active]);
               }
             }}
-            placeholder="Type a command, search devices/IPs, or find a place…"
-            aria-label="Command palette input"
+            placeholder={u('Type a command, search devices/IPs, or find a place…')}
+            aria-label={u('Command palette')}
             className="w-full bg-transparent text-sm text-fg/90 placeholder:text-fg/35 outline-none"
           />
           <kbd className="hidden shrink-0 rounded border border-fg/15 px-1.5 py-0.5 font-mono text-[10px] text-fg/40 sm:inline">
@@ -267,7 +269,7 @@ export function CommandPalette() {
 
         <ul className="ng-scroll flex-1 overflow-auto py-1.5">
           {commands.length === 0 ? (
-            <li className="px-4 py-6 text-center text-sm text-fg/40">No matching commands.</li>
+            <li className="px-4 py-6 text-center text-sm text-fg/40">{u('No matching commands.')}</li>
           ) : (
             commands.map((c, i) => (
               <li key={c.id}>

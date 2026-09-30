@@ -10,6 +10,7 @@ import { useTopologyStore } from '@/store/topologyStore';
 import { zc } from '@/theme/z';
 import { cn } from '@/lib/cn';
 import { Select } from '@/components/ui/Select';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 /** Placed AP/Tower nodes (real backend `Node`s, geo-placed) are the
  *  selectable PtP endpoints (N3.2 — a "Tower" is kind='ap' with
@@ -89,6 +90,7 @@ function PlaceButton({
 }
 
 export function RfLinkBar() {
+  const tx = useSurfaceText();
   const aId = useRfStore((s) => s.aId);
   const bId = useRfStore((s) => s.bId);
   const freqGhz = useRfStore((s) => s.freqGhz);
@@ -117,21 +119,21 @@ export function RfLinkBar() {
       <div className="glass-strong flex flex-wrap items-center gap-2 rounded-xl border border-fg/15 px-3 py-2 shadow-glass-lg">
         {/* Place real NetGeo RF sites straight from the RF view (design 12-UI §3.1). */}
         <div className="flex items-center gap-1">
-          <PlaceButton active={tool === 'ap'} onClick={() => setTool(tool === 'ap' ? 'select' : 'ap')} icon={Radio} label="Place AP site" />
-          <PlaceButton active={tool === 'tower'} onClick={() => setTool(tool === 'tower' ? 'select' : 'tower')} icon={RadioTower} label="Place tower" />
+          <PlaceButton active={tool === 'ap'} onClick={() => setTool(tool === 'ap' ? 'select' : 'ap')} icon={Radio} label={tx('Place AP site')} />
+          <PlaceButton active={tool === 'tower'} onClick={() => setTool(tool === 'tower' ? 'select' : 'tower')} icon={RadioTower} label={tx('Place tower')} />
         </div>
         <span className="mx-1 h-5 w-px bg-fg/10" />
 
-        <EndpointSelect value={aId} onChange={setA} options={endpoints} label="Endpoint A" />
+        <EndpointSelect value={aId} onChange={setA} options={endpoints} label={tx('Endpoint A')} />
         <button
           onClick={swap}
-          aria-label="Swap endpoints"
-          title="Swap endpoints"
+          aria-label={tx('Swap endpoints')}
+          title={tx('Swap endpoints')}
           className="grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
         >
           <ArrowLeftRight className="h-3.5 w-3.5" />
         </button>
-        <EndpointSelect value={bId} onChange={setB} options={endpoints} label="Endpoint B" />
+        <EndpointSelect value={bId} onChange={setB} options={endpoints} label={tx('Endpoint B')} />
 
         <span className="mx-1 h-5 w-px bg-fg/10" />
 
@@ -143,7 +145,7 @@ export function RfLinkBar() {
             min={0.1}
             value={freqGhz}
             onChange={(e) => Number(e.target.value) > 0 && setFreq(Number(e.target.value))}
-            aria-label="Frequency (GHz)"
+            aria-label={tx('Frequency (GHz)')}
             className="w-12 bg-transparent text-right font-mono text-xs text-fg/85 focus:outline-none"
           />
           <span className="text-[10px] text-fg/40">GHz</span>
@@ -157,7 +159,7 @@ export function RfLinkBar() {
             min={1}
             value={bwMhz}
             onChange={(e) => Number(e.target.value) > 0 && setBw(Number(e.target.value))}
-            aria-label="Bandwidth (MHz)"
+            aria-label={tx('Bandwidth (MHz)')}
             className="w-11 bg-transparent text-right font-mono text-xs text-fg/85 focus:outline-none"
           />
           <span className="text-[10px] text-fg/40">MHz</span>
@@ -165,7 +167,7 @@ export function RfLinkBar() {
 
         <ParamChip label="Mdl">
           <Select
-            aria-label="Propagation model"
+            aria-label={tx('Propagation model')}
             value={modelId}
             onChange={setModel}
             options={
@@ -182,7 +184,7 @@ export function RfLinkBar() {
           className="ml-1 inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-1.5 text-xs font-semibold text-accent-fg transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
         >
           {loading ? <Radio className="h-3.5 w-3.5 animate-pulse" /> : <ArrowRight className="h-3.5 w-3.5" />}
-          Calculate
+          {tx('Calculate')}
         </button>
       </div>
     </div>

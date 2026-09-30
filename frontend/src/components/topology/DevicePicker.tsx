@@ -27,6 +27,7 @@ import { zc } from '@/theme/z';
 import type { NodeKind } from '@/api/types';
 import { cn } from '@/lib/cn';
 import { useTranslation } from '@/i18n';
+import { translateCatalog } from '@/i18n/catalogText';
 
 const KIND_ICON: Record<NodeKind, typeof Router> = {
   router: Router,
@@ -62,7 +63,8 @@ function pushRecent(key: string): void {
 }
 
 export function DevicePicker() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const ct = (text: string) => translateCatalog(locale, text);
   const open = useUiStore((s) => s.activeModal === 'devicePicker');
   const pickerPos = useTopoUiStore((s) => s.pickerPos);
   const closePicker = useTopoUiStore((s) => s.closePicker);
@@ -97,6 +99,9 @@ export function DevicePicker() {
   const matches = (d: DeviceTemplate) =>
     !query ||
     d.label.toLowerCase().includes(query) ||
+    ct(d.label).toLowerCase().includes(query) ||
+    ct(d.kind).toLowerCase().includes(query) ||
+    ct(d.description).toLowerCase().includes(query) ||
     d.kind.includes(query) ||
     d.defaultNos.includes(query) ||
     d.description.toLowerCase().includes(query);
@@ -160,9 +165,9 @@ export function DevicePicker() {
             const devices = group.devices.filter(matches);
             if (devices.length === 0) return null;
             return (
-              <section key={group.category}>
+              <section key={ct(group.category)}>
                 <h3 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-fg/35">
-                  {group.category}
+                  {ct(group.category)}
                 </h3>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {devices.map((d) => (
@@ -187,12 +192,14 @@ export function DevicePicker() {
 }
 
 function DeviceButton({ device, onPick }: { device: DeviceTemplate; onPick: (d: DeviceTemplate) => void }) {
+  const { locale } = useTranslation();
+  const ct = (text: string) => translateCatalog(locale, text);
   const Icon = KIND_ICON[device.kind];
   const color = nodeColors[device.kind];
   return (
     <button
       onClick={() => onPick(device)}
-      title={device.description}
+      title={ct(device.description)}
       className={cn(
         'flex items-center gap-2.5 rounded-lg border border-fg/8 bg-fg/4 p-2.5 text-left',
         'transition-all duration-fast hover:border-fg/20 hover:bg-fg/8 active:scale-[0.98]',
@@ -202,9 +209,9 @@ function DeviceButton({ device, onPick }: { device: DeviceTemplate; onPick: (d: 
         <Icon className="h-4 w-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-xs font-medium text-fg/90">{device.label}</span>
+        <span className="block truncate text-xs font-medium text-fg/90">{ct(device.label)}</span>
         <span className="block truncate text-[10px] text-fg/40">
-          {device.defaultNos.toUpperCase()} · {device.kind}
+          {device.defaultNos.toUpperCase()} · {ct(device.kind)}
         </span>
       </span>
     </button>

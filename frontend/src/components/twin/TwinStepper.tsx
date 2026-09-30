@@ -11,6 +11,7 @@
 import { Check, FileInput } from 'lucide-react';
 import { TWIN_STEPS } from './twinLogic';
 import { cn } from '@/lib/cn';
+import { useFeatureText } from '@/i18n/featureText';
 
 export function TwinStepper({
   stepIndex,
@@ -19,6 +20,7 @@ export function TwinStepper({
   stepIndex: number;
   onImport: () => void;
 }) {
+  const t = useFeatureText();
   return (
     <div className="flex flex-wrap items-center gap-2">
       <ol className="glass flex flex-wrap items-center gap-1 rounded-full border border-fg/10 px-2 py-1.5 shadow-glass">
@@ -47,7 +49,7 @@ export function TwinStepper({
                 >
                   {done ? <Check className="h-2.5 w-2.5" /> : i + 1}
                 </span>
-                {step}
+                {t(step)}
               </span>
               {i < TWIN_STEPS.length - 1 && (
                 <span className="mx-0.5 h-px w-3 bg-fg/15" aria-hidden />
@@ -61,7 +63,7 @@ export function TwinStepper({
         onClick={onImport}
         className="glass flex shrink-0 items-center gap-1.5 rounded-full border border-accent/40 bg-accent/15 px-3.5 py-2 text-xs font-semibold text-accent shadow-glass transition-colors hover:bg-accent/25"
       >
-        <FileInput className="h-4 w-4" /> Import Config
+        <FileInput className="h-4 w-4" /> {t('Import Config')}
       </button>
     </div>
   );

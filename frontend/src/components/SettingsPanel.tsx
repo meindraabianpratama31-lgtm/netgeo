@@ -29,6 +29,7 @@ import { cn } from '@/lib/cn';
 import { Select } from '@/components/ui/Select';
 import { ConfirmDialog } from '@/components/shell/ConfirmDialog';
 import { LANGUAGE_OPTIONS, useTranslation, type MessageKey } from '@/i18n';
+import { useUiText } from '@/i18n/uiText';
 import {
   type DistributionMode,
   applyRuntimeProfile,
@@ -141,6 +142,7 @@ const RUNTIME_MODES: {
 ];
 
 function RuntimeSection() {
+  const u = useUiText();
   const [profile, setProfile] = useState(readRuntimeProfile);
   const [error, setError] = useState<string | null>(null);
   const [health, setHealth] = useState<string | null>(null);
@@ -158,10 +160,10 @@ function RuntimeSection() {
     setHealth(null);
     try {
       const version = await checkRemoteEngine(origin);
-      setHealth(`NetGeo ${version} is reachable.`);
+      setHealth(u('NetGeo {version} is reachable.', { version }));
       return true;
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not reach the server. Check its address and CORS settings.');
+      setError(cause instanceof Error ? cause.message : u('Could not reach the server. Check its address and CORS settings.'));
       return false;
     } finally {
       setChecking(false);
@@ -170,11 +172,11 @@ function RuntimeSection() {
 
   const apply = async () => {
     if (remote && !normalizedOrigin) {
-      setError('Enter an http:// or https:// server origin before applying this mode.');
+      setError(u('Enter an http:// or https:// server origin before applying this mode.'));
       return;
     }
     if (local && profile.localOrigin?.trim() && !normalizedLocalOrigin) {
-      setError('Enter a loopback HTTP(S) address (localhost, 127.0.0.1, or [::1]) with a port from 1 to 65535.');
+      setError(u('Enter a loopback HTTP(S) address (localhost, 127.0.0.1, or [::1]) with a port from 1 to 65535.'));
       return;
     }
     setChecking(true);
@@ -182,7 +184,7 @@ function RuntimeSection() {
     try {
       await applyRuntimeProfile({ ...profile, remoteOrigin: normalizedOrigin ?? '', localOrigin: normalizedLocalOrigin ?? '' }, () => window.location.reload());
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not reach the server.');
+      setError(cause instanceof Error ? cause.message : u('Could not reach the server.'));
     } finally {
       setChecking(false);
     }
@@ -191,15 +193,15 @@ function RuntimeSection() {
   return (
     <div className="space-y-6">
       <div>
-        <SectionHeading>Distribution Runtime</SectionHeading>
+        <SectionHeading>{u('Distribution Runtime')}</SectionHeading>
         <p className="mt-1 text-xs text-fg/45">
-          Choose how this client reaches NetGeo. Applying reloads the app so REST and WebSocket clients reconnect together.
+          {u('Choose how this client reaches NetGeo. Applying reloads the app so REST and WebSocket clients reconnect together.')}
         </p>
       </div>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-fg/85">Engine execution</legend>
-        <p className="text-xs text-fg/45">Choose where simulation runs. REST and live WebSocket traffic use the same backend.</p>
+        <legend className="text-sm font-medium text-fg/85">{u('Engine execution')}</legend>
+        <p className="text-xs text-fg/45">{u('Choose where simulation runs. REST and live WebSocket traffic use the same backend.')}</p>
         <div className="flex flex-wrap gap-2">
           {([
             { remote: false, label: 'Local / offline', detail: 'Same origin or headless loopback' },
@@ -208,7 +210,7 @@ function RuntimeSection() {
             <label key={choice.label} className={cn('cursor-pointer rounded-lg border px-3 py-2 text-sm', remote === choice.remote ? 'border-accent bg-accent/10 text-accent' : 'border-fg/10 bg-fg/5 text-fg/70')}>
               <input type="radio" name="engine-execution" className="mr-2 accent-accent" checked={remote === choice.remote}
                 onChange={() => { setProfile((current) => ({ ...current, mode: modeForEngine(current.mode, choice.remote) })); setError(null); setHealth(null); }} />
-              {choice.label}<span className="ml-2 text-xs text-fg/45">{choice.detail}</span>
+              {u(choice.label)}<span className="ml-2 text-xs text-fg/45">{u(choice.detail)}</span>
             </label>
           ))}
         </div>
@@ -232,17 +234,17 @@ function RuntimeSection() {
                 option.disabled && 'cursor-not-allowed opacity-45',
               )}
             >
-              <p className="text-sm font-medium text-fg/85">{option.label}</p>
-              <p className="mt-0.5 text-xs text-fg/45">{option.description}</p>
+              <p className="text-sm font-medium text-fg/85">{u(option.label)}</p>
+              <p className="mt-0.5 text-xs text-fg/45">{u(option.description)}</p>
             </button>
           );
         })}
       </div>
 
       {remote && (
-        <Row label="Remote server origin" description="HTTP(S) host and optional port; /api and ws(s) use this same endpoint.">
+        <Row label={u('Remote server origin')} description={u('HTTP(S) host and optional port; /api and ws(s) use this same endpoint.')}>
           <input
-            aria-label="Remote server origin"
+            aria-label={u('Remote server origin')}
             type="url"
             value={profile.remoteOrigin}
             onChange={(event) => { setProfile((current) => ({ ...current, remoteOrigin: event.target.value })); setError(null); setHealth(null); }}
@@ -253,9 +255,9 @@ function RuntimeSection() {
       )}
 
       {local && (
-        <Row label="Local engine origin" description="Optional. Leave blank to use this browser's origin. Only localhost, 127.0.0.1, or [::1] is allowed.">
+        <Row label={u('Local engine origin')} description={u("Optional. Leave blank to use this browser's origin. Only localhost, 127.0.0.1, or [::1] is allowed.")}>
           <input
-            aria-label="Local engine origin"
+            aria-label={u('Local engine origin')}
             type="url"
             value={profile.localOrigin ?? ''}
             onChange={(event) => { setProfile((current) => ({ ...current, localOrigin: event.target.value })); setError(null); setHealth(null); }}
@@ -266,19 +268,19 @@ function RuntimeSection() {
       )}
 
       <div className="rounded-lg border border-fg/10 bg-fg/5 px-4 py-3 text-xs text-fg/55">
-        <p><span className="font-medium text-fg/80">Engine host: </span>{endpoint.hostname}</p>
-        <p><span className="font-medium text-fg/80">Engine port: </span>{endpoint.port || (endpoint.protocol === 'https:' ? '443' : '80')}{!engineOrigin && ' (same origin)'}</p>
-        <p><span className="font-medium text-fg/80">Socket target: </span>{engineOrigin ? engineOrigin.replace(/^http/, 'ws') : 'same-origin socket'}</p>
+        <p><span className="font-medium text-fg/80">{u('Engine host:')} </span>{endpoint.hostname}</p>
+        <p><span className="font-medium text-fg/80">{u('Engine port:')} </span>{endpoint.port || (endpoint.protocol === 'https:' ? '443' : '80')}{!engineOrigin && ` (${u('same origin')})`}</p>
+        <p><span className="font-medium text-fg/80">{u('Socket target:')} </span>{engineOrigin ? engineOrigin.replace(/^http/, 'ws') : u('same-origin socket')}</p>
       </div>
 
-      {engineOrigin && <p className="text-xs text-fg/45">The server must allow this app origin through CORS. A separate server may require a new login after reconnect.</p>}
+      {engineOrigin && <p className="text-xs text-fg/45">{u('The server must allow this app origin through CORS. A separate server may require a new login after reconnect.')}</p>}
       {error && <p role="alert" className="text-xs text-danger">{error}</p>}
       {health && <p role="status" className="text-xs text-accent">{health}</p>}
 
       <div className="flex flex-wrap gap-2">
         {(remote || local) && <button type="button" onClick={() => { if (engineOrigin) void verify(engineOrigin); }} disabled={checking || !engineOrigin}
           className="rounded-md border border-fg/10 bg-fg/5 px-3 py-1.5 text-xs text-fg/70 disabled:opacity-50">
-          {checking ? 'Checking…' : 'Check connection'}
+          {checking ? u('Checking…') : u('Check connection')}
         </button>}
         <button
           type="button"
@@ -286,7 +288,7 @@ function RuntimeSection() {
           disabled={checking}
           className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-fg transition-colors hover:bg-accent-soft"
         >
-          Apply and reconnect
+          {u('Apply and reconnect')}
         </button>
         {profile.mode === 'full-online' && normalizedOrigin && (
           <button
@@ -294,7 +296,7 @@ function RuntimeSection() {
             onClick={() => window.open(normalizedOrigin, '_blank', 'noopener,noreferrer')}
             className="rounded-md border border-fg/10 bg-fg/5 px-3 py-1.5 text-xs text-fg/70 transition-colors hover:border-accent/50 hover:text-accent"
           >
-            Open server in browser
+            {u('Open server in browser')}
           </button>
         )}
       </div>
@@ -379,6 +381,7 @@ function GeneralSection() {
  *  first-run setup (FirstRunMapSetup), reachable here afterward so skipping
  *  it there is never a one-way door. */
 function OfflineMapSection() {
+  const u = useUiText();
   const queryClient = useQueryClient();
   const statusQ = useQuery({ queryKey: ['maps-status'], queryFn: mapsApi.status });
   const [url, setUrl] = useState('');
@@ -392,17 +395,17 @@ function OfflineMapSection() {
   const uploadMutation = useMutation({
     mutationFn: (file: File) => mapsApi.uploadOfflineMap(file),
     onSuccess: () => { setError(null); invalidate(); },
-    onError: (err) => onError(err, 'Could not install that file.'),
+    onError: (err) => onError(err, u('Could not install that file.')),
   });
   const urlMutation = useMutation({
     mutationFn: (u: string) => mapsApi.installOfflineMapFromUrl(u),
     onSuccess: () => { setError(null); setUrl(''); invalidate(); },
-    onError: (err) => onError(err, 'Download failed.'),
+    onError: (err) => onError(err, u('Download failed.')),
   });
   const removeMutation = useMutation({
     mutationFn: () => mapsApi.removeOfflineMap(),
     onSuccess: () => { setError(null); invalidate(); },
-    onError: (err) => onError(err, 'Could not remove the offline file.'),
+    onError: (err) => onError(err, u('Could not remove the offline file.')),
   });
 
   const status = statusQ.data;
@@ -414,14 +417,14 @@ function OfflineMapSection() {
         {status?.available ? (
           <>
             <p className="font-medium text-fg/80">
-              Offline file installed{status.region ? `: ${status.region}` : ''}
+              {u('Offline file installed')}{status.region ? `: ${status.region}` : ''}
             </p>
             <p className="mt-0.5 text-xs text-fg/40">
-              The map is served from this file instead of the internet.
+              {u('The map is served from this file instead of the internet.')}
             </p>
           </>
         ) : (
-          <p className="text-fg/60">Using the online map (default). No offline file installed.</p>
+          <p className="text-fg/60">{u('Using the online map (default). No offline file installed.')}</p>
         )}
       </div>
 
@@ -448,7 +451,7 @@ function OfflineMapSection() {
           disabled={busy}
           className="rounded-md border border-fg/10 bg-fg/5 px-3 py-1.5 text-xs text-fg/70 transition-colors hover:border-accent/50 hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {uploadMutation.isPending ? 'Installing…' : 'Upload .mbtiles file…'}
+          {uploadMutation.isPending ? u('Installing…') : u('Upload .mbtiles file…')}
         </button>
         {status?.available && (
           <button
@@ -456,7 +459,7 @@ function OfflineMapSection() {
             disabled={busy}
             className="rounded-md border border-fg/10 bg-fg/5 px-3 py-1.5 text-xs text-fg/50 transition-colors hover:border-danger/40 hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {removeMutation.isPending ? 'Removing…' : 'Use online map instead'}
+            {removeMutation.isPending ? u('Removing…') : u('Use online map instead')}
           </button>
         )}
       </div>
@@ -476,7 +479,7 @@ function OfflineMapSection() {
             busy || !url.trim() ? 'cursor-not-allowed bg-accent/40' : 'bg-accent hover:bg-accent-soft',
           )}
         >
-          {urlMutation.isPending ? 'Downloading…' : 'Install from URL'}
+          {urlMutation.isPending ? u('Downloading…') : u('Install from URL')}
         </button>
       </div>
     </div>
@@ -486,6 +489,7 @@ function OfflineMapSection() {
 /* ---------- Network OS ---------- */
 
 function NosSection() {
+  const u = useUiText();
   const { customNos, addNos, removeNos } = useNosStore();
   const [showForm, setShowForm] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<CustomNosEntry | null>(null);
@@ -512,9 +516,9 @@ function NosSection() {
 
   return (
     <div className="space-y-6">
-      <SectionHeading>Built-in Network Operating Systems</SectionHeading>
+      <SectionHeading>{u('Built-in Network Operating Systems')}</SectionHeading>
       <p className="text-xs text-fg/45">
-        These NOS entries are built into NetGeo and cannot be removed.
+        {u('These NOS entries are built into NetGeo and cannot be removed.')}
       </p>
 
       <div className="space-y-1.5">
@@ -525,7 +529,7 @@ function NosSection() {
           >
             <div>
               <p className="text-sm font-medium text-fg/85">{n.label}</p>
-              <p className="text-xs text-fg/40">{n.description}</p>
+              <p className="text-xs text-fg/40">{u(n.description)}</p>
             </div>
             <span className="rounded bg-fg/8 px-1.5 py-0.5 font-mono text-[10px] text-fg/50">
               {n.key}
@@ -535,22 +539,22 @@ function NosSection() {
       </div>
 
       <div className="flex items-center justify-between">
-        <SectionHeading>Custom Network OS</SectionHeading>
+        <SectionHeading>{u('Custom Network OS')}</SectionHeading>
         <button
           onClick={() => setShowForm((v) => !v)}
           className="flex items-center gap-1.5 rounded-md border border-fg/10 bg-fg/5 px-3 py-1.5 text-xs text-fg/70 transition-colors hover:border-accent/50 hover:text-accent"
         >
           <Plus className="h-3.5 w-3.5" />
-          Add NOS
+          {u('Add NOS')}
         </button>
       </div>
 
       {/* Add form */}
       {showForm && (
         <div className="space-y-3 rounded-lg border border-accent/20 bg-accent/5 p-4">
-          <h3 className="text-sm font-medium text-fg/80">New Network OS</h3>
+          <h3 className="text-sm font-medium text-fg/80">{u('New Network OS')}</h3>
           <div className="grid grid-cols-2 gap-3">
-            <FormField label="Label *" hint="e.g. OpenWRT 23.05">
+            <FormField label={u('Label *')} hint={u('e.g. OpenWRT 23.05')}>
               <input
                 value={formLabel}
                 onChange={(e) => setFormLabel(e.target.value)}
@@ -558,7 +562,7 @@ function NosSection() {
                 className={inputCls}
               />
             </FormField>
-            <FormField label="Key (slug)" hint="Auto-generated if blank">
+            <FormField label={u('Key (slug)')} hint={u('Auto-generated if blank')}>
               <input
                 value={formKey}
                 onChange={(e) => setFormKey(e.target.value)}
@@ -567,7 +571,7 @@ function NosSection() {
               />
             </FormField>
           </div>
-          <FormField label="Docker image / ISO" hint="Optional — used by the emulation engine">
+          <FormField label={u('Docker image / ISO')} hint={u('Optional — used by the emulation engine')}>
             <input
               value={formImage}
               onChange={(e) => setFormImage(e.target.value)}
@@ -575,11 +579,11 @@ function NosSection() {
               className={inputCls}
             />
           </FormField>
-          <FormField label="Description" hint="Short note shown in dropdowns">
+          <FormField label={u('Description')} hint={u('Short note shown in dropdowns')}>
             <input
               value={formDesc}
               onChange={(e) => setFormDesc(e.target.value)}
-              placeholder="Embedded Linux router OS"
+              placeholder={u('Embedded Linux router OS')}
               className={inputCls}
             />
           </FormField>
@@ -588,7 +592,7 @@ function NosSection() {
               onClick={() => setShowForm(false)}
               className="rounded-md px-3 py-1.5 text-sm text-fg/50 hover:text-fg/80"
             >
-              Cancel
+              {u('Cancel')}
             </button>
             <button
               onClick={handleAdd}
@@ -600,7 +604,7 @@ function NosSection() {
                   : 'cursor-not-allowed bg-accent/40',
               )}
             >
-              Add
+              {u('Add')}
             </button>
           </div>
         </div>
@@ -608,7 +612,7 @@ function NosSection() {
 
       {customNos.length === 0 ? (
         <p className="rounded-md border border-dashed border-fg/10 p-4 text-center text-xs text-fg/35">
-          No custom NOS entries yet. Click "Add NOS" to define one.
+          {u('No custom NOS entries yet. Click "Add NOS" to define one.')}
         </p>
       ) : (
         <div className="space-y-1.5">
@@ -620,9 +624,9 @@ function NosSection() {
 
       {confirmRemove && (
         <ConfirmDialog
-          title={`Remove "${confirmRemove.label}"?`}
-          message="This custom NOS definition will be deleted. This can't be undone."
-          confirmLabel="Remove"
+          title={u('Remove "{name}"?', { name: confirmRemove.label })}
+          message={u("This custom NOS definition will be deleted. This can't be undone.")}
+          confirmLabel={u('Remove')}
           danger
           onConfirm={() => {
             removeNos(confirmRemove.key);
@@ -636,6 +640,7 @@ function NosSection() {
 }
 
 function CustomNosRow({ entry, onRemove }: { entry: CustomNosEntry; onRemove: () => void }) {
+  const u = useUiText();
   return (
     <div className="flex items-start justify-between rounded-md border border-fg/10 bg-fg/5 px-3 py-2">
       <div className="min-w-0 flex-1">
@@ -654,7 +659,7 @@ function CustomNosRow({ entry, onRemove }: { entry: CustomNosEntry; onRemove: ()
       </div>
       <button
         onClick={onRemove}
-        aria-label={`Remove ${entry.label}`}
+        aria-label={u('Remove {name}', { name: entry.label })}
         className="ml-2 mt-0.5 shrink-0 rounded p-1 text-fg/30 transition-colors hover:bg-danger/15 hover:text-danger"
       >
         <Trash2 className="h-3.5 w-3.5" />
@@ -690,6 +695,7 @@ function saveDeviceTypes(list: CustomDeviceType[]): void {
 }
 
 function DeviceTypesSection() {
+  const u = useUiText();
   const [types, setTypes] = useState<CustomDeviceType[]>(loadDeviceTypes);
   const [showForm, setShowForm] = useState(false);
   const [kind, setKind] = useState<CustomDeviceType['kind']>('docker');
@@ -746,26 +752,25 @@ function DeviceTypesSection() {
 
   return (
     <div className="space-y-5">
-      <SectionHeading>Custom Device Types</SectionHeading>
+      <SectionHeading>{u('Custom Device Types')}</SectionHeading>
       <p className="text-xs text-fg/45">
-        Register network device types for use in map-mode emulation. Sources can be
-        Docker images, local appliance images (ISO / qcow2), or manual entries.
+        {u('Register network device types for use in map-mode emulation. Sources can be Docker images, local appliance images (ISO / qcow2), or manual entries.')}
       </p>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-fg/50">{types.length} custom type{types.length !== 1 ? 's' : ''}</span>
+        <span className="text-xs text-fg/50">{u(types.length === 1 ? '{count} custom type' : '{count} custom types', { count: types.length })}</span>
         <button
           onClick={() => setShowForm((v) => !v)}
           className="flex items-center gap-1.5 rounded-md border border-fg/10 bg-fg/5 px-3 py-1.5 text-xs text-fg/70 transition-colors hover:border-accent/50 hover:text-accent"
         >
           <Plus className="h-3.5 w-3.5" />
-          Add Device Type
+          {u('Add Device Type')}
         </button>
       </div>
 
       {showForm && (
         <div className="space-y-3 rounded-lg border border-accent/20 bg-accent/5 p-4">
-          <h3 className="text-sm font-medium text-fg/80">New Device Type</h3>
+          <h3 className="text-sm font-medium text-fg/80">{u('New Device Type')}</h3>
 
           {/* Kind selector */}
           <div className="flex rounded-md border border-fg/10 bg-recess/20 p-0.5">
@@ -781,12 +786,12 @@ function DeviceTypesSection() {
                 )}
                 style={kind === k ? { background: `${kindColor[k]}30`, color: kindColor[k] } : undefined}
               >
-                {k}
+                {u(k)}
               </button>
             ))}
           </div>
 
-          <FormField label="Name *">
+          <FormField label={u('Name *')}>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -795,7 +800,7 @@ function DeviceTypesSection() {
             />
           </FormField>
 
-          <FormField label={kindMeta[kind].label} hint={kindMeta[kind].hint}>
+          <FormField label={u(kindMeta[kind].label)} hint={u(kindMeta[kind].hint)}>
             <input
               value={source}
               onChange={(e) => setSource(e.target.value)}
@@ -804,11 +809,11 @@ function DeviceTypesSection() {
             />
           </FormField>
 
-          <FormField label="Description (optional)">
+          <FormField label={u('Description (optional)')}>
             <input
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              placeholder="Short description…"
+              placeholder={u('Short description…')}
               className={inputCls}
             />
           </FormField>
@@ -818,7 +823,7 @@ function DeviceTypesSection() {
               onClick={() => setShowForm(false)}
               className="rounded-md px-3 py-1.5 text-sm text-fg/50 hover:text-fg/80"
             >
-              Cancel
+              {u('Cancel')}
             </button>
             <button
               onClick={add}
@@ -828,7 +833,7 @@ function DeviceTypesSection() {
                 name.trim() ? 'bg-accent hover:bg-accent-soft' : 'cursor-not-allowed bg-accent/40',
               )}
             >
-              Add
+              {u('Add')}
             </button>
           </div>
         </div>
@@ -836,7 +841,7 @@ function DeviceTypesSection() {
 
       {types.length === 0 ? (
         <p className="rounded-md border border-dashed border-fg/10 p-4 text-center text-xs text-fg/35">
-          No custom device types yet.
+          {u('No custom device types yet.')}
         </p>
       ) : (
         <div className="space-y-1.5">
@@ -852,7 +857,7 @@ function DeviceTypesSection() {
                     className="rounded px-1.5 py-0.5 text-[10px] capitalize"
                     style={{ background: `${kindColor[t.kind]}20`, color: kindColor[t.kind] }}
                   >
-                    {t.kind}
+                    {u(t.kind)}
                   </span>
                 </div>
                 {t.description && (
@@ -864,7 +869,7 @@ function DeviceTypesSection() {
               </div>
               <button
                 onClick={() => remove(t.id)}
-                aria-label={`Remove ${t.name}`}
+                aria-label={u('Remove {name}', { name: t.name })}
                 className="ml-2 shrink-0 rounded p-1 text-fg/30 hover:bg-danger/15 hover:text-danger"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -874,9 +879,9 @@ function DeviceTypesSection() {
         </div>
       )}
 
-      <SectionHeading>Built-in Wireless Device Templates</SectionHeading>
+      <SectionHeading>{u('Built-in Wireless Device Templates')}</SectionHeading>
       <p className="text-xs text-fg/45">
-        Default device types available in map mode. These cannot be removed.
+        {u('Default device types available in map mode. These cannot be removed.')}
       </p>
       {[
         { name: 'Access Point (Generic)', desc: 'Wi-Fi AP — 5 GHz, 20 dBm, 500 m range' },
@@ -888,10 +893,10 @@ function DeviceTypesSection() {
           className="flex items-center justify-between rounded-md border border-fg/8 bg-fg/5 px-3 py-2"
         >
           <div>
-            <p className="text-sm font-medium text-fg/75">{t.name}</p>
-            <p className="text-xs text-fg/35">{t.desc}</p>
+            <p className="text-sm font-medium text-fg/75">{u(t.name)}</p>
+            <p className="text-xs text-fg/35">{u(t.desc)}</p>
           </div>
-          <span className="rounded bg-fg/8 px-1.5 py-0.5 text-[10px] text-fg/40">built-in</span>
+          <span className="rounded bg-fg/8 px-1.5 py-0.5 text-[10px] text-fg/40">{u('built-in')}</span>
         </div>
       ))}
     </div>
@@ -901,6 +906,7 @@ function DeviceTypesSection() {
 /* ---------- Device Library Packs (NG-DL-02) ---------- */
 
 function DevicePacksSection() {
+  const u = useUiText();
   const qc = useQueryClient();
   const { data: packs, isLoading, isError } = useQuery({
     queryKey: ['device-packs'],
@@ -918,23 +924,21 @@ function DevicePacksSection() {
     },
     onError: (e, pack) => {
       console.error('Failed to toggle device pack', pack.id, e);
-      setToggleError(`Could not ${pack.enabled ? 'disable' : 'enable'} "${pack.name}". Try again.`);
+      setToggleError(u(pack.enabled ? 'Could not disable "{name}". Try again.' : 'Could not enable "{name}". Try again.', { name: pack.name }));
     },
   });
 
   return (
     <div className="space-y-6">
-      <SectionHeading>Device Library Packs</SectionHeading>
+      <SectionHeading>{u('Device Library Packs')}</SectionHeading>
       <p className="text-xs text-fg/45">
-        Brand device packs add vendor-specific models (Huawei, ZTE, Nokia, …) to the
-        device catalog. Disabled packs are never parsed, so only enable the brands
-        relevant to the project you're working on — this keeps the catalog fast.
+        {u("Brand device packs add vendor-specific models (Huawei, ZTE, Nokia, …) to the device catalog. Disabled packs are never parsed, so only enable the brands relevant to the project you're working on — this keeps the catalog fast.")}
       </p>
 
-      {isLoading && <p className="text-xs text-fg/40">Loading packs…</p>}
+      {isLoading && <p className="text-xs text-fg/40">{u('Loading packs…')}</p>}
       {isError && (
         <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-          Failed to load device packs.
+          {u('Failed to load device packs.')}
         </p>
       )}
       {toggleError && (
@@ -945,7 +949,7 @@ function DevicePacksSection() {
 
       {packs && packs.length === 0 && (
         <p className="rounded-md border border-dashed border-fg/10 p-4 text-center text-xs text-fg/35">
-          No device packs installed yet.
+          {u('No device packs installed yet.')}
         </p>
       )}
 
@@ -964,7 +968,7 @@ function DevicePacksSection() {
                   </span>
                 </div>
                 <p className="mt-0.5 text-xs text-fg/40">
-                  {p.device_count} device{p.device_count !== 1 ? 's' : ''} · v{p.version}
+                  {u(p.device_count === 1 ? '{count} device' : '{count} devices', { count: p.device_count })} · v{p.version}
                 </p>
               </div>
               <button
@@ -978,7 +982,7 @@ function DevicePacksSection() {
                     : 'border-fg/10 bg-fg/5 text-fg/50 hover:border-fg/20 hover:text-fg/85',
                 )}
               >
-                {p.enabled ? 'Enabled' : 'Disabled'}
+                {p.enabled ? u('Enabled') : u('Disabled')}
               </button>
             </div>
           ))}
@@ -991,12 +995,13 @@ function DevicePacksSection() {
 /* ---------- Account ---------- */
 
 function AccountSection() {
+  const u = useUiText();
   const username = useAuthStore((s) => s.username);
   const logout = useAuthStore((s) => s.logout);
 
   return (
     <div className="space-y-6">
-      <SectionHeading>Signed-in account</SectionHeading>
+      <SectionHeading>{u('Signed-in account')}</SectionHeading>
 
       <div className="flex items-center gap-4 rounded-lg border border-fg/10 bg-fg/5 px-4 py-3">
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-accent/20 text-lg font-semibold text-accent">
@@ -1004,7 +1009,7 @@ function AccountSection() {
         </div>
         <div>
           <p className="font-medium text-fg/90">{username}</p>
-          <p className="text-xs text-fg/40">Local account</p>
+          <p className="text-xs text-fg/40">{u('Local account')}</p>
         </div>
       </div>
 
@@ -1015,7 +1020,7 @@ function AccountSection() {
         className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 px-4 py-2.5 text-sm text-danger transition-colors hover:bg-danger/20"
       >
         <LogOut className="h-4 w-4" />
-        Sign out
+        {u('Sign out')}
       </button>
     </div>
   );
@@ -1024,6 +1029,7 @@ function AccountSection() {
 const MIN_PASSWORD_LENGTH = 8;
 
 function ChangePasswordForm() {
+  const u = useUiText();
   const changePassword = useAuthStore((s) => s.changePassword);
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -1061,7 +1067,7 @@ function ChangePasswordForm() {
 
   return (
     <div className="space-y-3">
-      <SectionHeading>Change password</SectionHeading>
+      <SectionHeading>{u('Change password')}</SectionHeading>
       <form
         onSubmit={handleSubmit}
         className="space-y-3 rounded-lg border border-fg/10 bg-fg/5 px-4 py-4"
@@ -1071,7 +1077,7 @@ function ChangePasswordForm() {
           autoComplete="current-password"
           value={currentPassword}
           onChange={(e) => { setCurrentPassword(e.target.value); setError(null); setSuccess(false); }}
-          placeholder="Current password"
+          placeholder={u('Current password')}
           className={inputCls}
         />
         <input
@@ -1079,7 +1085,7 @@ function ChangePasswordForm() {
           autoComplete="new-password"
           value={newPassword}
           onChange={(e) => { setNewPassword(e.target.value); setError(null); setSuccess(false); }}
-          placeholder={`New password (min. ${MIN_PASSWORD_LENGTH} characters)`}
+          placeholder={u('New password (min. {count} characters)', { count: MIN_PASSWORD_LENGTH })}
           className={inputCls}
         />
         <input
@@ -1087,16 +1093,16 @@ function ChangePasswordForm() {
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(e) => { setConfirmPassword(e.target.value); setError(null); setSuccess(false); }}
-          placeholder="Confirm new password"
+          placeholder={u('Confirm new password')}
           className={inputCls}
         />
 
         {tooShort && (
           <p className="text-xs text-danger">
-            New password must be at least {MIN_PASSWORD_LENGTH} characters.
+            {u('New password must be at least {count} characters.', { count: MIN_PASSWORD_LENGTH })}
           </p>
         )}
-        {mismatch && <p className="text-xs text-danger">Passwords do not match.</p>}
+        {mismatch && <p className="text-xs text-danger">{u('Passwords do not match.')}</p>}
         {error && (
           <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
             {error}
@@ -1104,7 +1110,7 @@ function ChangePasswordForm() {
         )}
         {success && (
           <p className="rounded-md border border-success/30 bg-success/10 px-3 py-2 text-xs text-success">
-            Password updated.
+            {u('Password updated.')}
           </p>
         )}
 
@@ -1123,7 +1129,7 @@ function ChangePasswordForm() {
           ) : (
             <KeyRound className="h-4 w-4" />
           )}
-          {saving ? 'Updating…' : 'Update password'}
+          {saving ? u('Updating…') : u('Update password')}
         </button>
       </form>
     </div>

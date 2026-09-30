@@ -37,6 +37,7 @@ import type { Topology, NodeModel } from '@/api/types';
 import { useUiStore } from '@/store/uiStore';
 import { WorkspaceEmptyState } from '@/components/shell/WorkspaceEmptyState';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 type Severity = 'critical' | 'warning' | 'info';
 
@@ -201,6 +202,7 @@ function getAcks(pid: string): Set<string> {
 }
 
 export function ProblemsWorkspace() {
+  const u = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const setViewMode = useUiStore((s) => s.setViewMode);
   const [filter, setFilter] = useState<Severity | 'all'>('all');
@@ -268,7 +270,7 @@ export function ProblemsWorkspace() {
       <div className="absolute inset-0">
         <WorkspaceEmptyState
           icon={ShieldCheck}
-          title="No project open"
+          title={u('No project open')}
           hint="Open a project from the Projects portal to see its network health and problems."
         />
       </div>
@@ -279,12 +281,12 @@ export function ProblemsWorkspace() {
     <div
       className="absolute inset-0 flex gap-3 bg-surface p-3 pl-[116px]"
       role="region"
-      aria-label="Problem Center"
+      aria-label={u('Problem Center')}
     >
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-fg/15 bg-panel shadow-glass">
         <div className="flex min-h-14 shrink-0 items-center border-b border-fg/10 px-3">
           <div className="flex max-w-full flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2" role="tablist" aria-label="Filter by severity">
+            <div className="flex items-center gap-2" role="tablist" aria-label={u('Filter by severity')}>
               <FilterChip active={filter === 'all'} onClick={() => setFilter('all')} label="All" count={counts.all} />
               <FilterChip
                 active={filter === 'critical'}
@@ -326,19 +328,19 @@ export function ProblemsWorkspace() {
         {/* Table / empty */}
         <div className="ng-scroll min-h-0 flex-1 overflow-auto p-3">
           {isLoading ? (
-              <p className="p-4 text-sm text-fg/40">Deriving problems…</p>
+              <p className="p-4 text-sm text-fg/40">{u('Deriving problems…')}</p>
             ) : counts.all === 0 ? (
               <div className="grid h-full place-items-center text-center">
                 <div className="max-w-sm space-y-2">
                   <ShieldCheck className="mx-auto h-9 w-9 text-success" aria-hidden />
-                  <p className="text-sm text-fg/70">No problems detected</p>
+                  <p className="text-sm text-fg/70">{u('No problems detected')}</p>
                   <p className="text-xs leading-relaxed text-fg/40">
                     Every link is up and every device is addressed. New faults appear here as soon as the topology changes.
                   </p>
                 </div>
               </div>
             ) : visible.length === 0 ? (
-              <p className="p-4 text-sm text-fg/40">No problem matches the current filter.</p>
+              <p className="p-4 text-sm text-fg/40">{u('No problem matches the current filter.')}</p>
             ) : (
               // table-fixed + colgroup keeps dense engineering rows aligned;
               // the bounded panel supplies the readable edge instead of a
@@ -355,11 +357,11 @@ export function ProblemsWorkspace() {
                     </colgroup>
                     <thead>
                       <tr className="border-b border-fg/10 bg-recess/30 text-[12px] text-fg/55">
-                        <th className="px-4 py-2 font-normal" aria-label="Severity" />
-                        <th className="px-4 py-2 font-normal">Problem</th>
-                        <th className="px-4 py-2 font-normal">Affected node</th>
-                        <th className="px-4 py-2 font-normal">Detected</th>
-                        <th className="px-4 py-2 font-normal">Status</th>
+                        <th className="px-4 py-2 font-normal" aria-label={u('Severity')} />
+                        <th className="px-4 py-2 font-normal">{u('Problem')}</th>
+                        <th className="px-4 py-2 font-normal">{u('Affected node')}</th>
+                        <th className="px-4 py-2 font-normal">{u('Detected')}</th>
+                        <th className="px-4 py-2 font-normal">{u('Status')}</th>
                       </tr>
                     </thead>
                     <tbody className="font-mono text-[12px]">
@@ -398,7 +400,7 @@ export function ProblemsWorkspace() {
             <div className="grid h-full place-items-center p-6 text-center">
               <div className="max-w-[15rem] space-y-2 text-fg/40">
                 <ShieldCheck className="mx-auto h-8 w-8" aria-hidden />
-                <p className="text-xs leading-relaxed">Select a problem to see its evidence and suggested actions.</p>
+                <p className="text-xs leading-relaxed">{u('Select a problem to see its evidence and suggested actions.')}</p>
               </div>
             </div>
           )}
@@ -500,6 +502,7 @@ function Inspector({
   onAck: () => void;
   onOpenTopology: () => void;
 }) {
+  const u = useUiText();
   const { icon: Icon, tone, label } = SEV_META[problem.severity];
   const bannerTone =
     problem.severity === 'critical' ? 'bg-danger' : problem.severity === 'warning' ? 'bg-warning' : 'bg-accent';
@@ -523,7 +526,7 @@ function Inspector({
           <p className="mb-5 text-[13px] leading-relaxed text-fg/70">{problem.detail}</p>
 
           <div className="mb-5">
-            <h3 className="mb-2 text-[13px] font-medium text-fg/85">Evidence</h3>
+            <h3 className="mb-2 text-[13px] font-medium text-fg/85">{u('Evidence')}</h3>
             <pre className="ng-scroll overflow-x-auto rounded-lg border border-fg/10 bg-recess/50 p-3 font-mono text-[11px] leading-relaxed text-fg/70">
               {problem.evidence.join('\n')}
             </pre>
@@ -532,7 +535,7 @@ function Inspector({
           <div className="rounded-lg border border-fg/10 bg-recess/30 p-4">
             <div className="mb-2 flex items-center gap-2">
               <Wrench className="h-[18px] w-[18px] text-accent" aria-hidden />
-              <h3 className="text-[13px] font-medium text-fg">Suggested Actions</h3>
+              <h3 className="text-[13px] font-medium text-fg">{u('Suggested Actions')}</h3>
             </div>
             <ul className="list-inside list-disc space-y-1 text-[13px] text-fg/70">
               {problem.actions.map((a, i) => (

@@ -1,3 +1,5 @@
+import { useLocaleStore } from '@/i18n';
+import { internalText, relocalizeInternal } from '@/i18n/internalText';
 /**
  * Auth store — bearer-token session backed by the backend (AUTH_CONTRACT.md).
  *
@@ -74,10 +76,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       const e = err as ApiError;
       const message =
         e.status === 429
-          ? 'Too many attempts. Please wait a minute and try again.'
+          ? internalText("Too many attempts. Please wait a minute and try again.")
           : e.status === 0
-            ? 'Cannot reach the server. Check your connection.'
-            : 'Incorrect username or password.';
+            ? internalText("Cannot reach the server. Check your connection.")
+            : internalText("Incorrect username or password.");
       setToken(null);
       set({ isAuthenticated: false, username: null, role: null, loginError: message, loggingIn: false });
       return false;
@@ -120,10 +122,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       const e = err as ApiError;
       const message =
         e.status === 409
-          ? 'Setup was already completed. Please sign in instead.'
+          ? internalText("Setup was already completed. Please sign in instead.")
           : e.status === 0
-            ? 'Cannot reach the server. Check your connection.'
-            : e.message || 'Could not complete setup.';
+            ? internalText("Cannot reach the server. Check your connection.")
+            : e.message || internalText("Could not complete setup.");
       setToken(null);
       set({
         isAuthenticated: false,
@@ -144,9 +146,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       return null;
     } catch (err) {
       const e = err as ApiError;
-      if (e.status === 401) return 'Current password is incorrect.';
-      if (e.status === 0) return 'Cannot reach the server. Check your connection.';
-      return e.message || 'Could not change the password.';
+      if (e.status === 401) return internalText("Current password is incorrect.");
+      if (e.status === 0) return internalText("Cannot reach the server. Check your connection.");
+      return e.message || internalText("Could not change the password.");
     }
   },
 }));
@@ -155,4 +157,13 @@ export const useAuthStore = create<AuthState>((set) => ({
 // once at module load; the REST client and WS layer call notifyUnauthorized().
 setUnauthorizedHandler(() => {
   useAuthStore.getState().logout();
+});
+
+// Keep existing application errors in step with the selected UI language.
+useLocaleStore.subscribe(({ locale }, previous) => {
+  if (locale === previous.locale) return;
+  const state = useAuthStore.getState();
+  useAuthStore.setState({
+    loginError: relocalizeInternal(state.loginError, locale),
+  });
 });

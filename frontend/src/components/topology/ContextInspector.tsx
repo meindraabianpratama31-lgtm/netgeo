@@ -10,9 +10,11 @@ import { PropertiesPanel } from '@/components/PropertiesPanel';
 import { useTopologyStore } from '@/store/topologyStore';
 import { useTopoUiStore } from '@/store/topoUiStore';
 import { cn } from '@/lib/cn';
+import { useSurfaceText } from '@/i18n/surfaceText';
 import { zc } from '@/theme/z';
 
 export function ContextInspector() {
+  const tx = useSurfaceText();
   const selectedNodeId = useTopologyStore((s) => s.selectedNodeId);
   const selectedLinkId = useTopologyStore((s) => s.selectedLinkId);
   const select = useTopologyStore((s) => s.select);
@@ -28,10 +30,11 @@ export function ContextInspector() {
     select({ nodeId: null, linkId: null });
     if (pinned) togglePin();
   };
+  const deleteLabel = selectedNodeId ? tx('Delete device') : tx('Delete link');
 
   return (
     <aside
-      aria-label="Selection inspector"
+      aria-label={tx('Selection inspector')}
       className={cn(
         // B2-glitch-2 fix: removed animate-fade-in — its opacity:0→1 + translateY
         // left the panel semi-transparent over the map workspace during the
@@ -44,13 +47,13 @@ export function ContextInspector() {
       )}
     >
       <div className="flex shrink-0 items-center justify-between border-b border-fg/10 px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-fg/50">Inspector</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-fg/50">{tx('Inspector')}</span>
         <div className="flex items-center gap-1">
           {hasSelection && (
             <button
               onClick={() => deleteSelected?.()}
-              aria-label={selectedNodeId ? 'Delete device' : 'Delete link'}
-              title={selectedNodeId ? 'Delete device' : 'Delete link'}
+              aria-label={deleteLabel}
+              title={deleteLabel}
               className="grid h-6 w-6 place-items-center rounded text-fg/50 transition-colors hover:bg-danger/10 hover:text-danger"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -58,9 +61,9 @@ export function ContextInspector() {
           )}
           <button
             onClick={togglePin}
-            aria-label={pinned ? 'Unpin inspector' : 'Pin inspector'}
+            aria-label={pinned ? tx('Unpin inspector') : tx('Pin inspector')}
             aria-pressed={pinned}
-            title={pinned ? 'Unpin (auto-hide when nothing selected)' : 'Pin open'}
+            title={pinned ? tx('Unpin (auto-hide when nothing selected)') : tx('Pin open')}
             className={cn(
               'grid h-6 w-6 place-items-center rounded transition-colors',
               pinned ? 'text-accent hover:bg-fg/10' : 'text-fg/50 hover:bg-fg/10 hover:text-fg/80',
@@ -70,8 +73,8 @@ export function ContextInspector() {
           </button>
           <button
             onClick={close}
-            aria-label="Close inspector"
-            title="Close (Esc)"
+            aria-label={tx('Close inspector')}
+            title={tx('Close (Esc)')}
             className="grid h-6 w-6 place-items-center rounded text-fg/50 transition-colors hover:bg-fg/10 hover:text-fg/80"
           >
             <X className="h-3.5 w-3.5" />

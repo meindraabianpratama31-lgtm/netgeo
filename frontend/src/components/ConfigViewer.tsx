@@ -14,8 +14,10 @@ import { configsApi } from '@/api/client';
 import { useTopologyStore } from '@/store/topologyStore';
 import type { ConfigArtifact } from '@/api/types';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 export function ConfigViewer() {
+  const t = useUiText();
   const nodeId = useTopologyStore((s) => s.selectedNodeId);
 
   const [artifacts, setArtifacts] = useState<ConfigArtifact[]>([]);
@@ -32,13 +34,13 @@ export function ConfigViewer() {
     configsApi
       .forNode(nodeId)
       .then((a) => setArtifacts(a))
-      .catch((e) => setError(e?.message ?? 'Failed to load configs'))
+      .catch((e) => setError(e?.message ?? t('Failed to load configs')))
       .finally(() => setLoading(false));
   }, [nodeId]);
 
   if (!nodeId) {
     return (
-      <Empty>Select a node, then open Config Viewer to see generated output.</Empty>
+      <Empty>{t('Select a node, then open Config Viewer to see generated output.')}</Empty>
     );
   }
 
@@ -47,7 +49,7 @@ export function ConfigViewer() {
     configsApi
       .generate(nodeId)
       .then((a) => setArtifacts((prev) => [a, ...prev]))
-      .catch((e) => setError(e?.message ?? 'Generation failed'))
+      .catch((e) => setError(e?.message ?? t('Generation failed')))
       .finally(() => setLoading(false));
   };
 
@@ -79,7 +81,7 @@ export function ConfigViewer() {
         <button
           onClick={copy}
           disabled={!current}
-          aria-label="Copy config"
+          aria-label={t('Copy config')}
           className="grid h-7 w-7 place-items-center rounded text-fg/70 hover:bg-fg/10 disabled:opacity-40"
         >
           {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
@@ -87,7 +89,7 @@ export function ConfigViewer() {
         <button
           onClick={regenerate}
           disabled={loading}
-          aria-label="Regenerate config"
+          aria-label={t('Regenerate config')}
           className="grid h-7 w-7 place-items-center rounded text-fg/70 hover:bg-fg/10 disabled:opacity-40"
         >
           <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
@@ -98,9 +100,9 @@ export function ConfigViewer() {
         {error ? (
           <p className="text-sm text-danger">{error}</p>
         ) : loading && artifacts.length === 0 ? (
-          <p className="text-sm text-fg/40">Generating…</p>
+          <p className="text-sm text-fg/40">{t('Generating…')}</p>
         ) : !current ? (
-          <Empty>No config artifacts yet. Click regenerate to build one.</Empty>
+          <Empty>{t('No config artifacts yet. Click regenerate to build one.')}</Empty>
         ) : (
           <pre className="whitespace-pre-wrap font-mono text-[12.5px] leading-relaxed text-fg/85">
             {current.content}

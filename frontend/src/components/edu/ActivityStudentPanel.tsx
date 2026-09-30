@@ -31,15 +31,16 @@ import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import {
-  checkLabel,
   checkStatuses,
   fmtClock,
   elapsedSeconds,
   CHECK_KIND_LABEL,
   type CheckStatus,
 } from './eduLogic';
+import { useFeatureText } from '@/i18n/featureText';
 
 export function ActivityStudentPanel() {
+  const t = useFeatureText();
   const selectedId = useEduStore((s) => s.selectedId);
   const activity = useEduStore((s) => s.activities.find((a) => a.id === s.selectedId));
   const liveReport = useEduStore((s) => s.liveReport);
@@ -96,9 +97,9 @@ export function ActivityStudentPanel() {
     // Selected id points at nothing (e.g. it was just deleted) — recover, don't blank.
     return (
       <aside className={cn('glass-strong pointer-events-auto absolute left-3 top-36 w-[340px] max-w-[calc(100vw-5rem)] rounded-2xl border border-fg/12 p-5 text-center shadow-glass-lg', zc.workspace)}>
-        <p className="text-sm text-fg/70">This activity is no longer available.</p>
+        <p className="text-sm text-fg/70">{t('This activity is no longer available.')}</p>
         <button onClick={toBrowse} className="mt-3 text-xs font-semibold text-accent hover:underline">
-          Back to activities
+          {t('Back to activities')}
         </button>
       </aside>
     );
@@ -120,7 +121,7 @@ export function ActivityStudentPanel() {
               remaining <= 30 ? 'border-danger/40' : 'border-warning/30',
             )}
             role="timer"
-            aria-label="Time remaining"
+            aria-label={t('Time remaining')}
           >
             <Timer className={cn('h-4 w-4', remaining <= 30 ? 'text-danger' : 'text-warning')} />
             <span
@@ -139,19 +140,19 @@ export function ActivityStudentPanel() {
           top-left column (mode bar + overlay chips + toolbar row, now
           stacked together — see TopologyCanvas topLeftExtra). */}
       <aside
-        aria-label="Objectives"
+        aria-label={t('Objectives')}
         className={cn('glass-strong pointer-events-auto absolute left-3 top-36 bottom-16 flex w-[340px] max-w-[calc(100vw-5rem)] flex-col rounded-2xl border border-fg/12 shadow-glass-lg', zc.workspace)}
       >
         <header className="flex items-start gap-2 border-b border-fg/10 px-4 py-3">
           <div className="min-w-0 flex-1">
             <span className="mb-1 inline-block rounded bg-fg/8 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-fg/55">
-              Lab
+              {t('Lab')}
             </span>
             <h2 className="truncate text-base font-semibold text-fg/90">{activity.name}</h2>
           </div>
           <button
             onClick={toBrowse}
-            aria-label="Leave activity"
+            aria-label={t('Leave activity')}
             className="grid h-6 w-6 shrink-0 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
           >
             <X className="h-4 w-4" />
@@ -167,18 +168,18 @@ export function ActivityStudentPanel() {
 
           <div>
             <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.05em] text-fg/50">
-              Objectives
+              {t('Objectives')}
             </h3>
             {checks.length === 0 ? (
               <p className="text-[13px] leading-relaxed text-fg/45">
-                This activity has no grading checks — read the instructions and submit when done.
+                {t('This activity has no grading checks — read the instructions and submit when done.')}
               </p>
             ) : (
               <ul className="space-y-4">
                 {checks.map((c, i) => (
                   <ObjectiveItem
                     key={i}
-                    label={checkLabel(c, i)}
+                    label={c.label?.trim() || `${i + 1}. ${t(CHECK_KIND_LABEL[c.kind])}${c.node ? ` — ${c.node}` : ''}`}
                     status={statuses[i]!}
                     reason={liveReport?.items[i]?.reason}
                   />
@@ -196,12 +197,12 @@ export function ActivityStudentPanel() {
         <div className="glass-strong flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-fg/12 px-3 py-2 shadow-glass-lg">
           <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto ng-scroll">
             {checks.length === 0 ? (
-              <span className="text-[11px] text-fg/40">No checks to track.</span>
+              <span className="text-[11px] text-fg/40">{t('No checks to track.')}</span>
             ) : (
               checks.map((c, i) => (
                 <StatusChip
                   key={i}
-                  label={c.label?.trim() || CHECK_KIND_LABEL[c.kind]}
+                  label={c.label?.trim() || t(CHECK_KIND_LABEL[c.kind])}
                   status={statuses[i]!}
                 />
               ))
@@ -222,10 +223,10 @@ export function ActivityStudentPanel() {
           )}
 
           <input
-            aria-label="Student name"
+            aria-label={t('Student name')}
             value={student}
             onChange={(e) => setStudent(e.target.value)}
-            placeholder="student"
+            placeholder={t('student')}
             className="w-24 shrink-0 rounded-md border border-fg/15 bg-recess/20 px-2 py-1 text-xs text-fg/85 placeholder:text-fg/30 focus:border-accent/50 focus:outline-none"
           />
 
@@ -236,7 +237,7 @@ export function ActivityStudentPanel() {
               className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg hover:bg-accent-soft disabled:opacity-40"
             >
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
-              Start attempt
+              {t('Start attempt')}
             </button>
           ) : (
             <>
@@ -246,7 +247,7 @@ export function ActivityStudentPanel() {
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-fg/15 px-3 py-1.5 text-xs font-semibold text-fg/85 hover:bg-fg/8 disabled:opacity-40"
               >
                 {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileCheck2 className="h-3.5 w-3.5" />}
-                Check my work
+                {t('Check my work')}
               </button>
               {submitted ? (
                 <button
@@ -255,7 +256,7 @@ export function ActivityStudentPanel() {
                   className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg hover:bg-accent-soft disabled:opacity-40"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
-                  New attempt
+                  {t('New attempt')}
                 </button>
               ) : (
                 <button
@@ -264,7 +265,7 @@ export function ActivityStudentPanel() {
                   className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg hover:bg-accent-soft disabled:opacity-40"
                 >
                   <Send className="h-3.5 w-3.5" />
-                  Submit
+                  {t('Submit')}
                 </button>
               )}
             </>
@@ -332,16 +333,17 @@ function FeedbackCard({
   graded: boolean;
   started: boolean;
 }) {
+  const t = useFeatureText();
   const failIndex = statuses.findIndex((s) => s === 'fail');
   let body: string;
   if (!graded) {
     body = started
-      ? 'Build the network on the canvas, then press "Check my work" to see how each objective scores.'
-      : 'Press "Start attempt" to load this activity\'s starting network onto the canvas.';
+      ? t('Build the network on the canvas, then press "Check my work" to see how each objective scores.')
+      : t('Press "Start attempt" to load this activity\'s starting network onto the canvas.');
   } else if (failIndex >= 0) {
-    body = report?.items[failIndex]?.reason || 'One or more objectives are not passing yet.';
+    body = report?.items[failIndex]?.reason || t('One or more objectives are not passing yet.');
   } else {
-    body = 'All objectives pass. Submit to record your attempt.';
+    body = t('All objectives pass. Submit to record your attempt.');
   }
 
   return (
@@ -356,6 +358,7 @@ function FeedbackCard({
 }
 
 function StatusChip({ label, status }: { label: string; status: CheckStatus }) {
+  const t = useFeatureText();
   const meta =
     status === 'pass'
       ? { cls: 'border-success/25 bg-success/10 text-success', dot: 'bg-success', word: 'PASS' }
@@ -372,7 +375,7 @@ function StatusChip({ label, status }: { label: string; status: CheckStatus }) {
     >
       <span className={cn('h-1.5 w-1.5 rounded-full', meta.dot)} aria-hidden />
       <span className="max-w-[9rem] truncate text-[9px] font-semibold uppercase tracking-wider">
-        {label} {meta.word}
+        {label} {t(meta.word)}
       </span>
     </span>
   );

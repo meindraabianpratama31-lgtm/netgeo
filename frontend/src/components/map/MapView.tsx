@@ -100,7 +100,8 @@ import { DeviceLibraryModal } from './DeviceLibraryModal';
 import { Layers as LayersIcon, AlertTriangle } from 'lucide-react';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
-import { useTranslation } from '@/i18n';
+import { useLocaleStore, useTranslation } from '@/i18n';
+import { useSurfaceText } from '@/i18n/surfaceText';
 import { zc } from '@/theme/z';
 import { CHROME_INSET } from '@/theme/shell';
 
@@ -1171,19 +1172,21 @@ function towersFC(towers: OsmTower[]): GeoJSON.FeatureCollection {
   };
 }
 
-function osmTowerInfoHtml(p: Record<string, unknown>): string {
-  const operator = p.operator ? `<p class="ng-popup-sub2">Operator: ${escapeHtml(String(p.operator))}</p>` : '';
-  const height = p.height ? `<p class="ng-popup-sub2">Height: ${escapeHtml(String(p.height))} m</p>` : '';
+function osmTowerInfoHtml(p: Record<string, unknown>, tx: (source: string) => string): string {
+  const operator = p.operator ? `<p class="ng-popup-sub2">${escapeHtml(tx('Operator'))}: ${escapeHtml(String(p.operator))}</p>` : '';
+  const height = p.height ? `<p class="ng-popup-sub2">${escapeHtml(tx('Height'))}: ${escapeHtml(String(p.height))} m</p>` : '';
   return `<div class="ng-popup-body">
     <p class="ng-popup-title" style="color:${p.color}">${escapeHtml(String(p.name))}</p>
-    <p class="ng-popup-sub">OSM ID: ${p.id} &middot; Type: ${escapeHtml(String(p.label))}</p>
+    <p class="ng-popup-sub">OSM ID: ${p.id} &middot; ${escapeHtml(tx('Type'))}: ${escapeHtml(String(p.label))}</p>
     ${operator}${height}
     <p class="ng-popup-coord">${Number(p.lat).toFixed(6)}, ${Number(p.lng).toFixed(6)}</p>
-    <p class="ng-popup-attrib">Source: OpenStreetMap contributors</p>
+    <p class="ng-popup-attrib">${escapeHtml(tx('Source'))}: OpenStreetMap contributors</p>
   </div>`;
 }
 
 function OsmTowerLayer() {
+  const tx = useSurfaceText();
+  const locale = useLocaleStore((state) => state.locale);
   const map = useGlobeMap();
   const [towers, setTowers] = useState<OsmTower[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1213,7 +1216,7 @@ function OsmTowerLayer() {
     const onClick = (e: MapLayerMouseEvent) => {
       const f = e.features?.[0];
       if (!f?.properties) return;
-      openPopup(map, e.lngLat, osmTowerInfoHtml(f.properties));
+      openPopup(map, e.lngLat, osmTowerInfoHtml(f.properties, tx));
     };
     const enter = () => setCursor(map, 'pointer');
     const leave = () => setCursor(map, '');
@@ -1227,7 +1230,7 @@ function OsmTowerLayer() {
       map.off('mouseleave', TOWER_LAYER, leave);
       teardown(map, TOWER_SRC, [TOWER_LAYER]);
     };
-  }, [map]);
+  }, [map, locale]);
 
   useEffect(() => {
     if (!map) return;

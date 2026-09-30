@@ -16,6 +16,7 @@ import { zc } from '@/theme/z';
 import { physicalApi } from '@/api/client';
 import { useUiStore } from '@/store/uiStore';
 import { useMapStore } from '@/store/mapStore';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 interface Props {
   px: { x: number; y: number };
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function SiteCreateMenu({ px, lat, lon, defaultName, onClose }: Props) {
+  const tx = useSurfaceText();
   const projectId = useUiStore((s) => s.projectId);
   const flashNotice = useMapStore((s) => s.flashNotice);
   const queryClient = useQueryClient();
@@ -66,7 +68,7 @@ export function SiteCreateMenu({ px, lat, lon, defaultName, onClose }: Props) {
       await queryClient.invalidateQueries({ queryKey: ['topology', projectId] });
       onClose();
     } catch {
-      flashNotice('Failed to place site — check backend.');
+      flashNotice(tx('Failed to place site — check backend.'));
       setBusy(false);
     }
   };
@@ -87,15 +89,15 @@ export function SiteCreateMenu({ px, lat, lon, defaultName, onClose }: Props) {
         zc.popover,
       )}
       role="dialog"
-      aria-label="Name new site"
+      aria-label={tx('Name new site')}
     >
       <div className="mb-1.5 flex items-center justify-between px-0.5">
         <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-fg/50">
-          <Building2 className="h-3 w-3" /> New site here
+          <Building2 className="h-3 w-3" /> {tx('New site here')}
         </span>
         <button
           onClick={onClose}
-          aria-label="Cancel"
+          aria-label={tx('Cancel')}
           className="grid h-5 w-5 place-items-center rounded text-fg/40 hover:text-fg"
         >
           <X className="h-3 w-3" />
@@ -103,7 +105,7 @@ export function SiteCreateMenu({ px, lat, lon, defaultName, onClose }: Props) {
       </div>
 
       <label htmlFor="ng-site-create-name" className="mb-1 block px-0.5 text-[9px] font-medium text-fg/40">
-        Site name
+        {tx('Site name')}
       </label>
       <input
         id="ng-site-create-name"
@@ -119,14 +121,14 @@ export function SiteCreateMenu({ px, lat, lon, defaultName, onClose }: Props) {
 
       <div className="mt-2 flex items-center justify-between">
         <button onClick={onClose} className="text-[10px] text-fg/45 hover:text-fg/80">
-          Cancel
+          {tx('Cancel')}
         </button>
         <button
           onClick={() => void create()}
           disabled={busy || !name.trim()}
           className="flex items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-fg transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {busy && <Loader className="h-3 w-3 animate-spin" />} Create
+          {busy && <Loader className="h-3 w-3 animate-spin" />} {tx('Create')}
         </button>
       </div>
     </div>

@@ -25,6 +25,7 @@ import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import { CHROME_INSET } from '@/theme/shell';
 import { useTranslation } from '@/i18n';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 interface ToolItem {
   tool: MapTool;
@@ -81,6 +82,7 @@ const TOOL_GROUPS: ToolGroup[] = [
 
 export function MapToolbar() {
   const { t } = useTranslation();
+  const tx = useSurfaceText();
   const tool    = useMapStore((s) => s.tool);
   const setTool = useMapStore((s) => s.setTool);
   const selectedId   = useMapStore((s) => s.selectedDeviceId);
@@ -157,12 +159,14 @@ export function MapToolbar() {
                   <p className="px-1.5 pb-0.5 text-[9px] font-semibold uppercase tracking-wide text-fg/45">
                     {group.id === 'place' ? t('map.place') : group.id === 'rf-planning' ? t('map.rfPlanning') : t('map.measure')}
                   </p>
-                  {group.tools.map(({ tool: t, icon: SubIcon, label, color: c }) => (
+                  {group.tools.map(({ tool: t, icon: SubIcon, label, color: c }) => {
+                    const translatedLabel = tx(label);
+                    return (
                     <button
                       key={t}
                       onClick={() => setTool(t)}
-                      title={label}
-                      aria-label={label}
+                      title={translatedLabel}
+                      aria-label={translatedLabel}
                       aria-pressed={tool === t}
                       className={cn(
                         'flex items-center gap-2 whitespace-nowrap rounded-md px-2 py-1.5 text-left text-xs transition-colors',
@@ -171,9 +175,10 @@ export function MapToolbar() {
                       style={tool === t ? { background: `${c}25`, color: c } : undefined}
                     >
                       <SubIcon className="h-4 w-4 shrink-0" />
-                      {label}
+                      {translatedLabel}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -203,7 +208,7 @@ export function MapToolbar() {
         {/* Rain indicator button (opens tooltip with slider) */}
         <div className="group relative">
           <button
-            title={`Rain: ${rainRateLabel(rainRate)} (${rainRate} mm/hr)`}
+            title={`${tx('Rain')}: ${tx(rainRateLabel(rainRate))} (${rainRate} mm/hr)`}
             aria-label={t('map.rainControl')}
             className={cn(
               'grid h-10 w-10 place-items-center rounded-lg transition-all duration-fast',
@@ -240,7 +245,7 @@ export function MapToolbar() {
                 <span>{t('map.heavy')}</span>
               </div>
               <p className="mt-1.5 text-center text-[10px] text-fg/45">
-                {rainRateLabel(rainRate)}
+                {tx(rainRateLabel(rainRate))}
               </p>
             </div>
           </div>

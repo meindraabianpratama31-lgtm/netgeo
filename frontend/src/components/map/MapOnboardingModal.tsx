@@ -8,6 +8,7 @@ import { useMapStore, type MapTool } from '@/store/mapStore';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 interface QuickstartOption {
   icon: typeof Radio;
@@ -42,6 +43,7 @@ const OPTIONS: QuickstartOption[] = [
 ];
 
 export function MapOnboardingModal() {
+  const tx = useSurfaceText();
   const markSeen = useMapStore((s) => s.dismissOnboarding);
   const setTool = useMapStore((s) => s.setTool);
   const closeModal = useUiStore((s) => s.closeModal);
@@ -66,7 +68,7 @@ export function MapOnboardingModal() {
         {/* Close */}
         <button
           onClick={dismiss}
-          aria-label="Skip onboarding"
+          aria-label={tx('Skip onboarding')}
           className="absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-md text-fg/40 hover:bg-fg/10 hover:text-fg"
         >
           <X className="h-4 w-4" />
@@ -77,9 +79,9 @@ export function MapOnboardingModal() {
           <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-accent/20 text-accent">
             <Radio className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-semibold text-fg">Start a Network Design</h2>
+          <h2 className="text-lg font-semibold text-fg">{tx('Start a Network Design')}</h2>
           <p className="mt-1 text-sm text-fg/55">
-            Click the map to place devices. Links and signal coverage are drawn automatically.
+            {tx('Click the map to place devices. Links and signal coverage are drawn automatically.')}
           </p>
         </div>
 
@@ -103,8 +105,8 @@ export function MapOnboardingModal() {
                   <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-medium text-fg/90">{opt.title}</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-fg/50">{opt.description}</p>
+                  <p className="font-medium text-fg/90">{tx(opt.title)}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-fg/50">{tx(opt.description)}</p>
                 </div>
               </button>
             );
@@ -116,7 +118,7 @@ export function MapOnboardingModal() {
             onClick={dismiss}
             className="text-xs text-fg/35 hover:text-fg/60 transition-colors"
           >
-            Skip — I'll explore on my own
+            {tx("Skip — I'll explore on my own")}
           </button>
         </div>
       </div>

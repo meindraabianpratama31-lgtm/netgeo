@@ -9,6 +9,7 @@ import { Globe, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { systemApi } from '@/api/client';
 import type { HostInterface, InternetStatus, NodeModel, Uplink, UplinkMode } from '@/api/types';
 import { Select } from '@/components/ui/Select';
+import { useUiText } from '@/i18n/uiText';
 
 export function CloudUplink({
   node,
@@ -17,6 +18,7 @@ export function CloudUplink({
   node: NodeModel;
   patch: (p: Partial<NodeModel>) => void;
 }) {
+  const u = useUiText();
   const [ifaces, setIfaces] = useState<HostInterface[] | null>(null);
   const [net, setNet] = useState<InternetStatus | null>(null);
   const [loading, setLoading] = useState(false);
@@ -65,7 +67,7 @@ export function CloudUplink({
         </h4>
         <button
           onClick={() => void load()}
-          title="Re-scan adapters"
+          title={u('Re-scan adapters')}
           className="grid h-6 w-6 place-items-center rounded hover:bg-fg/10"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -92,15 +94,15 @@ export function CloudUplink({
           Host adapter
         </span>
         {ifaces == null ? (
-          <p className="text-xs text-fg/40">Detecting adapters…</p>
+          <p className="text-xs text-fg/40">{u('Detecting adapters…')}</p>
         ) : ifaces.length === 0 ? (
-          <p className="text-xs text-warning">No adapters detected.</p>
+          <p className="text-xs text-warning">{u('No adapters detected.')}</p>
         ) : (
           <Select
-            aria-label="Host adapter"
+            aria-label={u('Host adapter')}
             value={selected ?? ''}
             onChange={(v) => setUplink({ adapter: v, mode: uplink?.mode ?? 'nat' })}
-            placeholder="Select adapter…"
+            placeholder={u('Select adapter…')}
             options={ifaces.map((i) => ({
               value: i.name,
               label:
@@ -117,7 +119,7 @@ export function CloudUplink({
 
       {/* NAT vs bridge */}
       <label className="block space-y-1">
-        <span className="text-[10px] font-medium uppercase tracking-wide text-fg/45">Mode</span>
+        <span className="text-[10px] font-medium uppercase tracking-wide text-fg/45">{u('Mode')}</span>
         <div className="flex rounded-md border border-fg/10 bg-recess/20 p-0.5">
           {(['nat', 'bridge'] as UplinkMode[]).map((m) => (
             <button
@@ -135,9 +137,7 @@ export function CloudUplink({
       </label>
 
       <p className="text-[10px] leading-snug text-fg/40">
-        <b>NAT</b>: sim reaches the internet via the host (outbound). <b>Bridge</b>: place sim
-        nodes directly on the adapter&apos;s L2 segment. Applied by the emulation backend when the
-        node runs in <code>emul</code> mode.
+        {u('NAT: simulation reaches the internet through the host (outbound). Bridge: places simulation nodes directly on the adapter L2 segment. Applied by the emulation backend when the node runs in emul mode.')}
       </p>
     </section>
   );

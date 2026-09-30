@@ -58,6 +58,7 @@ import { DeviceIcon } from '@/components/canvas/DeviceIcon';
 import { ConfirmDialog } from '@/components/shell/ConfirmDialog';
 import { MapContextMenu } from './MapContextMenu';
 import type { LinkType, NodeModel, NodeStatus, Site } from '@/api/types';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 interface Props {
   site: Site;
@@ -100,6 +101,7 @@ const STATUS_DOT: Record<NodeStatus, string> = {
 };
 
 export function SitePopup({ site, px, onClose }: Props) {
+  const tx = useSurfaceText();
   const projectId = useUiStore((s) => s.projectId);
   const queryClient = useQueryClient();
   const nodes = useTopologyStore((s) => s.nodeList());
@@ -194,7 +196,7 @@ export function SitePopup({ site, px, onClose }: Props) {
           zc.popover,
         )}
         role="dialog"
-        aria-label={`Site ${site.name}`}
+        aria-label={`${tx('Site')} ${site.name}`}
       >
         {/* Header */}
         <div className="flex items-center gap-2.5 border-b border-fg/10 px-3.5 py-2.5">
@@ -219,7 +221,7 @@ export function SitePopup({ site, px, onClose }: Props) {
                 <p className="truncate text-sm font-semibold text-fg/90">{site.name}</p>
                 <button
                   onClick={() => setEditing(true)}
-                  aria-label="Rename site"
+                  aria-label={tx('Rename site')}
                   className="grid h-5 w-5 shrink-0 place-items-center rounded text-fg/35 hover:text-fg/80"
                 >
                   <Pencil className="h-3 w-3" />
@@ -233,14 +235,14 @@ export function SitePopup({ site, px, onClose }: Props) {
               <button
                 onClick={saveEdit}
                 disabled={renameSite.isPending || !name.trim()}
-                aria-label="Save name"
+                aria-label={tx('Save name')}
                 className="grid h-6 w-6 place-items-center rounded-md text-success hover:bg-success/10 disabled:opacity-40"
               >
                 <Check className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={cancelEdit}
-                aria-label="Cancel rename"
+                aria-label={tx('Cancel rename')}
                 className="grid h-6 w-6 place-items-center rounded-md text-fg/40 hover:bg-fg/10 hover:text-fg"
               >
                 <X className="h-3.5 w-3.5" />
@@ -251,8 +253,8 @@ export function SitePopup({ site, px, onClose }: Props) {
               <button
                 onClick={startMove}
                 disabled={site.lat == null || site.lon == null}
-                title={site.lat == null || site.lon == null ? 'Site has no coordinates yet' : 'Move this site'}
-                aria-label="Move site"
+                title={site.lat == null || site.lon == null ? tx('Site has no coordinates yet') : tx('Move this site')}
+                aria-label={tx('Move site')}
                 className="grid h-6 w-6 place-items-center rounded-md text-fg/40 hover:bg-accent/10 hover:text-accent disabled:opacity-30"
               >
                 <Move className="h-3.5 w-3.5" />
@@ -260,14 +262,14 @@ export function SitePopup({ site, px, onClose }: Props) {
               <button
                 onClick={() => setConfirmDelete(true)}
                 disabled={removeSite.isPending}
-                aria-label="Delete site"
+                aria-label={tx('Delete site')}
                 className="grid h-6 w-6 place-items-center rounded-md text-fg/40 hover:bg-danger/10 hover:text-danger disabled:opacity-50"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={tx('Close')}
                 className="grid h-6 w-6 place-items-center rounded-md text-fg/40 hover:bg-fg/10 hover:text-fg"
               >
                 <X className="h-3.5 w-3.5" />
@@ -286,10 +288,10 @@ export function SitePopup({ site, px, onClose }: Props) {
         <div className="ng-scroll max-h-80 overflow-y-auto px-3.5 py-2.5">
           <div className="mb-3">
             <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-fg/40">
-              Devices ({devicesAtSite.length})
+              {tx('Devices')} ({devicesAtSite.length})
             </p>
             {devicesAtSite.length === 0 ? (
-              <p className="py-1 text-[11px] text-fg/40">No devices at this site yet.</p>
+              <p className="py-1 text-[11px] text-fg/40">{tx('No devices at this site yet.')}</p>
             ) : (
               <ul className="space-y-1">
                 {devicesAtSite.map((n) => (
@@ -310,19 +312,19 @@ export function SitePopup({ site, px, onClose }: Props) {
           </div>
 
           {linkGroups.length === 0 ? (
-            <p className="py-1 text-[11px] text-fg/40">No links at this site yet.</p>
+            <p className="py-1 text-[11px] text-fg/40">{tx('No links at this site yet.')}</p>
           ) : (
             linkGroups.map((g) => (
               <div key={g.type} className="mb-2 last:mb-0">
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-fg/40">
-                  {g.label} ({g.rows.length})
+                  {tx(g.label)} ({g.rows.length})
                 </p>
                 <table className="w-full text-left text-[11px]">
                   <thead>
                     <tr className="text-fg/40">
-                      <th className="pb-1 font-medium">Link</th>
-                      <th className="pb-1 font-medium">Distance</th>
-                      <th className="pb-1 font-medium">Capacity</th>
+                      <th className="pb-1 font-medium">{tx('Link')}</th>
+                      <th className="pb-1 font-medium">{tx('Distance')}</th>
+                      <th className="pb-1 font-medium">{tx('Capacity')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -349,32 +351,32 @@ export function SitePopup({ site, px, onClose }: Props) {
             <button
               onClick={() => setAddCategory('wireless')}
               disabled={site.lat == null || site.lon == null}
-              title={site.lat == null || site.lon == null ? 'Site has no coordinates yet' : 'Add a wireless AP to this site'}
+              title={site.lat == null || site.lon == null ? tx('Site has no coordinates yet') : tx('Add a wireless AP to this site')}
               className="flex items-center justify-center gap-1 rounded-lg border border-accent/20 bg-accent/10 px-2 py-1.5 text-[11px] font-semibold text-accent transition-colors hover:bg-accent/20 disabled:opacity-40"
             >
-              <Radio className="h-3 w-3" /> Add AP
+              <Radio className="h-3 w-3" /> {tx('Add AP')}
             </button>
             <button
               disabled
-              title="Add PtP would create a link between two endpoints — no two-endpoint link-creation flow exists yet, only single-device placement."
+              title={tx('Add PtP would create a link between two endpoints — no two-endpoint link-creation flow exists yet, only single-device placement.')}
               className="flex cursor-not-allowed items-center justify-center gap-1 rounded-lg border border-fg/10 px-2 py-1.5 text-[11px] font-medium text-fg/30"
             >
-              <ArrowLeftRight className="h-3 w-3" /> Add PtP
+              <ArrowLeftRight className="h-3 w-3" /> {tx('Add PtP')}
             </button>
             <button
               disabled
-              title="Add Backbone would create a link between two endpoints — no two-endpoint link-creation flow exists yet, only single-device placement."
+              title={tx('Add Backbone would create a link between two endpoints — no two-endpoint link-creation flow exists yet, only single-device placement.')}
               className="flex cursor-not-allowed items-center justify-center gap-1 rounded-lg border border-fg/10 px-2 py-1.5 text-[11px] font-medium text-fg/30"
             >
-              <Network className="h-3 w-3" /> Add Backbone
+              <Network className="h-3 w-3" /> {tx('Add Backbone')}
             </button>
             <button
               onClick={() => setAddCategory('fiber')}
               disabled={site.lat == null || site.lon == null}
-              title={site.lat == null || site.lon == null ? 'Site has no coordinates yet' : 'Add a fiber device to this site'}
+              title={site.lat == null || site.lon == null ? tx('Site has no coordinates yet') : tx('Add a fiber device to this site')}
               className="flex items-center justify-center gap-1 rounded-lg border border-accent/20 bg-accent/10 px-2 py-1.5 text-[11px] font-semibold text-accent transition-colors hover:bg-accent/20 disabled:opacity-40"
             >
-              <Cable className="h-3 w-3" /> Add Fiber
+              <Cable className="h-3 w-3" /> {tx('Add Fiber')}
             </button>
           </div>
         </div>
@@ -401,7 +403,7 @@ export function SitePopup({ site, px, onClose }: Props) {
               ? `Its ${devicesAtSite.length} device${devicesAtSite.length === 1 ? '' : 's'} will be unassigned from this site. This can't be undone.`
               : "This can't be undone."
           }
-          confirmLabel="Delete"
+          confirmLabel={tx('Delete')}
           danger
           onConfirm={() => {
             setConfirmDelete(false);

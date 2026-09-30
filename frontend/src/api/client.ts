@@ -1,3 +1,4 @@
+import { internalText } from '@/i18n/internalText';
 /**
  * REST client for the NetGeo FastAPI backend (see NetGeo/09_API_STANDARD.md).
  * Thin axios wrapper: single base instance, JSON, error normalization, and
@@ -105,7 +106,7 @@ http.interceptors.response.use(
         const body = (env.error ?? {}) as ApiErrorBody;
         const apiError: ApiError = {
           status: res.status,
-          message: body.message ?? 'Request failed',
+          message: internalText(body.message ?? 'Request failed'),
           code: body.code,
           detail: body.detail ?? body,
         };
@@ -136,12 +137,13 @@ http.interceptors.response.use(
     }
     const apiError: ApiError = {
       status: err.response?.status ?? 0,
-      message:
+      message: internalText(
+        !err.response ? 'Cannot reach the server. Check your connection.' :
         envError?.message ||
         (typeof data?.detail === 'string' ? data.detail : undefined) ||
         data?.message ||
         err.message ||
-        'Network error',
+        'Network error'),
       code: envError?.code,
       detail: envError?.detail ?? data?.detail ?? data,
     };

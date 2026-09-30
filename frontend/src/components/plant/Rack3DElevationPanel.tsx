@@ -39,6 +39,7 @@ import { mountElevationM, structureSpecFor } from '@/lib/three/outdoorPlacement'
 import { RackDevicePicker } from './RackDevicePicker';
 import { UnrackedDevicesPanel } from './UnrackedDevicesPanel';
 import { Select } from '@/components/ui/Select';
+import { useSurfaceText } from '@/i18n/surfaceText';
 import {
   adaptTopology,
   cableLengthUpdatesForNode,
@@ -127,6 +128,7 @@ const KIND_BY_ICON: Record<string, NodeKind> = {
 };
 
 export function Rack3DElevationPanel() {
+  const tx = useSurfaceText();
   const projectId = useUiStore((s) => s.projectId);
   const queryClient = useQueryClient();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -1112,8 +1114,8 @@ export function Rack3DElevationPanel() {
         <div className="relative min-h-0 flex-1">
           <WorkspaceEmptyState
             icon={AlertTriangle}
-            title="3D view unavailable"
-            hint="This browser doesn't support WebGL, which the physical plant view requires. Try a different browser or enable hardware acceleration."
+            title={tx('3D view unavailable')}
+            hint={tx("This browser doesn't support WebGL, which the physical plant view requires. Try a different browser or enable hardware acceleration.")}
           />
         </div>
       </div>
@@ -1130,7 +1132,7 @@ export function Rack3DElevationPanel() {
         <div className="absolute inset-0">
           <WorkspaceEmptyState
             icon={Server}
-            title="No racks yet"
+            title={tx('No racks yet')}
             hint={racks.length > 0
               ? 'This site has no racks yet — create one above, or switch Site to see another one’s racks.'
               : 'Create a rack using the toolbar above — placed devices render as RU-accurate 3D blocks.'}
@@ -1153,28 +1155,28 @@ export function Rack3DElevationPanel() {
             // neighbours) into the entry bundle just for this one call.
             void import('@/store/mapStore').then(({ useMapStore }) => useMapStore.getState().setTool('site'));
           }}
-          title="Opens the map — click a point to place and name the new site"
+          title={tx('Opens the map — click a point to place and name the new site')}
           className={cn(btn(false), 'shrink-0')}
         >
-          <Plus className="size-3.5" /> Site
+          <Plus className="size-3.5" /> {tx('Site')}
         </button>
         <input
           ref={newRackNameRef}
           value={newRackName}
           onChange={(e) => setNewRackName(e.target.value)}
-          placeholder="New rack name"
-          aria-label="New rack name"
+          placeholder={tx('New rack name')}
+          aria-label={tx('New rack name')}
           className="w-28 shrink-0 rounded-lg border border-fg/15 bg-panel px-2 py-1.5 text-xs text-fg outline-none placeholder:text-fg/55 focus:border-accent/50"
         />
         <Select
-          aria-label="New rack site"
+          aria-label={tx('New rack site')}
           value={newRackSite}
           onChange={setNewRackSiteOverride}
           className="w-24 shrink-0"
           options={[{ value: '', label: '(no site)' }, ...sites.map((s) => ({ value: s.id, label: s.name }))]}
         />
         <Select
-          aria-label="Rack height"
+          aria-label={tx('Rack height')}
           value={String(newRackU)}
           onChange={(v) => setNewRackU(Number(v))}
           className="w-16 shrink-0"
@@ -1194,16 +1196,16 @@ export function Rack3DElevationPanel() {
           disabled={createRack.isPending}
           className={cn(btn(false), 'shrink-0 disabled:cursor-not-allowed disabled:opacity-40')}
         >
-          <Plus className="size-3.5" /> Rack
+          <Plus className="size-3.5" /> {tx('Rack')}
         </button>
         <div className="mx-1 h-5 w-px shrink-0 bg-fg/10" />
         {/* Site being viewed — every rack in it renders, no manual per-rack
             picking (permintaan Surya). Switching this is what "resets to 0"
             and then shows only the new site's racks. */}
         <div className="flex shrink-0 items-center gap-1.5 text-xs text-fg-muted">
-          Site
+          {tx('Site')}
           <Select
-            aria-label="Site ditampilkan"
+            aria-label={tx('Displayed site')}
             value={viewSiteId}
             onChange={(id) => { setViewSiteId(id); setNewRackSiteOverride(null); }}
             className="w-28"
@@ -1220,27 +1222,27 @@ export function Rack3DElevationPanel() {
             aria-expanded={enclosuresOpen}
             aria-controls="rack-enclosure-panel"
           >
-            <SlidersHorizontal className="size-3.5" /> Enclosure
+            <SlidersHorizontal className="size-3.5" /> {tx('Enclosure')}
           </button>
           <div className="mx-1 h-5 w-px shrink-0 bg-fg/10" />
-          <button type="button" className={cn(btn(face === 'front'), 'shrink-0')} onClick={() => setFace('front')}>Depan</button>
-          <button type="button" className={cn(btn(face === 'back'), 'shrink-0')} onClick={() => setFace('back')}>Belakang</button>
+          <button type="button" className={cn(btn(face === 'front'), 'shrink-0')} onClick={() => setFace('front')}>{tx('Front')}</button>
+          <button type="button" className={cn(btn(face === 'back'), 'shrink-0')} onClick={() => setFace('back')}>{tx('Back')}</button>
           <div className="mx-1 h-5 w-px shrink-0 bg-fg/10" />
-          <button type="button" className={cn(btn(doors), 'shrink-0')} onClick={() => setDoors((v) => !v)} title="Tutup pintu mesh depan">
-            <DoorClosed className="size-3.5" /> Pintu
+          <button type="button" className={cn(btn(doors), 'shrink-0')} onClick={() => setDoors((v) => !v)} title={tx('Toggle front mesh door')}>
+            <DoorClosed className="size-3.5" /> {tx('Doors')}
           </button>
           <button type="button" className={cn(btn(labels), 'shrink-0')} onClick={() => setLabels((v) => !v)}>
-            <Tag className="size-3.5" /> Label
+            <Tag className="size-3.5" /> {tx('Labels')}
           </button>
           <button type="button" className={cn(btn(anim), 'shrink-0')} onClick={() => setAnim((v) => !v)}>
-            <Zap className="size-3.5" /> Animasi
+            <Zap className="size-3.5" /> {tx('Animation')}
           </button>
           <div className="mx-1 h-5 w-px shrink-0 bg-fg/10" />
-          <button type="button" className={cn(btn(mode === 'cable'), 'shrink-0')} onClick={() => toggleMode('cable')} title="Buat kabel patch nyata">
-            <Cable className="size-3.5" /> Cable Mode
+          <button type="button" className={cn(btn(mode === 'cable'), 'shrink-0')} onClick={() => toggleMode('cable')} title={tx('Create a real patch cable')}>
+            <Cable className="size-3.5" /> {tx('Cable Mode')}
           </button>
-          <button type="button" className={cn(btn(mode === 'adddev'), 'shrink-0')} onClick={() => toggleMode('adddev')} title="Tambah perangkat ke rak">
-            <Plus className="size-3.5" /> Tambah perangkat
+          <button type="button" className={cn(btn(mode === 'adddev'), 'shrink-0')} onClick={() => toggleMode('adddev')} title={tx('Add device to rack')}>
+            <Plus className="size-3.5" /> {tx('Add device')}
           </button>
         </div>
         </div>
@@ -1278,7 +1280,7 @@ export function Rack3DElevationPanel() {
           the exact same place-a-device path P2 already shipped. */}
       {unplaced.length > 0 && (
         <div className="glass pointer-events-auto flex max-w-full flex-wrap items-center gap-1.5 rounded-xl px-3 py-2 text-xs shadow-glass">
-          <span className="text-fg-muted">Unplaced ({unplaced.length})</span>
+          <span className="text-fg-muted">{tx('Unplaced')} ({unplaced.length})</span>
           {unplaced.map((n) => (
             <button
               key={n.id}
@@ -1334,18 +1336,18 @@ export function Rack3DElevationPanel() {
       {enclosuresOpen && viewRacks.length > 0 && (
         <section
           id="rack-enclosure-panel"
-          aria-label="Rack enclosure profiles"
+          aria-label={tx('Rack enclosure profiles')}
           className="glass-strong absolute top-[76px] right-3 z-20 flex max-h-[calc(100%-152px)] w-[340px] flex-col overflow-hidden rounded-xl border border-fg/15 shadow-glass-lg"
         >
           <div className="flex items-center justify-between border-b border-fg/10 px-3 py-2.5">
             <div>
-              <h2 className="text-sm font-medium text-fg">Rack enclosures</h2>
-              <p className="text-[11px] text-fg/50">Choose a verified enclosure profile per rack.</p>
+              <h2 className="text-sm font-medium text-fg">{tx('Rack enclosures')}</h2>
+              <p className="text-[11px] text-fg/50">{tx('Choose a verified enclosure profile per rack.')}</p>
             </div>
             <button
               type="button"
               onClick={() => setEnclosuresOpen(false)}
-              aria-label="Close enclosure panel"
+              aria-label={tx('Close enclosure panel')}
               className="grid size-8 place-items-center rounded-lg text-fg/55 transition-colors hover:bg-fg/8 hover:text-fg"
             >
               <X className="size-4" aria-hidden />

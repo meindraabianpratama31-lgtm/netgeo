@@ -12,6 +12,7 @@ import type { ConsolePort } from '@/components/rack/DeviceFaceplate';
 import type { Interface, LinkModel, NodeModel } from '@/api/types';
 import type { DeviceType } from '@/api/client';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 /* ─── Toggle switch (P5 admin/PoE controls) ──────────────────────────────── */
 
@@ -65,6 +66,7 @@ function portGlyphClasses(port: ConsolePort): string {
 }
 
 export function PortStrip({ ports }: { ports: ConsolePort[] }) {
+  const u = useUiText();
   if (ports.length === 0) return null;
 
   return (
@@ -105,8 +107,8 @@ export function PortStrip({ ports }: { ports: ConsolePort[] }) {
       <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[10px] text-fg/45">
         <Legend swatch="border-success bg-success/10">1 Gbps</Legend>
         <Legend swatch="border-warning bg-warning/10">100/10 Mbps</Legend>
-        <Legend swatch="border-fg/20">Disconnected</Legend>
-        <Legend swatch="border-danger bg-danger/10">Disabled</Legend>
+        <Legend swatch="border-fg/20">{u('Disconnected')}</Legend>
+        <Legend swatch="border-danger bg-danger/10">{u('Disabled')}</Legend>
         <span className="flex items-center gap-1.5">
           <Zap className="h-2.5 w-2.5 text-accent" fill="currentColor" />
           PoE Active
@@ -189,6 +191,7 @@ export function LinksTable({
   links: Map<string, LinkModel>;
   nodesById: Map<string, NodeModel>;
 }) {
+  const u = useUiText();
   const rows = node.interfaces
     .filter((i) => i.peer_link_id)
     .map((i) => {
@@ -214,8 +217,8 @@ export function LinksTable({
           <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr className="bg-fg/5">
-                <th className="px-2.5 py-1.5 font-medium text-fg/45">Remote Link</th>
-                <th className="px-2.5 py-1.5 text-right font-medium text-fg/45">Local Port</th>
+                <th className="px-2.5 py-1.5 font-medium text-fg/45">{u('Remote Link')}</th>
+                <th className="px-2.5 py-1.5 text-right font-medium text-fg/45">{u('Local Port')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-fg/8 font-mono">
@@ -244,6 +247,7 @@ export function ConfigTabs({
   ports: ConsolePort[];
   patchInterface: (ifaceId: string, p: Partial<Interface>) => void;
 }) {
+  const u = useUiText();
   const [tab, setTab] = useState<'ip' | 'ports'>('ip');
   const poeCapableByIface = new Map(ports.filter((p) => p.iface).map((p) => [p.iface!.id, p.poeCapable]));
 
@@ -275,9 +279,9 @@ export function ConfigTabs({
           <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr className="bg-fg/5">
-                <th className="px-2.5 py-1.5 font-medium text-fg/45">Interface</th>
-                <th className="px-2.5 py-1.5 font-medium text-fg/45">IP Address</th>
-                <th className="px-2.5 py-1.5 text-center font-medium text-fg/45">Admin</th>
+                <th className="px-2.5 py-1.5 font-medium text-fg/45">{u('Interface')}</th>
+                <th className="px-2.5 py-1.5 font-medium text-fg/45">{u('IP Address')}</th>
+                <th className="px-2.5 py-1.5 text-center font-medium text-fg/45">{u('Admin')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-fg/8">
@@ -292,8 +296,8 @@ export function ConfigTabs({
           <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr className="bg-fg/5">
-                <th className="px-2.5 py-1.5 font-medium text-fg/45">Interface</th>
-                <th className="px-2.5 py-1.5 text-center font-medium text-fg/45">Admin</th>
+                <th className="px-2.5 py-1.5 font-medium text-fg/45">{u('Interface')}</th>
+                <th className="px-2.5 py-1.5 text-center font-medium text-fg/45">{u('Admin')}</th>
                 <th className="px-2.5 py-1.5 text-center font-medium text-fg/45">PoE</th>
               </tr>
             </thead>
@@ -337,6 +341,7 @@ function IpRow({
   iface: Interface;
   patchInterface: (ifaceId: string, p: Partial<Interface>) => void;
 }) {
+  const u = useUiText();
   const [text, setText] = useState(iface.ip.join(', '));
 
   return (
@@ -353,7 +358,7 @@ function IpRow({
               .filter(Boolean);
             if (next.join(', ') !== iface.ip.join(', ')) patchInterface(iface.id, { ip: next });
           }}
-          placeholder="unassigned"
+          placeholder={u('unassigned')}
           className="w-full rounded border border-transparent bg-transparent px-1 py-0.5 font-mono text-fg/90 outline-none transition-colors focus:border-accent focus:bg-recess/20"
         />
       </td>

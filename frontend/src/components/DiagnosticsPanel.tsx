@@ -21,25 +21,27 @@ import { useTopologyStore } from '@/store/topologyStore';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
 import { Select } from '@/components/ui/Select';
+import { useUiText } from '@/i18n/uiText';
 
 type Tab = 'ping' | 'trace' | 'capture' | 'tables';
 
 export function DiagnosticsPanel() {
+  const t = useUiText();
   const [tab, setTab] = useState<Tab>('ping');
   return (
     <div className="flex h-full flex-col text-[13px]">
       <div className="flex items-center gap-1 border-b border-fg/10 px-2 py-1.5">
         <TabButton active={tab === 'ping'} onClick={() => setTab('ping')} icon={Activity}>
-          Ping
+          {t('Ping')}
         </TabButton>
         <TabButton active={tab === 'trace'} onClick={() => setTab('trace')} icon={Route}>
-          Traceroute
+          {t('Traceroute')}
         </TabButton>
         <TabButton active={tab === 'capture'} onClick={() => setTab('capture')} icon={Radio}>
-          Capture
+          {t('Capture')}
         </TabButton>
         <TabButton active={tab === 'tables'} onClick={() => setTab('tables')} icon={Table2}>
-          Tables
+          {t('Tables')}
         </TabButton>
       </div>
       <div className="ng-scroll flex-1 overflow-auto p-3">
@@ -107,14 +109,15 @@ function SrcDstRow({
   running: boolean;
   runLabel: string;
 }) {
+  const t = useUiText();
   const options = useNodeOptions();
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Select
         value={src}
         onChange={setSrc}
-        aria-label="Source device"
-        placeholder="source device…"
+        aria-label={t('Source device')}
+        placeholder={t('source device…')}
         options={options.map((o) => ({ value: o.id, label: `${o.name} (${o.kind})` }))}
         className="min-w-[130px]"
       />
@@ -123,8 +126,8 @@ function SrcDstRow({
         value={dst}
         onChange={(e) => setDst(e.target.value)}
         list="ng-diag-dst-options"
-        placeholder="IPv4/IPv6 or device"
-        aria-label="Destination"
+        placeholder={t('IPv4/IPv6 or device')}
+        aria-label={t('Destination')}
         spellCheck={false}
         className="w-[190px] rounded-md border border-fg/10 bg-fg/5 px-2 py-1.5 text-xs outline-none placeholder:text-fg/30 focus:border-accent"
       />
@@ -143,7 +146,7 @@ function SrcDstRow({
             : 'bg-accent text-accent-fg hover:bg-accent/85',
         )}
       >
-        {running ? 'Running…' : runLabel}
+        {running ? t('Running…') : runLabel}
       </button>
     </div>
   );
@@ -157,6 +160,7 @@ function ErrorNote({ message }: { message?: string }) {
 /* --------------------------------- Ping ----------------------------------- */
 
 function PingTool() {
+  const t = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const [src, setSrc] = useState('');
   const [dst, setDst] = useState('');
@@ -174,7 +178,7 @@ function PingTool() {
         setDst={setDst}
         onRun={() => m.mutate()}
         running={m.isPending}
-        runLabel="Ping"
+        runLabel={t('Ping')}
       />
       <ErrorNote message={m.error?.message} />
       {m.data && (
@@ -184,7 +188,7 @@ function PingTool() {
           </p>
           {m.data.rtts_ms.map((rtt, i) => (
             <p key={i} className="text-emerald-300/90">
-              reply seq={i + 1} time={rtt} ms
+              {t('reply seq={seq} time={time} ms', { seq: i + 1, time: rtt })}
             </p>
           ))}
           {m.data.errors.map((e, i) => (
@@ -193,9 +197,9 @@ function PingTool() {
             </p>
           ))}
           <p className={cn('mt-1', m.data.loss_pct === 0 ? 'text-success' : 'text-warning')}>
-            {m.data.received}/{m.data.sent} received, {m.data.loss_pct}% loss
+            {t('{received}/{sent} received, {loss}% loss', { received: m.data.received, sent: m.data.sent, loss: m.data.loss_pct })}
             {m.data.avg_ms !== null &&
-              ` — rtt min/avg/max ${m.data.min_ms}/${m.data.avg_ms}/${m.data.max_ms} ms`}
+              ` — ${t('rtt min/avg/max {min}/{avg}/{max} ms', { min: m.data.min_ms ?? '—', avg: m.data.avg_ms, max: m.data.max_ms ?? '—' })}`}
           </p>
         </div>
       )}
@@ -206,6 +210,7 @@ function PingTool() {
 /* ------------------------------ Traceroute --------------------------------- */
 
 function TraceTool() {
+  const t = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const [src, setSrc] = useState('');
   const [dst, setDst] = useState('');
@@ -223,7 +228,7 @@ function TraceTool() {
         setDst={setDst}
         onRun={() => m.mutate()}
         running={m.isPending}
-        runLabel="Trace"
+        runLabel={t('Trace')}
       />
       <ErrorNote message={m.error?.message} />
       {m.data && (
@@ -241,7 +246,7 @@ function TraceTool() {
             </p>
           ))}
           <p className={cn('mt-1', m.data.reached ? 'text-success' : 'text-warning')}>
-            {m.data.reached ? 'Destination reached.' : 'Destination not reached.'}
+            {m.data.reached ? t('Destination reached.') : t('Destination not reached.')}
           </p>
         </div>
       )}
@@ -252,6 +257,7 @@ function TraceTool() {
 /* -------------------------------- Capture ---------------------------------- */
 
 function CaptureTool() {
+  const t = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const links = useTopologyStore((s) => s.links);
   const [linkId, setLinkId] = useState<string>('');
@@ -270,7 +276,7 @@ function CaptureTool() {
 
   const linkOptions = useMemo(() => Array.from(links.values()), [links]);
   const filterError =
-    q.error && filter ? ((q.error as { message?: string }).message ?? 'bad filter') : null;
+    q.error && filter ? ((q.error as { message?: string }).message ?? t('bad filter')) : null;
 
   return (
     <div className="flex h-full flex-col gap-2">
@@ -278,8 +284,8 @@ function CaptureTool() {
         <Select
           value={linkId}
           onChange={setLinkId}
-          aria-label="Capture link filter"
-          placeholder="all links"
+          aria-label={t('Capture link filter')}
+          placeholder={t('all links')}
           options={linkOptions.map((l) => ({ value: l.id, label: `${l.id.slice(0, 8)} (${l.type})` }))}
           className="w-40"
         />
@@ -288,8 +294,8 @@ function CaptureTool() {
           value={filterDraft}
           onChange={(e) => setFilterDraft(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && setFilter(filterDraft.trim())}
-          placeholder="filter: icmp && ip.addr==10.0.0.1"
-          aria-label="Display filter"
+          placeholder={t('filter: icmp && ip.addr==10.0.0.1')}
+          aria-label={t('Display filter')}
           spellCheck={false}
           className={cn(
             'w-[240px] rounded-md border bg-fg/5 px-2 py-1.5 font-mono text-[11px] outline-none placeholder:text-fg/25',
@@ -300,24 +306,24 @@ function CaptureTool() {
           onClick={() => setFilter(filterDraft.trim())}
           className="rounded-md bg-fg/10 px-2 py-1.5 text-xs text-fg/70 hover:bg-fg/15"
         >
-          Apply
+          {t('Apply')}
         </button>
         <button
           onClick={() => setView(view === 'frames' ? 'conversations' : 'frames')}
           className="rounded-md bg-fg/10 px-2 py-1.5 text-xs text-fg/70 hover:bg-fg/15"
-          title="Toggle conversation view"
+          title={t('Toggle conversation view')}
         >
-          {view === 'frames' ? 'Conversations' : 'Frames'}
+          {view === 'frames' ? t('Conversations') : t('Frames')}
         </button>
         <button
           onClick={() => void labApi.downloadPcapng(projectId!, linkId || undefined)}
           className="rounded-md bg-accent/80 px-2 py-1.5 text-xs font-medium text-accent-fg hover:bg-accent"
-          title="Download as .pcapng — opens in Wireshark"
+          title={t('Download as .pcapng — opens in Wireshark')}
         >
           .pcapng
         </button>
         <span className="text-xs text-fg/40">
-          {q.data?.length ?? 0} frames · auto-refresh
+          {t('{count} frames · auto-refresh', { count: q.data?.length ?? 0 })}
         </span>
       </div>
       {filterError && (
@@ -329,7 +335,7 @@ function CaptureTool() {
       <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-fg/10 bg-recess/25 font-mono text-[11px] leading-relaxed">
         {(q.data ?? []).length === 0 ? (
           <p className="p-3 text-fg/35">
-            No frames captured yet — run a ping or let protocols talk.
+            {t('No frames captured yet — run a ping or let protocols talk.')}
           </p>
         ) : (
           <table className="w-full">
@@ -375,6 +381,7 @@ function CaptureTool() {
 
 /** Conversation view (NG-CAP-02): traffic grouped per endpoint pair. */
 function ConversationView({ records }: { records: CaptureRecord[] }) {
+  const t = useUiText();
   const rows = useMemo(() => {
     const acc = new Map<
       string,
@@ -402,16 +409,16 @@ function ConversationView({ records }: { records: CaptureRecord[] }) {
   return (
     <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-fg/10 bg-recess/25 font-mono text-[11px] leading-relaxed">
       {rows.length === 0 ? (
-        <p className="p-3 text-fg/35">No conversations in the current capture.</p>
+        <p className="p-3 text-fg/35">{t('No conversations in the current capture.')}</p>
       ) : (
         <table className="w-full">
           <thead>
             <tr className="border-b border-fg/10 text-left text-fg/40">
-              <th className="px-2 py-1 font-normal">Endpoint A</th>
-              <th className="px-2 py-1 font-normal">Endpoint B</th>
-              <th className="px-2 py-1 font-normal">Proto</th>
-              <th className="px-2 py-1 text-right font-normal">Frames</th>
-              <th className="px-2 py-1 text-right font-normal">Bytes</th>
+              <th className="px-2 py-1 font-normal">{t('Endpoint A')}</th>
+              <th className="px-2 py-1 font-normal">{t('Endpoint B')}</th>
+              <th className="px-2 py-1 font-normal">{t('Proto')}</th>
+              <th className="px-2 py-1 text-right font-normal">{t('Frames')}</th>
+              <th className="px-2 py-1 text-right font-normal">{t('Bytes')}</th>
             </tr>
           </thead>
           <tbody>
@@ -464,6 +471,7 @@ interface RouteRow {
 }
 
 function TablesTool() {
+  const tr = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const options = useNodeOptions();
   const [nodeRef, setNodeRef] = useState('');
@@ -481,8 +489,8 @@ function TablesTool() {
       <Select
         value={nodeRef}
         onChange={setNodeRef}
-        aria-label="Device tables"
-        placeholder="select device…"
+        aria-label={tr('Device tables')}
+        placeholder={tr('select device…')}
         options={options.map((o) => ({ value: o.id, label: `${o.name} (${o.kind})` }))}
         className="w-fit min-w-[180px]"
       />
@@ -490,11 +498,11 @@ function TablesTool() {
       {t && (
         <div className="flex flex-col gap-3 font-mono text-[11px] leading-relaxed">
           {/* Interfaces with live badges */}
-          <TableCard title="Interfaces">
+          <TableCard title={tr('Interfaces')}>
             {t.interfaces.map((i) => (
               <p key={i.name} className="flex flex-wrap items-center gap-1.5">
                 <span className="text-fg/75">{i.name}</span>
-                <Badge tone={i.up ? 'ok' : 'bad'}>{i.up ? 'up' : 'down'}</Badge>
+                <Badge tone={i.up ? 'ok' : 'bad'}>{i.up ? tr('up') : tr('down')}</Badge>
                 {i.stp && i.stp.state !== 'forwarding' && (
                   <Badge tone="warn">STP {i.stp.state}</Badge>
                 )}
@@ -506,14 +514,14 @@ function TablesTool() {
           </TableCard>
 
           {(t.routes?.length ?? 0) > 0 && (
-            <RouteTable title="IPv4 routes" rows={t.routes!} />
+            <RouteTable title={tr('IPv4 routes')} rows={t.routes!} />
           )}
           {(t.routes6?.length ?? 0) > 0 && (
-            <RouteTable title="IPv6 routes" rows={t.routes6!} />
+            <RouteTable title={tr('IPv6 routes')} rows={t.routes6!} />
           )}
 
           {(t.arp?.length ?? 0) > 0 && (
-            <TableCard title="ARP cache">
+            <TableCard title={tr('ARP cache')}>
               {t.arp!.map((a) => (
                 <p key={a.ip} className="text-fg/60">
                   {a.ip} <span className="text-fg/35">→</span> {a.mac}{' '}
@@ -523,7 +531,7 @@ function TablesTool() {
             </TableCard>
           )}
           {(t.neighbors6?.length ?? 0) > 0 && (
-            <TableCard title="IPv6 neighbors (NDP)">
+            <TableCard title={tr('IPv6 neighbors (NDP)')}>
               {t.neighbors6!.map((a) => (
                 <p key={a.ip} className="text-fg/60">
                   {a.ip} <span className="text-fg/35">→</span> {a.mac}{' '}
@@ -534,34 +542,34 @@ function TablesTool() {
           )}
 
           {(t.mac_table?.length ?? 0) > 0 && (
-            <TableCard title="MAC address table">
+            <TableCard title={tr('MAC address table')}>
               {t.mac_table!.map((m, i) => (
                 <p key={i} className="text-fg/60">
-                  vlan {m.vlan} · {m.mac} → {m.port}
+                  {tr('vlan')} {m.vlan} · {m.mac} → {m.port}
                 </p>
               ))}
             </TableCard>
           )}
 
           {(t.ospf_neighbors?.length ?? 0) > 0 && (
-            <TableCard title="OSPF neighbors">
+            <TableCard title={tr('OSPF neighbors')}>
               {t.ospf_neighbors!.map((n) => (
                 <p key={n.router_id} className="flex items-center gap-1.5 text-fg/60">
-                  {n.router_id} via {n.iface}
+                  {n.router_id} {tr('via')} {n.iface}
                   <Badge tone={n.state.toLowerCase() === 'full' ? 'ok' : 'warn'}>{n.state}</Badge>
                 </p>
               ))}
             </TableCard>
           )}
           {(t.bgp_peers?.length ?? 0) > 0 && (
-            <TableCard title="BGP peers">
+            <TableCard title={tr('BGP peers')}>
               {t.bgp_peers!.map((p) => (
                 <p key={p.neighbor} className="flex items-center gap-1.5 text-fg/60">
                   {p.neighbor} (AS{p.remote_as})
                   <Badge tone={p.state.toLowerCase() === 'established' ? 'ok' : 'warn'}>
                     {p.state}
                   </Badge>
-                  <span className="text-fg/35">{p.prefixes_received} pfx</span>
+                  <span className="text-fg/35">{p.prefixes_received} {tr('pfx')}</span>
                 </p>
               ))}
             </TableCard>
@@ -573,13 +581,14 @@ function TablesTool() {
 }
 
 function RouteTable({ title, rows }: { title: string; rows: RouteRow[] }) {
+  const t = useUiText();
   return (
     <TableCard title={title}>
       {rows.map((r, i) => (
         <p key={i} className="text-fg/60">
           <span className="text-fg/40">{sourceCode(r.source)}</span> {r.prefix}{' '}
           <span className="text-fg/35">[{r.ad}/{r.metric}]</span>{' '}
-          {r.next_hop ? `via ${r.next_hop}` : 'directly connected'}
+          {r.next_hop ? `${t('via')} ${r.next_hop}` : t('directly connected')}
           {r.iface ? <span className="text-fg/35">, {r.iface}</span> : null}
         </p>
       ))}

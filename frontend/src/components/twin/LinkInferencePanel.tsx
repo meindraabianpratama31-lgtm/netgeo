@@ -11,6 +11,7 @@ import { useUiStore } from '@/store/uiStore';
 import { useTopologyStore } from '@/store/topologyStore';
 import { zc } from '@/theme/z';
 import type { LinkProposal } from './twinLogic';
+import { useFeatureText } from '@/i18n/featureText';
 
 export function LinkInferencePanel({
   proposals,
@@ -23,6 +24,7 @@ export function LinkInferencePanel({
   onReject: (id: string) => void;
   onResolved: () => void;
 }) {
+  const t = useFeatureText();
   const projectId = useUiStore((s) => s.projectId);
   const queryClient = useQueryClient();
   const total = resolved + proposals.length;
@@ -53,16 +55,16 @@ export function LinkInferencePanel({
 
   return (
     <aside
-      aria-label="Link inference"
+      aria-label={t('Link Inference')}
       className={`panel absolute right-0 top-0 ${zc.workspace} flex h-full w-[360px] max-w-[85vw] flex-col border-l border-fg/10 shadow-glass-lg`}
     >
       <header className="flex shrink-0 items-center justify-between border-b border-fg/10 px-4 py-3">
         <div className="flex items-center gap-2">
           <Link2 className="h-4 w-4 text-accent" />
-          <h2 className="text-sm font-semibold text-fg/90">Link Inference</h2>
+          <h2 className="text-sm font-semibold text-fg/90">{t('Link Inference')}</h2>
         </div>
         <span className="rounded-full bg-fg/10 px-2 py-0.5 text-[11px] font-medium text-fg/60">
-          {resolved} of {total} resolved
+          {t('{resolved} of {total} resolved', { resolved, total })}
         </span>
       </header>
 
@@ -70,18 +72,18 @@ export function LinkInferencePanel({
         <button
           onClick={() => inferAll.mutate()}
           disabled={!projectId || inferAll.isPending}
-          title="Wire every interface pair that shares a subnet (idempotent)"
+          title={t('Wire every interface pair that shares a subnet (idempotent)')}
           className="flex w-full items-center justify-center gap-1.5 rounded-md border border-fg/10 bg-fg/5 px-3 py-2 text-xs font-medium text-fg/80 transition-colors hover:border-accent/40 hover:text-fg disabled:opacity-40"
         >
           {inferAll.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-          Infer all links
+          {t('Infer all links')}
         </button>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
         {acceptErr && (
           <div className="mb-2 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-danger">
-            {acceptErr.message || 'Could not create link.'}
+            {acceptErr.message || t('Could not create link.')}
           </div>
         )}
 
@@ -90,10 +92,10 @@ export function LinkInferencePanel({
             <div className="text-fg/45">
               <Check className="mx-auto mb-2 h-6 w-6 text-success/70" />
               <p className="text-xs">
-                {total > 0 ? 'All proposals resolved.' : 'No link proposals.'}
+                {total > 0 ? t('All proposals resolved.') : t('No link proposals.')}
               </p>
               <p className="mt-1 text-[11px] text-fg/35">
-                Import configs with shared subnets to see suggested links.
+                {t('Import configs with shared subnets to see suggested links.')}
               </p>
             </div>
           </div>
@@ -113,14 +115,14 @@ export function LinkInferencePanel({
                     <span className="truncate">{p.bNode.name}</span>
                     <span className="font-mono text-[11px] text-fg/45">{p.bIface.name}</span>
                   </div>
-                  <div className="mt-1 font-mono text-[11px] text-fg/50">shared subnet {p.subnet}</div>
+                  <div className="mt-1 font-mono text-[11px] text-fg/50">{t('shared subnet {subnet}', { subnet: p.subnet })}</div>
                   <div className="mt-2 flex items-center gap-2">
                     <button
                       onClick={() => onReject(p.id)}
                       disabled={accept.isPending}
                       className="flex flex-1 items-center justify-center gap-1 rounded-md border border-fg/10 px-2 py-1.5 text-xs text-fg/60 transition-colors hover:border-danger/40 hover:text-danger disabled:opacity-40"
                     >
-                      <X className="h-3.5 w-3.5" /> Reject
+                      <X className="h-3.5 w-3.5" /> {t('Reject')}
                     </button>
                     <button
                       onClick={() => accept.mutate(p)}
@@ -128,7 +130,7 @@ export function LinkInferencePanel({
                       className="flex flex-1 items-center justify-center gap-1 rounded-md bg-accent px-2 py-1.5 text-xs font-semibold text-accent-fg transition-colors hover:bg-accent-soft disabled:opacity-40"
                     >
                       {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                      Accept
+                      {t('Accept')}
                     </button>
                   </div>
                 </li>

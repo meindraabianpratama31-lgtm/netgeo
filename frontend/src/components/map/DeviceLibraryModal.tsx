@@ -27,6 +27,7 @@ import { Select } from '@/components/ui/Select';
 import { ConfirmDialog } from '@/components/shell/ConfirmDialog';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 /* -------------------------------------------------------------------------- */
 /* Icon + category mapping                                                     */
@@ -67,6 +68,7 @@ type Tab = 'library' | 'upload' | 'docker' | 'manual';
 /* Modal                                                                       */
 /* -------------------------------------------------------------------------- */
 export function DeviceLibraryModal() {
+  const tx = useSurfaceText();
   const close = () => useUiStore.getState().closeModal();
   const [tab, setTab] = useState<Tab>('library');
   const qc = useQueryClient();
@@ -92,7 +94,7 @@ export function DeviceLibraryModal() {
       onClick={(e) => e.target === e.currentTarget && close()}
       role="dialog"
       aria-modal="true"
-      aria-label="Device library"
+      aria-label={tx('Device library')}
     >
       <div className="glass-strong relative flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-fg/15 shadow-glass-lg animate-scale-in">
         {/* Header */}
@@ -101,14 +103,14 @@ export function DeviceLibraryModal() {
             <Boxes className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <h2 className="text-base font-semibold text-fg">Device Library</h2>
+            <h2 className="text-base font-semibold text-fg">{tx('Device Library')}</h2>
             <p className="text-xs text-fg/45">
-              Built-in types plus your custom appliances, Docker images, and uploads.
+              {tx('Built-in types plus your custom appliances, Docker images, and uploads.')}
             </p>
           </div>
           <button
             onClick={close}
-            aria-label="Close device library"
+            aria-label={tx('Close device library')}
             className="grid h-7 w-7 place-items-center rounded-md text-fg/40 hover:bg-fg/10 hover:text-fg"
           >
             <X className="h-4 w-4" />
@@ -129,7 +131,7 @@ export function DeviceLibraryModal() {
               )}
             >
               <Icon className="h-3.5 w-3.5" />
-              {label}
+              {tx(label)}
             </button>
           ))}
         </div>
@@ -166,6 +168,7 @@ function DeviceTypeList({
   error: ApiError | null;
   onChanged: () => void;
 }) {
+  const tx = useSurfaceText();
   const [confirmRemove, setConfirmRemove] = useState<DeviceType | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
 
@@ -181,7 +184,7 @@ function DeviceTypeList({
     },
     onError: (e, id) => {
       console.error('Failed to delete device type', id, e);
-      setRemoveError('Could not delete this device type. It was not removed — try again.');
+      setRemoveError(tx('Could not delete this device type. It was not removed — try again.'));
     },
   });
 
@@ -189,7 +192,7 @@ function DeviceTypeList({
     return (
       <div className="grid place-items-center py-16 text-fg/40">
         <Loader2 className="h-6 w-6 animate-spin" />
-        <p className="mt-2 text-xs">Loading device types…</p>
+        <p className="mt-2 text-xs">{tx('Loading device types…')}</p>
       </div>
     );
   }
@@ -198,8 +201,8 @@ function DeviceTypeList({
     return (
       <div className="grid place-items-center py-16 text-center text-danger/80">
         <AlertTriangle className="h-6 w-6" />
-        <p className="mt-2 text-sm">Couldn’t load device types.</p>
-        <p className="mt-1 text-xs text-fg/40">Check your connection and try again.</p>
+        <p className="mt-2 text-sm">{tx('Couldn’t load device types.')}</p>
+        <p className="mt-1 text-xs text-fg/40">{tx('Check your connection and try again.')}</p>
       </div>
     );
   }
@@ -208,7 +211,7 @@ function DeviceTypeList({
     return (
       <div className="grid place-items-center py-16 text-fg/40">
         <Boxes className="h-6 w-6" />
-        <p className="mt-2 text-sm">No device types yet.</p>
+        <p className="mt-2 text-sm">{tx('No device types yet.')}</p>
       </div>
     );
   }
@@ -243,7 +246,7 @@ function DeviceTypeList({
               </div>
               {dt.builtin ? (
                 <span className="absolute right-2 top-2 rounded bg-fg/10 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-fg/40">
-                  Built-in
+                  {tx('Built-in')}
                 </span>
               ) : (
                 <button
@@ -264,7 +267,7 @@ function DeviceTypeList({
         <ConfirmDialog
           title={`Delete "${confirmRemove.name}"?`}
           message="This device type will be removed from the library. This can't be undone."
-          confirmLabel="Delete"
+          confirmLabel={tx('Delete')}
           danger
           onConfirm={() => {
             remove.mutate(confirmRemove.id);
@@ -281,6 +284,7 @@ function DeviceTypeList({
 /* Upload ISO form                                                             */
 /* -------------------------------------------------------------------------- */
 function UploadIsoForm({ onDone }: { onDone: () => void }) {
+  const tx = useSurfaceText();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState('');
@@ -322,7 +326,7 @@ function UploadIsoForm({ onDone }: { onDone: () => void }) {
         {file ? (
           <span className="text-sm text-fg/90">{file.name}</span>
         ) : (
-          <span className="text-sm text-fg/55">Click to choose an image file</span>
+          <span className="text-sm text-fg/55">{tx('Click to choose an image file')}</span>
         )}
         <span className="text-[10px] text-fg/35">
           {file ? `${(file.size / 1_048_576).toFixed(1)} MB` : 'ISO / qcow2 / img'}
@@ -336,7 +340,7 @@ function UploadIsoForm({ onDone }: { onDone: () => void }) {
         />
       </label>
 
-      <Field label="Display name (optional)">
+      <Field label={tx('Display name (optional)')}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -351,7 +355,7 @@ function UploadIsoForm({ onDone }: { onDone: () => void }) {
         </div>
       )}
 
-      <FormStatus mutation={upload} successText="Image uploaded and registered." />
+      <FormStatus mutation={upload} successText={tx('Image uploaded and registered.')} />
 
       <button
         type="submit"
@@ -359,7 +363,7 @@ function UploadIsoForm({ onDone }: { onDone: () => void }) {
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {upload.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
-        {upload.isPending ? 'Uploading…' : 'Upload & Register'}
+        {upload.isPending ? tx('Uploading…') : tx('Upload & Register')}
       </button>
     </form>
   );
@@ -369,6 +373,7 @@ function UploadIsoForm({ onDone }: { onDone: () => void }) {
 /* Docker form                                                                 */
 /* -------------------------------------------------------------------------- */
 function DockerForm({ onDone }: { onDone: () => void }) {
+  const tx = useSurfaceText();
   const [image, setImage] = useState('');
   const [name, setName] = useState('');
 
@@ -393,7 +398,7 @@ function DockerForm({ onDone }: { onDone: () => void }) {
         Register a device backed by a container image pulled from a registry.
       </p>
 
-      <Field label="Docker image">
+      <Field label={tx('Docker image')}>
         <input
           value={image}
           onChange={(e) => setImage(e.target.value)}
@@ -402,11 +407,11 @@ function DockerForm({ onDone }: { onDone: () => void }) {
         />
       </Field>
 
-      <Field label="Display name (optional)">
+      <Field label={tx('Display name (optional)')}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Defaults to the image name"
+          placeholder={tx('Defaults to the image name')}
           className="w-full rounded-md border border-fg/10 bg-recess/20 px-2.5 py-1.5 text-sm text-fg/90 outline-none focus:border-accent"
         />
       </Field>
@@ -419,7 +424,7 @@ function DockerForm({ onDone }: { onDone: () => void }) {
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Container className="h-4 w-4" />}
-        Add Docker Device
+        {tx('Add Docker Device')}
       </button>
     </form>
   );
@@ -429,6 +434,7 @@ function DockerForm({ onDone }: { onDone: () => void }) {
 /* Manual custom form                                                          */
 /* -------------------------------------------------------------------------- */
 function ManualForm({ onDone }: { onDone: () => void }) {
+  const tx = useSurfaceText();
   const [name, setName] = useState('');
   const [category, setCategory] = useState('custom');
   const [description, setDescription] = useState('');
@@ -454,7 +460,7 @@ function ManualForm({ onDone }: { onDone: () => void }) {
         if (name.trim()) create.mutate();
       }}
     >
-      <Field label="Name">
+      <Field label={tx('Name')}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -463,9 +469,9 @@ function ManualForm({ onDone }: { onDone: () => void }) {
         />
       </Field>
 
-      <Field label="Category">
+      <Field label={tx('Category')}>
         <Select
-          aria-label="Category"
+          aria-label={tx('Category')}
           value={category}
           onChange={setCategory}
           options={CATEGORIES.map((c) => ({ value: c, label: c }))}
@@ -473,12 +479,12 @@ function ManualForm({ onDone }: { onDone: () => void }) {
         />
       </Field>
 
-      <Field label="Description (optional)">
+      <Field label={tx('Description (optional)')}>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          placeholder="Notes about this device type…"
+          placeholder={tx('Notes about this device type…')}
           className="w-full resize-none rounded-md border border-fg/10 bg-recess/20 px-2.5 py-1.5 text-sm text-fg/90 outline-none focus:border-accent"
         />
       </Field>
@@ -491,7 +497,7 @@ function ManualForm({ onDone }: { onDone: () => void }) {
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-fg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-        Create Device Type
+        {tx('Create Device Type')}
       </button>
     </form>
   );

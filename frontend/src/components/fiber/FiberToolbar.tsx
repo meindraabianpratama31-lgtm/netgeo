@@ -16,6 +16,7 @@ import { useFiberStore } from '@/store/fiberStore';
 import { GPON_OPTIONS, SPLIT_RATIOS } from './fiberLogic';
 import type { GponClass } from '@/api/client';
 import { Select } from '@/components/ui/Select';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const SPLIT_RATIO_OPTIONS = SPLIT_RATIOS.map((r) => ({ value: String(r), label: String(r) }));
 
@@ -32,6 +33,7 @@ function AppendButton({ label, onClick, disabled }: { label: string; onClick: ()
 }
 
 export function FiberToolbar() {
+  const tx = useSurfaceText();
   const paths = useFiberStore((s) => s.paths);
   const selectedId = useFiberStore((s) => s.selectedId);
   const selected = paths.find((p) => p.id === selectedId);
@@ -66,10 +68,10 @@ export function FiberToolbar() {
       <div className="glass-strong flex flex-wrap items-center gap-2 rounded-xl border border-fg/15 px-3 py-2 shadow-glass-lg">
         {/* Path selection */}
         <Select
-          aria-label="Fiber path"
+          aria-label={tx('Fiber path')}
           value={selectedId ?? ''}
           onChange={(v) => select(v || null)}
-          placeholder="No paths"
+          placeholder={tx('No paths')}
           options={visible.map((p) => ({ value: p.id, label: p.name }))}
           className="max-w-[150px]"
         />
@@ -83,23 +85,23 @@ export function FiberToolbar() {
               if (e.key === 'Escape') setNewName(null);
             }}
             onBlur={() => setNewName(null)}
-            aria-label="New fiber path name"
-            placeholder="Path name — Enter to create"
+            aria-label={tx('New fiber path name')}
+            placeholder={tx('Path name — Enter to create')}
             className="w-32 rounded-md border border-accent/50 bg-recess/20 px-2 py-1 text-xs text-fg/85 placeholder:text-fg/35 focus:outline-none"
           />
         ) : (
           <button
             onClick={() => setNewName(`ODP-${paths.length + 1}`)}
             disabled={!projectId || busy}
-            aria-label="New fiber path"
-            title="New fiber path"
+            aria-label={tx('New fiber path')}
+            title={tx('New fiber path')}
             className="grid h-6 w-6 place-items-center rounded text-fg/60 hover:bg-fg/10 hover:text-fg disabled:opacity-40"
           >
             <Plus className="h-4 w-4" />
           </button>
         )}
         <Select
-          aria-label="GPON class"
+          aria-label={tx('GPON class')}
           value={selected?.gpon_class ?? 'c_plus'}
           onChange={(v) => void setGpon(v as GponClass)}
           disabled={disabled}
@@ -108,8 +110,8 @@ export function FiberToolbar() {
         <button
           onClick={() => selected && void deletePath(selected.id)}
           disabled={disabled}
-          aria-label="Delete path"
-          title="Delete path"
+          aria-label={tx('Delete path')}
+          title={tx('Delete path')}
           className="grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-danger/15 hover:text-danger disabled:opacity-40"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -125,13 +127,13 @@ export function FiberToolbar() {
             min={0.01}
             value={km}
             onChange={(e) => Number(e.target.value) > 0 && setKm(Number(e.target.value))}
-            aria-label="Fiber length (km)"
+            aria-label={tx('Fiber length (km)')}
             disabled={disabled}
             className="w-11 bg-transparent text-right font-mono text-xs text-fg/85 focus:outline-none disabled:opacity-40"
           />
           <span className="text-[9px] text-fg/40">km</span>
           <AppendButton
-            label="Fiber"
+            label={tx('Fiber')}
             disabled={disabled}
             onClick={() => void append({ kind: 'fiber', length_m: km * 1000, atten_db_km: 0.22 })}
           />
@@ -139,7 +141,7 @@ export function FiberToolbar() {
         <div className="flex items-center gap-1 rounded-md border border-fg/15 bg-recess/40 px-1.5 py-0.5">
           <span className="text-[9px] text-fg/40">1:</span>
           <Select
-            aria-label="Splitter ratio"
+            aria-label={tx('Splitter ratio')}
             value={String(ratio)}
             onChange={(v) => setRatio(Number(v))}
             disabled={disabled}
@@ -147,19 +149,19 @@ export function FiberToolbar() {
             className="w-16"
           />
           <AppendButton
-            label="Splitter"
+            label={tx('Splitter')}
             disabled={disabled}
             onClick={() => void append({ kind: 'splitter', split_ratio: ratio })}
           />
         </div>
-        <AppendButton label="Connector" disabled={disabled} onClick={() => void append({ kind: 'connector' })} />
-        <AppendButton label="Splice" disabled={disabled} onClick={() => void append({ kind: 'splice' })} />
+        <AppendButton label={tx('Connector')} disabled={disabled} onClick={() => void append({ kind: 'connector' })} />
+        <AppendButton label={tx('Splice')} disabled={disabled} onClick={() => void append({ kind: 'splice' })} />
 
         <button
           onClick={() => selected && selected.elements.length > 0 && void removeElement(selected.elements.length - 1)}
           disabled={disabled || (selected?.elements.length ?? 0) === 0}
-          aria-label="Undo last element"
-          title="Remove last element"
+          aria-label={tx('Undo last element')}
+          title={tx('Remove last element')}
           className="grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg disabled:opacity-40"
         >
           <Undo2 className="h-3.5 w-3.5" />
@@ -167,9 +169,9 @@ export function FiberToolbar() {
 
         <span
           className={cn('inline-flex cursor-not-allowed items-center gap-1 px-1.5 text-xs text-fg/30')}
-          title="Measure — coming in a later phase"
+          title={tx('Measure — coming in a later phase')}
         >
-          <Ruler className="h-3.5 w-3.5" /> Measure
+          <Ruler className="h-3.5 w-3.5" /> {tx('Measure')}
         </span>
       </div>
     </div>

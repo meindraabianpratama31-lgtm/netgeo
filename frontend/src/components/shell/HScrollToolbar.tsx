@@ -19,6 +19,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 const FADE = 28; // px — the mask fade distance.
 // Chevron's reserved edge padding: FADE plus a little extra so the button
@@ -40,6 +41,7 @@ export function HScrollToolbar({
    * window buttons use. No-op for every other caller. */
   onMouseDown?: (e: React.MouseEvent) => void;
 }) {
+  const u = useUiText();
   const ref = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
@@ -79,7 +81,7 @@ export function HScrollToolbar({
       {canLeft && (
         <button
           onClick={() => scrollBy(-160)}
-          aria-label="Scroll toolbar left"
+          aria-label={u('Scroll toolbar left')}
           className="absolute left-0.5 z-20 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-fg/15 bg-panel text-fg/70 shadow-glass hover:text-fg"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
@@ -109,7 +111,7 @@ export function HScrollToolbar({
       {canRight && (
         <button
           onClick={() => scrollBy(160)}
-          aria-label="Scroll toolbar right"
+          aria-label={u('Scroll toolbar right')}
           className="absolute right-0.5 z-20 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-fg/15 bg-panel text-fg/70 shadow-glass hover:text-fg"
         >
           <ChevronRight className="h-3.5 w-3.5" />

@@ -20,6 +20,7 @@ import { Search, X, Loader, Server } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import type { DeviceType } from '@/api/client';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 interface Props {
   px: { x: number; y: number };
@@ -32,6 +33,7 @@ interface Props {
 }
 
 export function RackDevicePicker({ px, rackLabel, ruStart, types, busy, onPick, onClose }: Props) {
+  const tx = useSurfaceText();
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
 
@@ -70,7 +72,7 @@ export function RackDevicePicker({ px, rackLabel, ruStart, types, busy, onPick, 
         zc.popover,
       )}
       role="menu"
-      aria-label="Add device here"
+      aria-label={tx('Add device here')}
     >
       <div className="mb-1.5 flex items-center gap-1 px-0.5">
         <Server className="h-3 w-3 shrink-0 text-fg/50" />
@@ -79,7 +81,7 @@ export function RackDevicePicker({ px, rackLabel, ruStart, types, busy, onPick, 
         </span>
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label={tx('Close')}
           className="grid h-5 w-5 shrink-0 place-items-center rounded text-fg/40 hover:text-fg"
         >
           <X className="h-3 w-3" />
@@ -92,7 +94,7 @@ export function RackDevicePicker({ px, rackLabel, ruStart, types, busy, onPick, 
           autoFocus
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search devices…"
+          placeholder={tx('Search devices…')}
           disabled={busy}
           className="w-full rounded-lg border border-fg/10 bg-recess/20 py-1.5 pl-7 pr-2.5 text-xs text-fg/90 outline-none focus:border-accent"
         />
@@ -100,7 +102,7 @@ export function RackDevicePicker({ px, rackLabel, ruStart, types, busy, onPick, 
 
       <div className="ng-scroll max-h-56 space-y-0.5 overflow-y-auto">
         {results.length === 0 && (
-          <p className="px-1 py-2 text-[11px] text-fg/40">No matching devices.</p>
+          <p className="px-1 py-2 text-[11px] text-fg/40">{tx('No matching devices.')}</p>
         )}
         {results.map((dt) => {
           const ru = dt.physical?.ru;
@@ -128,7 +130,7 @@ export function RackDevicePicker({ px, rackLabel, ruStart, types, busy, onPick, 
 
       <div className="mt-1.5 flex items-center justify-between border-t border-fg/10 pt-1.5">
         <button onClick={onClose} className="text-[10px] text-fg/45 hover:text-fg/80">
-          Cancel
+          {tx('Cancel')}
         </button>
         {busy && <Loader className="h-3.5 w-3.5 animate-spin text-fg/50" />}
       </div>

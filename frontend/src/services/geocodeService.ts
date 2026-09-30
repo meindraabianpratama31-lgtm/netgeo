@@ -1,3 +1,4 @@
+import { internalText } from '@/i18n/internalText';
 /**
  * Geocoding service — place/address search → lat/lng.
  *
@@ -26,7 +27,7 @@ let lastCall = 0;
 async function nominatim(q: string, signal?: AbortSignal): Promise<GeoResult[]> {
   const url = `${NOMINATIM_URL}?format=jsonv2&limit=5&addressdetails=0&q=${encodeURIComponent(q)}`;
   const res = await fetch(url, { signal, headers: { Accept: 'application/json' } });
-  if (!res.ok) throw new Error(`Geocoding failed (HTTP ${res.status})`);
+  if (!res.ok) throw new Error(internalText("Geocoding failed (HTTP {status})", { status: res.status }));
   const rows = (await res.json()) as { display_name: string; lat: string; lon: string }[];
   return rows.slice(0, 5).map((r) => ({
     label: r.display_name,

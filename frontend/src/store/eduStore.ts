@@ -1,3 +1,5 @@
+import { useLocaleStore } from '@/i18n';
+import { internalText, relocalizeInternal } from '@/i18n/internalText';
 /**
  * Education store — orchestration for the Education Lab workspace (NG-EDU-01/02/03).
  *
@@ -68,7 +70,7 @@ interface EduState {
 
 function errMsg(err: unknown, fallback: string): string {
   const status = (err as { status?: number })?.status;
-  if (status === 0) return 'Cannot reach the server. Check your connection.';
+  if (status === 0) return internalText("Cannot reach the server. Check your connection.");
   return (err as { message?: string })?.message ?? fallback;
 }
 
@@ -91,7 +93,7 @@ export const useEduStore = create<EduState>((set, get) => ({
     try {
       set({ activities: await educationApi.list(), loading: false });
     } catch (err) {
-      set({ loading: false, error: errMsg(err, 'Could not load activities.') });
+      set({ loading: false, error: errMsg(err, internalText("Could not load activities.")) });
     }
   },
 
@@ -141,7 +143,7 @@ export const useEduStore = create<EduState>((set, get) => ({
   captureNetwork: async (target) => {
     const projectId = useUiStore.getState().projectId;
     if (!projectId) {
-      set({ error: 'Open a project first — its current network is what gets captured.' });
+      set({ error: internalText("Open a project first — its current network is what gets captured.") });
       return;
     }
     set({ saving: true, error: null });
@@ -149,14 +151,14 @@ export const useEduStore = create<EduState>((set, get) => ({
       const envelope = await projectsApi.archive(projectId);
       set((s) => ({ draft: { ...s.draft, [target]: envelope }, saving: false }));
     } catch (err) {
-      set({ saving: false, error: errMsg(err, 'Could not capture the current network.') });
+      set({ saving: false, error: errMsg(err, internalText("Could not capture the current network.")) });
     }
   },
 
   saveActivity: async () => {
     const draft = get().draft;
     if (!draft.name.trim()) {
-      set({ error: 'Give the activity a name before saving.' });
+      set({ error: internalText("Give the activity a name before saving.") });
       return null;
     }
     set({ saving: true, error: null });
@@ -166,7 +168,7 @@ export const useEduStore = create<EduState>((set, get) => ({
       set({ saving: false, mode: 'browse', selectedId: null, draft: blankDraft() });
       return activity;
     } catch (err) {
-      set({ saving: false, error: errMsg(err, 'Could not save the activity.') });
+      set({ saving: false, error: errMsg(err, internalText("Could not save the activity.")) });
       return null;
     }
   },
@@ -179,7 +181,7 @@ export const useEduStore = create<EduState>((set, get) => ({
         selectedId: s.selectedId === id ? null : s.selectedId,
       }));
     } catch (err) {
-      set({ error: errMsg(err, 'Could not delete the activity.') });
+      set({ error: errMsg(err, internalText("Could not delete the activity.")) });
     }
   },
 
@@ -198,7 +200,7 @@ export const useEduStore = create<EduState>((set, get) => ({
         lastResult: null,
       });
     } catch (err) {
-      set({ saving: false, error: errMsg(err, 'Could not start the activity.') });
+      set({ saving: false, error: errMsg(err, internalText("Could not start the activity.")) });
     }
   },
 
@@ -211,7 +213,7 @@ export const useEduStore = create<EduState>((set, get) => ({
       const liveReport = await educationApi.grade(selectedId, projectId);
       set({ liveReport, saving: false });
     } catch (err) {
-      set({ saving: false, error: errMsg(err, 'Grading failed. Try again.') });
+      set({ saving: false, error: errMsg(err, internalText("Grading failed. Try again.")) });
     }
   },
 
@@ -239,7 +241,7 @@ export const useEduStore = create<EduState>((set, get) => ({
         },
       });
     } catch (err) {
-      set({ saving: false, error: errMsg(err, 'Submit failed. Try again.') });
+      set({ saving: false, error: errMsg(err, internalText("Submit failed. Try again.")) });
     }
   },
 
@@ -255,7 +257,7 @@ export const useEduStore = create<EduState>((set, get) => ({
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      set({ error: errMsg(err, 'Could not export the activity.') });
+      set({ error: errMsg(err, internalText("Could not export the activity.")) });
     }
   },
 
@@ -266,7 +268,16 @@ export const useEduStore = create<EduState>((set, get) => ({
       await get().loadActivities();
       set({ saving: false });
     } catch (err) {
-      set({ saving: false, error: errMsg(err, 'That file is not a valid .netgeo-lab activity.') });
+      set({ saving: false, error: errMsg(err, internalText("That file is not a valid .netgeo-lab activity.")) });
     }
   },
 }));
+
+// Keep existing application errors in step with the selected UI language.
+useLocaleStore.subscribe(({ locale }, previous) => {
+  if (locale === previous.locale) return;
+  const state = useEduStore.getState();
+  useEduStore.setState({
+    error: relocalizeInternal(state.error, locale),
+  });
+});

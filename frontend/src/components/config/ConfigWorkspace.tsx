@@ -30,6 +30,7 @@ import { WorkspaceEmptyState } from '@/components/shell/WorkspaceEmptyState';
 import { Select } from '@/components/ui/Select';
 import { HScrollToolbar } from '@/components/shell/HScrollToolbar';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 type Tab = 'running' | 'diff' | 'export';
 
@@ -68,6 +69,7 @@ function kindIcon(kind: NodeKind): LucideIcon {
 }
 
 export function ConfigWorkspace() {
+  const u = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const [tab, setTab] = useState<Tab>('running');
   const [search, setSearch] = useState('');
@@ -116,8 +118,8 @@ export function ConfigWorkspace() {
       <div className="absolute inset-0">
         <WorkspaceEmptyState
           icon={FileCode2}
-          title="No project open"
-          hint="Open a project from the Projects portal to inspect and export its device configs."
+          title={u('No project open')}
+          hint={u('Open a project from the Projects portal to inspect and export its device configs.')}
         />
       </div>
     );
@@ -139,7 +141,7 @@ export function ConfigWorkspace() {
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-fg/15 bg-panel shadow-glass">
         {/* Toolbar + tabs */}
         <div className="flex min-h-14 shrink-0 items-center gap-3 border-b border-fg/10 bg-panel px-3">
-          <div className="flex shrink-0 gap-1 rounded-full border border-fg/10 bg-surface p-1 text-xs font-medium" role="tablist" aria-label="Config views">
+          <div className="flex shrink-0 gap-1 rounded-full border border-fg/10 bg-surface p-1 text-xs font-medium" role="tablist" aria-label={u('Config views')}>
             {(['running', 'diff', 'export'] as const).map((t) => (
               <button
                 key={t}
@@ -153,7 +155,7 @@ export function ConfigWorkspace() {
                     : 'text-fg/70 hover:bg-fg/10 hover:text-fg',
                 )}
               >
-                {t === 'running' ? 'Running config' : t === 'diff' ? 'Diff' : 'Export'}
+                {t === 'running' ? u('Running config') : t === 'diff' ? u('Diff') : u('Export')}
               </button>
             ))}
           </div>
@@ -167,8 +169,8 @@ export function ConfigWorkspace() {
             <Select
               value={vendor}
               onChange={setVendor}
-              aria-label="Export target vendor"
-              options={EXPORT_VENDORS.map((v) => ({ value: v.id, label: v.label }))}
+              aria-label={u('Export target vendor')}
+              options={EXPORT_VENDORS.map((v) => ({ value: v.id, label: v.id ? v.label : u(v.label) }))}
               className="w-48 shrink-0"
             />
           )}
@@ -176,7 +178,7 @@ export function ConfigWorkspace() {
           <HScrollToolbar className="flex-1 gap-3">
             {tab === 'diff' && (
               <span className="shrink-0 rounded-full border border-fg/10 bg-surface px-3 py-1.5 text-xs text-fg/70">
-                Compare: intent vs running
+                {u('Compare: intent vs running')}
               </span>
             )}
             <button
@@ -185,14 +187,14 @@ export function ConfigWorkspace() {
               className="flex shrink-0 items-center gap-2 rounded-full border border-fg/10 px-3 py-1.5 text-xs font-medium text-fg/85 transition-colors hover:bg-fg/5 disabled:opacity-40"
             >
               {copied ? <Check className="h-4 w-4 text-success" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
-              Copy
+              {u('Copy')}
             </button>
             <button
               onClick={() => configsApi.downloadProjectConfigs(projectId, vendor || undefined)}
               className="flex shrink-0 items-center gap-2 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-fg transition-colors hover:bg-accent-soft"
             >
               <Download className="h-4 w-4" aria-hidden />
-              Export vendor config
+              {u('Export vendor config')}
             </button>
           </HScrollToolbar>
         </div>
@@ -200,22 +202,22 @@ export function ConfigWorkspace() {
         {/* Body */}
         <div className="min-h-0 flex-1 bg-panel">
           {!selected ? (
-            <WorkspaceEmptyState icon={FileCode2} title="Select a device" hint="Pick a device to view its config." />
+            <WorkspaceEmptyState icon={FileCode2} title={u('Select a device')} hint={u('Pick a device to view its config.')} />
           ) : tab === 'running' ? (
-            <PaneState loading={runningQ.isLoading} error={runningQ.error} empty={!runningText}
-              emptyMsg={`${selected.name} has no generated config yet — generate one from the topology's Config panel.`}>
+            <PaneState u={u} loading={runningQ.isLoading} error={runningQ.error} empty={!runningText}
+              emptyMsg={u('{name} has no generated config yet — generate one from the topology Config panel.', { name: selected.name })}>
               <CodePane text={runningText} />
             </PaneState>
           ) : tab === 'diff' ? (
-            <PaneState loading={diffQ.isLoading} error={diffQ.error} empty={false}>
+            <PaneState u={u} loading={diffQ.isLoading} error={diffQ.error} empty={false}>
               {diffQ.data && !diffQ.data.changed ? (
                 <div className="grid h-full place-items-center text-center text-fg/45">
                   <div className="space-y-2">
                     <Check className="mx-auto h-8 w-8 text-success" aria-hidden />
                     <p className="text-sm">
                       {diffQ.data.had_stored
-                        ? 'Stored config is in sync with intent.'
-                        : 'No stored config to compare — intent matches a fresh render.'}
+                        ? u('Stored config is in sync with intent.')
+                        : u('No stored config to compare — intent matches a fresh render.')}
                     </p>
                   </div>
                 </div>
@@ -224,8 +226,8 @@ export function ConfigWorkspace() {
               )}
             </PaneState>
           ) : (
-            <PaneState loading={exportQ.isLoading} error={exportQ.error} empty={!exportText}
-              emptyMsg={`No renderable config for ${selected.name} in this dialect (hosts and clouds have no device config).`}>
+            <PaneState u={u} loading={exportQ.isLoading} error={exportQ.error} empty={!exportText}
+              emptyMsg={u('No renderable config for {name} in this dialect (hosts and clouds have no device config).', { name: selected.name })}>
               <CodePane text={exportText} />
             </PaneState>
           )}
@@ -237,7 +239,7 @@ export function ConfigWorkspace() {
       <aside className="flex w-56 shrink-0 flex-col overflow-hidden rounded-xl border border-fg/15 bg-panel shadow-glass lg:w-[296px]">
         <div className="border-b border-fg/10 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-semibold text-fg/85">Devices</span>
+            <span className="text-xs font-semibold text-fg/85">{u('Devices')}</span>
             <span className="rounded-full bg-fg/8 px-2 py-0.5 text-[10px] text-fg/60">{nodes.length}</span>
           </div>
           <label className="flex items-center gap-2 rounded-lg border border-fg/10 bg-surface px-2.5 py-1.5 focus-within:border-accent/50">
@@ -245,18 +247,18 @@ export function ConfigWorkspace() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Filter devices…"
-              aria-label="Filter devices"
+              placeholder={u('Filter devices…')}
+              aria-label={u('Filter devices…')}
               className="w-full bg-transparent text-xs text-fg/85 placeholder:text-fg/50 focus:outline-none"
             />
           </label>
         </div>
-        <div className="ng-scroll flex-1 overflow-y-auto p-1.5" role="listbox" aria-label="Devices">
+        <div className="ng-scroll flex-1 overflow-y-auto p-1.5" role="listbox" aria-label={u('Devices')}>
           {isLoading ? (
-            <p className="p-3 text-xs text-fg/40">Loading devices…</p>
+            <p className="p-3 text-xs text-fg/40">{u('Loading devices…')}</p>
           ) : filtered.length === 0 ? (
             <p className="p-3 text-xs text-fg/60">
-              {nodes.length === 0 ? 'This project has no devices yet.' : `No device matches “${search}”.`}
+              {nodes.length === 0 ? u('This project has no devices yet.') : u('No device matches “{query}”.', { query: search })}
             </p>
           ) : (
             filtered.map((n) => (
@@ -273,7 +275,6 @@ export function ConfigWorkspace() {
     </div>
   );
 }
-
 function DeviceRow({ node, active, onSelect }: { node: NodeModel; active: boolean; onSelect: () => void }) {
   const Icon = kindIcon(node.kind);
   return (
@@ -309,16 +310,18 @@ function PaneState({
   empty,
   emptyMsg,
   children,
+  u,
 }: {
   loading: boolean;
   error: unknown;
   empty: boolean;
   emptyMsg?: string;
   children: ReactNode;
+  u: ReturnType<typeof useUiText>;
 }) {
-  if (loading) return <p className="p-6 text-sm text-fg/40">Loading…</p>;
+  if (loading) return <p className="p-6 text-sm text-fg/40">{u('Loading…')}</p>;
   if (error)
-    return <p className="p-6 text-sm text-danger">{(error as Error)?.message ?? 'Failed to load.'}</p>;
+    return <p className="p-6 text-sm text-danger">{(error as Error)?.message ?? u('Failed to load.')}</p>;
   if (empty)
     return (
       <div className="grid h-full place-items-center p-6 text-center text-fg/40">
@@ -401,12 +404,13 @@ function splitUnified(diff: string): { left: Cell; right: Cell }[] {
 }
 
 function DiffPane({ node, diff }: { node: NodeModel; diff: string }) {
+  const u = useUiText();
   const rows = useMemo(() => splitUnified(diff), [diff]);
   return (
     <div className="flex h-full">
-      <DiffColumn title="Intent Config" rows={rows} side="left" />
+      <DiffColumn title={u('Intent Config')} rows={rows} side="left" />
       <div className="w-px shrink-0 bg-fg/10" aria-hidden />
-      <DiffColumn title={`Running Config (${node.name})`} rows={rows} side="right" />
+      <DiffColumn title={u('Running Config ({name})', { name: node.name })} rows={rows} side="right" />
     </div>
   );
 }

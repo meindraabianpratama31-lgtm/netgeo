@@ -19,6 +19,7 @@ import { useUiStore } from '@/store/uiStore';
 import { ConfirmDialog } from './ConfirmDialog';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useFeatureText } from '@/i18n/featureText';
 
 /**
  * Turn a normalized {@link ApiError} (or anything else thrown) into an honest,
@@ -68,6 +69,7 @@ function plainNotes(md: string): string {
 }
 
 export function UpdatesButton() {
+  const t = useFeatureText();
   // Shared with the command palette and TopBar's user menu (uiStore.activeModal)
   // so opening one closes the others, and Escape-to-close comes for free from
   // the global handler in useShortcuts.
@@ -96,11 +98,11 @@ export function UpdatesButton() {
       // we don't fall through to "up to date".
       setError(next.error ?? null);
     } catch (e) {
-      setError(describeError(e));
+      setError(t(describeError(e)));
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [t]);
 
   // Check on first open, and once a day in the background.
   useEffect(() => {
@@ -142,15 +144,15 @@ export function UpdatesButton() {
           }
         } catch {
           // Backend unreachable === it's restarting. Reload shortly.
-          setStatus({ state: 'restarting', message: 'App is restarting…' });
+          setStatus({ state: 'restarting', message: t('App is restarting…') });
         }
       }, 3000);
     } catch (e) {
-      setStatus({ state: 'error', message: describeError(e) });
+      setStatus({ state: 'error', message: t(describeError(e)) });
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [t]);
 
   const apply = useCallback(() => {
     // The admin session authorises the update; only prompt for the extra
@@ -170,8 +172,8 @@ export function UpdatesButton() {
     <div className="relative" ref={rootRef}>
       <button
         onClick={() => (open ? closeModal() : openModal('updates'))}
-        aria-label="Updates"
-        title={available ? `Update available: ${info?.latest}` : 'Check for updates'}
+        aria-label={t('Updates')}
+        title={available ? t('Update available: {version}', { version: info?.latest ?? '' }) : t('Check for updates')}
         className={cn(
           'relative grid h-7 w-7 place-items-center rounded-md hover:bg-fg/10',
           available && 'text-accent',
@@ -186,12 +188,12 @@ export function UpdatesButton() {
       {open && (
         <div className={cn('absolute right-0 top-9 w-72 rounded-lg border border-fg/10 bg-panel p-3 text-[13px] text-fg/85 shadow-xl backdrop-blur', zc.popover)}>
           <div className="mb-2 flex items-center justify-between">
-            <span className="font-semibold">Software update</span>
+            <span className="font-semibold">{t('Software update')}</span>
             <button
               onClick={() => void check()}
               disabled={busy}
               className="grid h-6 w-6 place-items-center rounded hover:bg-fg/10 disabled:opacity-50"
-              title="Check again"
+              title={t('Check again')}
             >
               <RefreshCw className={cn('h-3.5 w-3.5', busy && 'animate-spin')} />
             </button>
@@ -199,16 +201,16 @@ export function UpdatesButton() {
 
           <div className="space-y-1 text-fg/70">
             <div>
-              Current:{' '}
+              {t('Current:')}{' '}
               <span className="tabular-nums text-fg">
                 {info?.current ?? (checking ? '…' : '—')}
               </span>
             </div>
             <div>
-              Latest release:{' '}
+              {t('Latest release:')}{' '}
               <span className="tabular-nums text-fg">
                 {info
-                  ? (info.latest ? `v${info.latest}` : 'Could not reach GitHub')
+                  ? (info.latest ? `v${info.latest}` : t('Could not reach GitHub'))
                   : (checking ? '…' : '—')}
               </span>
             </div>
@@ -229,33 +231,30 @@ export function UpdatesButton() {
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-accent px-3 py-1.5 font-medium text-accent-fg disabled:opacity-50"
               >
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                Update &amp; restart
+                {t('Update & restart')}
               </button>
               {info?.token_required && (
                 <p className="mt-1 text-[11px] text-fg/40">
-                  You&apos;ll be asked for the update token (UPDATE_TOKEN).
+                  {t("You'll be asked for the update token (UPDATE_TOKEN).")}
                 </p>
               )}
             </>
           ) : checking ? (
-            <p className="mt-2 text-xs text-fg/50">Checking for updates…</p>
+            <p className="mt-2 text-xs text-fg/50">{t('Checking for updates…')}</p>
           ) : upToDate ? (
             info?.latest && info.current !== info.latest ? (
               // No update available yet current ≠ latest → this build is ahead of
               // the public release (dev build). Say so instead of "up to date",
               // which reads like a downgrade next to a lower "latest" number.
-              <p className="mt-2 text-xs text-fg/50">
-                This dev build (v{info.current}) is ahead of the latest public
-                release (v{info.latest}).
-              </p>
+              <p className="mt-2 text-xs text-fg/50">{t('This dev build (v{current}) is ahead of the latest public release (v{latest}).', { current: info.current, latest: info.latest })}</p>
             ) : (
-              <p className="mt-2 text-xs text-success">You&apos;re up to date.</p>
+              <p className="mt-2 text-xs text-success">{t("You're up to date.")}</p>
             )
           ) : null}
 
           {status && (
             <p className="mt-2 border-t border-fg/10 pt-2 text-xs text-fg/70">
-              <span className="font-medium capitalize">{status.state}</span>
+              <span className="font-medium capitalize">{t(status.state)}</span>
               {status.message ? ` — ${status.message}` : ''}
             </p>
           )}
@@ -264,10 +263,10 @@ export function UpdatesButton() {
 
       {tokenPrompt && (
         <ConfirmDialog
-          title="Update token required"
-          message="This backend requires the shared UPDATE_TOKEN to apply an update."
-          confirmLabel="Apply update"
-          passwordLabel="Update token"
+          title={t('Update token required')}
+          message={t('This backend requires the shared UPDATE_TOKEN to apply an update.')}
+          confirmLabel={t('Apply update')}
+          passwordLabel={t('Update token')}
           onConfirm={(token) => {
             setTokenPrompt(false);
             if (token) void runApply(token);

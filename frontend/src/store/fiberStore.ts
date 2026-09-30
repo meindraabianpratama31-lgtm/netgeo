@@ -1,3 +1,5 @@
+import { useLocaleStore } from '@/i18n';
+import { internalText, relocalizeInternal } from '@/i18n/internalText';
 /**
  * Fiber store — state for the Fiber/FTTH planner workspace. A project owns a set
  * of GPON distribution paths (`FiberPath`); each path is an ordered OLT→ONU chain
@@ -63,7 +65,7 @@ async function applyPatch(set: Set, id: string, patch: FiberPathUpdate) {
       busy: false,
     }));
   } catch (err) {
-    set({ busy: false, error: errMsg(err, 'Update failed.') });
+    set({ busy: false, error: errMsg(err, internalText("Update failed.")) });
   }
 }
 
@@ -102,7 +104,7 @@ export const useFiberStore = create<FiberState>((set, get) => ({
             : paths[0]?.id ?? null,
       }));
     } catch (err) {
-      set({ loading: false, error: errMsg(err, 'Failed to load fiber paths.') });
+      set({ loading: false, error: errMsg(err, internalText("Failed to load fiber paths.")) });
     }
   },
 
@@ -129,7 +131,7 @@ export const useFiberStore = create<FiberState>((set, get) => ({
         busy: false,
       }));
     } catch (err) {
-      set({ busy: false, error: errMsg(err, 'Failed to create path.') });
+      set({ busy: false, error: errMsg(err, internalText("Failed to create path.")) });
     }
   },
 
@@ -149,7 +151,7 @@ export const useFiberStore = create<FiberState>((set, get) => ({
         };
       });
     } catch (err) {
-      set({ busy: false, error: errMsg(err, 'Failed to delete path.') });
+      set({ busy: false, error: errMsg(err, internalText("Failed to delete path.")) });
     }
   },
 
@@ -172,3 +174,12 @@ export const useFiberStore = create<FiberState>((set, get) => ({
     }
   },
 }));
+
+// Keep existing application errors in step with the selected UI language.
+useLocaleStore.subscribe(({ locale }, previous) => {
+  if (locale === previous.locale) return;
+  const state = useFiberStore.getState();
+  useFiberStore.setState({
+    error: relocalizeInternal(state.error, locale),
+  });
+});

@@ -15,6 +15,7 @@ import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import { Select } from '@/components/ui/Select';
+import { useUiText } from '@/i18n/uiText';
 
 const SPEEDS = [0.25, 0.5, 1, 2, 4];
 const SPEED_OPTIONS = SPEEDS.map((s) => ({ value: String(s), label: `${s}×` }));
@@ -30,6 +31,7 @@ function fmtClock(t: number): string {
 }
 
 export function SimulationDock() {
+  const u = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const speed = useUiStore((s) => s.simSpeed);
   const setSpeed = useUiStore((s) => s.setSimSpeed);
@@ -161,7 +163,7 @@ export function SimulationDock() {
         </DockBtn>
 
         <Select
-          aria-label="Simulation speed"
+          aria-label={u('Simulation speed')}
           value={String(speed)}
           onChange={(v) => setSpeed(Number(v))}
           options={SPEED_OPTIONS}
@@ -169,7 +171,7 @@ export function SimulationDock() {
         />
 
         <span className="mx-1 h-5 w-px bg-fg/15" aria-hidden />
-        <span className="tabular-nums font-mono text-xs text-fg/85" aria-label="Simulation time">
+        <span className="tabular-nums font-mono text-xs text-fg/85" aria-label={u('Simulation time')}>
           {fmtClock(simTime)}
         </span>
         <span className="ml-1.5 rounded-md bg-fg/10 px-1.5 py-0.5 text-[11px] tabular-nums text-fg/60">

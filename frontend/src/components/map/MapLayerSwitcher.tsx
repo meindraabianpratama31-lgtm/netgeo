@@ -25,6 +25,7 @@ import type { MapTileKey } from '@/config/mapTiles';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import { useTranslation } from '@/i18n';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const LAYERS: { key: MapTileKey; label: string; icon: typeof Satellite }[] = [
   { key: 'satellite', label: 'Satellite', icon: Satellite },
@@ -49,6 +50,7 @@ export interface MapLayerSwitcherProps {
 
 export function MapLayerSwitcher({ tileStatus = 'ready', offline = null }: MapLayerSwitcherProps) {
   const { t } = useTranslation();
+  const tx = useSurfaceText();
   const mapLayer = useMapStore((s) => s.mapLayer);
   const setMapLayer = useMapStore((s) => s.setMapLayer);
 
@@ -101,7 +103,7 @@ export function MapLayerSwitcher({ tileStatus = 'ready', offline = null }: MapLa
         >
           {tileStatus === 'error'
             ? offline
-              ? 'Area di luar cakupan peta offline'
+              ? tx('Area outside offline map coverage')
               : t('map.tilesUnavailable')
             : t('map.loadingTiles')}
         </span>

@@ -5,10 +5,12 @@
  * enabled and a second peer joins.
  */
 import { useCollabStore } from '@/store/collabStore';
+import { useFeatureText } from '@/i18n/featureText';
 
 const MAX_AVATARS = 4;
 
 export function PresenceBar() {
+  const t = useFeatureText();
   const peers = useCollabStore((s) => s.peerList());
   if (peers.length === 0) return null;
 
@@ -19,7 +21,7 @@ export function PresenceBar() {
     <div
       className="flex items-center"
       role="group"
-      aria-label={`${peers.length} collaborator${peers.length === 1 ? '' : 's'} online`}
+      aria-label={t('{count} collaborators online', { count: peers.length })}
     >
       <div className="flex -space-x-1.5">
         {shown.map((p) => (

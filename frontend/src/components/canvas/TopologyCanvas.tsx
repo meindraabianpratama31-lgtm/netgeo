@@ -46,6 +46,7 @@ import { mediaForIfaceTypes } from '@/lib/cableMedia';
 import { linkStatusColors, nodeColors } from '@/theme/tokens';
 import type { IfaceType, LinkModel, LinkType, NodeModel } from '@/api/types';
 import { useTranslation } from '@/i18n';
+import { useSurfaceText } from '@/i18n/surfaceText';
 import { cn } from '@/lib/cn';
 
 const nodeTypes = { device: DeviceNode };
@@ -61,6 +62,7 @@ const EDGE_DASH: Record<LinkType, string | undefined> = {
 };
 
 export function TopologyCanvas({ topLeftExtra }: { topLeftExtra?: ReactNode } = {}) {
+  const tx = useSurfaceText();
   const { t } = useTranslation();
   const rfRef = useRef<ReactFlowInstance<Node<DeviceNodeData>, Edge> | null>(null);
   const nodesMap = useTopologyStore((s) => s.nodes);
@@ -574,7 +576,7 @@ export function TopologyCanvas({ topLeftExtra }: { topLeftExtra?: ReactNode } = 
               {mutationError}
               <button
                 onClick={() => setMutationError(null)}
-                aria-label="Dismiss"
+                aria-label={tx('Dismiss')}
                 className="ml-1 text-danger/70 hover:text-danger"
               >
                 <X size={12} />

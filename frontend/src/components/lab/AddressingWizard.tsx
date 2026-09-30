@@ -19,6 +19,7 @@ import { labApi, type AutoAddressResult } from '@/api/client';
 import { useUiStore } from '@/store/uiStore';
 import { ModalScrim } from '@/components/shell/ModalScrim';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 type Step = 'scope' | 'preview' | 'apply';
 const STEPS: { id: Step; label: string }[] = [
@@ -28,6 +29,7 @@ const STEPS: { id: Step; label: string }[] = [
 ];
 
 export function AddressingWizard() {
+  const u = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const closeModal = useUiStore((s) => s.closeModal);
   const qc = useQueryClient();
@@ -57,8 +59,8 @@ export function AddressingWizard() {
     <ModalScrim label="Auto-addressing wizard" onClose={closeModal} className="max-w-[720px]">
       {/* Header + stepper */}
       <div className="flex flex-col gap-4 border-b border-fg/10 px-6 py-5">
-        <h2 className="pr-8 font-display text-xl font-semibold text-fg">Auto-addressing wizard</h2>
-        <ol className="flex items-center font-mono text-[12px]" aria-label="Steps">
+        <h2 className="pr-8 font-display text-xl font-semibold text-fg">{u('Auto-addressing wizard')}</h2>
+        <ol className="flex items-center font-mono text-[12px]" aria-label={u('Steps')}>
           {STEPS.map((s, i) => {
             const active = s.id === step;
             const done = STEPS.findIndex((x) => x.id === step) > i;
@@ -77,7 +79,7 @@ export function AddressingWizard() {
                   >
                     {done ? <Check className="h-3 w-3" aria-hidden /> : i + 1}
                   </span>
-                  <span className={cn(active ? 'text-accent' : done ? 'text-fg/70' : 'text-fg/45')}>{s.label}</span>
+                  <span className={cn(active ? 'text-accent' : done ? 'text-fg/70' : 'text-fg/45')}>{u(s.label)}</span>
                 </span>
                 {i < STEPS.length - 1 && <span className="mx-4 h-px flex-1 bg-fg/10" aria-hidden />}
               </li>
@@ -98,7 +100,7 @@ export function AddressingWizard() {
             <div className="rounded-lg border border-warning/30 bg-warning/10 p-3">
               <div className="flex gap-2 text-[13px] text-fg/80">
                 <AlertTriangle className="h-4 w-4 shrink-0 text-warning" aria-hidden />
-                <span>Applying overwrites existing interface addressing across every device in this project.</span>
+                <span>{u('Applying overwrites existing interface addressing across every device in this project.')}</span>
               </div>
             </div>
           </div>
@@ -121,14 +123,14 @@ export function AddressingWizard() {
                 <Chip icon={GitCompareArrows} label={`${summary.p2p_links} p2p links`} />
               </div>
               {summary.ipv4.length > 0 && (
-                <Section dotClass="bg-accent" title="IPv4 domains">
+                <Section dotClass="bg-accent" title={u('IPv4 domains')}>
                   <table className="w-full border-collapse text-left font-mono text-[12px]">
                     <thead>
                       <tr className="text-fg/50">
-                        <Th>Segment</Th>
-                        <Th>Subnet</Th>
-                        <Th>Gateway</Th>
-                        <Th>Hosts</Th>
+                        <Th>{u('Segment')}</Th>
+                        <Th>{u('Subnet')}</Th>
+                        <Th>{u('Gateway')}</Th>
+                        <Th>{u('Hosts')}</Th>
                       </tr>
                     </thead>
                     <tbody className="text-fg/85">
@@ -145,13 +147,13 @@ export function AddressingWizard() {
                 </Section>
               )}
               {summary.ipv6.length > 0 && (
-                <Section dotClass="bg-success" title="IPv6 (ULA)">
+                <Section dotClass="bg-success" title={u('IPv6 (ULA)')}>
                   <table className="w-full border-collapse text-left font-mono text-[12px]">
                     <thead>
                       <tr className="text-fg/50">
-                        <Th>Segment</Th>
-                        <Th>Prefix</Th>
-                        <Th>Gateway</Th>
+                        <Th>{u('Segment')}</Th>
+                        <Th>{u('Prefix')}</Th>
+                        <Th>{u('Gateway')}</Th>
                       </tr>
                     </thead>
                     <tbody className="text-fg/85">
@@ -182,7 +184,7 @@ export function AddressingWizard() {
               <p className="text-sm text-fg/80">
                 Addressing applied to {applied?.nodes_updated ?? 0} device{applied?.nodes_updated === 1 ? '' : 's'}.
               </p>
-              <p className="text-xs text-fg/45">The topology now reflects the new dual-stack plan.</p>
+              <p className="text-xs text-fg/45">{u('The topology now reflects the new dual-stack plan.')}</p>
             </div>
           </div>
         )}

@@ -40,6 +40,7 @@ import type { NodeKind, Topology } from '@/api/types';
 import { deployAt } from '@/lib/mapDeploy';
 import { useUiStore } from '@/store/uiStore';
 import { useMapStore } from '@/store/mapStore';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 interface Props {
   px: { x: number; y: number };
@@ -73,6 +74,7 @@ const CATEGORIES: Category[] = [
 const packIdOf = (dt: DeviceType) => dt.id.split(':')[0] ?? '';
 
 export function MapContextMenu({ px, lat, lon, onClose, siteId, initialCategoryKey }: Props) {
+  const tx = useSurfaceText();
   const projectId = useUiStore((s) => s.projectId);
   const flashNotice = useMapStore((s) => s.flashNotice);
   const queryClient = useQueryClient();
@@ -150,7 +152,7 @@ export function MapContextMenu({ px, lat, lon, onClose, siteId, initialCategoryK
       }
       onClose();
     } catch (err) {
-      flashNotice((err as unknown as ApiError)?.message || 'Failed to place device — check backend.');
+      flashNotice((err as unknown as ApiError)?.message || tx('Failed to place device — check backend.'));
       setBusy(false);
     }
   };
@@ -171,13 +173,13 @@ export function MapContextMenu({ px, lat, lon, onClose, siteId, initialCategoryK
         zc.popover,
       )}
       role="menu"
-      aria-label="Place device here"
+      aria-label={tx('Place device here')}
     >
       <div className="mb-1.5 flex items-center gap-1 px-0.5">
         {category ? (
           <button
             onClick={() => setCategory(null)}
-            aria-label="Back to categories"
+            aria-label={tx('Back to categories')}
             className="grid h-4 w-4 shrink-0 place-items-center rounded text-fg/50 hover:text-fg"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
@@ -186,11 +188,11 @@ export function MapContextMenu({ px, lat, lon, onClose, siteId, initialCategoryK
           <MapPin className="h-3 w-3 shrink-0 text-fg/50" />
         )}
         <span className="flex-1 truncate text-[10px] font-semibold uppercase tracking-wider text-fg/50">
-          {category ? category.label : `${lat.toFixed(5)}, ${lon.toFixed(5)}`}
+          {category ? tx(category.label) : `${lat.toFixed(5)}, ${lon.toFixed(5)}`}
         </span>
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label={tx('Close')}
           className="grid h-5 w-5 shrink-0 place-items-center rounded text-fg/40 hover:text-fg"
         >
           <X className="h-3 w-3" />
@@ -206,7 +208,7 @@ export function MapContextMenu({ px, lat, lon, onClose, siteId, initialCategoryK
               className="flex w-full items-center gap-2 rounded-lg border border-fg/10 px-2.5 py-2 text-left transition-colors hover:border-fg/25 hover:bg-fg/10"
             >
               <c.icon className="h-3.5 w-3.5 text-fg/60" />
-              <span className="text-xs font-medium text-fg/85">{c.label}</span>
+              <span className="text-xs font-medium text-fg/85">{tx(c.label)}</span>
             </button>
           ))}
         </div>
@@ -218,20 +220,20 @@ export function MapContextMenu({ px, lat, lon, onClose, siteId, initialCategoryK
               autoFocus
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products…"
+              placeholder={tx('Search products…')}
               disabled={busy}
               className="w-full rounded-lg border border-fg/10 bg-recess/20 py-1.5 pl-7 pr-2.5 text-xs text-fg/90 outline-none focus:border-accent"
             />
           </div>
           <div className="ng-scroll max-h-56 space-y-0.5 overflow-y-auto">
-            {typesQ.isLoading && <p className="px-1 py-2 text-[11px] text-fg/40">Loading catalog…</p>}
+            {typesQ.isLoading && <p className="px-1 py-2 text-[11px] text-fg/40">{tx('Loading catalog…')}</p>}
             {typesQ.isError && (
               <p className="px-1 py-2 text-[11px] text-danger">
-                {(typesQ.error as unknown as ApiError)?.message ?? 'Failed to load catalog.'}
+                {(typesQ.error as unknown as ApiError)?.message ?? tx('Failed to load catalog.')}
               </p>
             )}
             {!typesQ.isLoading && !typesQ.isError && products.length === 0 && (
-              <p className="px-1 py-2 text-[11px] text-fg/40">No matching products.</p>
+              <p className="px-1 py-2 text-[11px] text-fg/40">{tx('No matching products.')}</p>
             )}
             {products.map((dt) => (
               <button
@@ -250,7 +252,7 @@ export function MapContextMenu({ px, lat, lon, onClose, siteId, initialCategoryK
 
       <div className="mt-1.5 flex items-center justify-between border-t border-fg/10 pt-1.5">
         <button onClick={onClose} className="text-[10px] text-fg/45 hover:text-fg/80">
-          Cancel
+          {tx('Cancel')}
         </button>
         {busy && <Loader className="h-3.5 w-3.5 animate-spin text-fg/50" />}
       </div>

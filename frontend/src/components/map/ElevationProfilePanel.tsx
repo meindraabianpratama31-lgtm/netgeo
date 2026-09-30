@@ -16,6 +16,7 @@ import { Mountain, X, Check, AlertTriangle, Loader2, RefreshCw } from 'lucide-re
 import { useMapStore, type ProfileData } from '@/store/mapStore';
 import { zc } from '@/theme/z';
 import { ProfileChart, TerrainSourceNotice, verdictOf, fmtKm } from './ProfileChart';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 /* -------------------------------------------------------------------------- */
 /* Verdict chips                                                               */
@@ -31,22 +32,23 @@ function Chip({ color, icon: Icon, label, value }: { color: string; icon: typeof
 }
 
 function Summary({ data }: { data: ProfileData }) {
+  const tx = useSurfaceText();
   const v = verdictOf(data);
   return (
     <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-      <Chip color="#5C8AFF" icon={Mountain} label="Distance" value={fmtKm(data.totalDistanceM)} />
-      <Chip color={v.color} icon={v.icon} label="Sight line" value={data.losClear ? 'Clear' : 'Blocked'} />
+      <Chip color="#5C8AFF" icon={Mountain} label={tx('Distance')} value={fmtKm(data.totalDistanceM)} />
+      <Chip color={v.color} icon={v.icon} label={tx('Sight line')} value={data.losClear ? tx('Clear') : tx('Blocked')} />
       <Chip
         color={data.fresnelClear ? '#27C28B' : '#F5A623'}
         icon={data.fresnelClear ? Check : AlertTriangle}
         label="Fresnel"
-        value={data.fresnelClear ? 'Clear' : 'Obstructed'}
+        value={data.fresnelClear ? tx('Clear') : tx('Obstructed')}
       />
       <Chip
         color={data.worstObstructionM > 0 ? '#F5A623' : '#27C28B'}
         icon={data.worstObstructionM > 0 ? AlertTriangle : Check}
-        label="Worst obstr."
-        value={data.worstObstructionM > 0 ? `${data.worstObstructionM.toFixed(1)} m` : 'none'}
+        label={tx('Worst obstr.')}
+        value={data.worstObstructionM > 0 ? `${data.worstObstructionM.toFixed(1)} m` : tx('none')}
       />
     </div>
   );
@@ -61,6 +63,7 @@ function NumField({
   label: string; unit: string; value: number; step: number; min: number;
   onCommit: (v: number) => void;
 }) {
+  const tx = useSurfaceText();
   const [local, setLocal] = useState(String(value));
   useEffect(() => setLocal(String(value)), [value]);
   const commit = () => {
@@ -70,14 +73,14 @@ function NumField({
   };
   return (
     <label className="flex items-center gap-1.5 text-[10px] text-fg/50">
-      <span className="uppercase tracking-wide">{label}</span>
+      <span className="uppercase tracking-wide">{tx(label)}</span>
       <input
         type="number" inputMode="decimal" step={step} min={min}
         value={local}
         onChange={(e) => setLocal(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        aria-label={`${label} (${unit})`}
+        aria-label={`${tx(label)} (${unit})`}
         className="w-14 rounded-md border border-fg/15 bg-recess/50 px-1.5 py-0.5 text-right font-mono text-xs text-fg/85 focus:border-accent/50 focus:outline-none"
       />
       <span className="text-fg/30">{unit}</span>
@@ -89,6 +92,7 @@ function NumField({
 /* Panel                                                                       */
 /* -------------------------------------------------------------------------- */
 export function ElevationProfilePanel() {
+  const tx = useSurfaceText();
   const pts = useMapStore((s) => s.profilePts);
   const data = useMapStore((s) => s.profileData);
   const loading = useMapStore((s) => s.profileLoading);
@@ -114,21 +118,21 @@ export function ElevationProfilePanel() {
   return (
     <section
       role="region"
-      aria-label="Elevation profile"
+      aria-label={tx('Elevation profile')}
       className={`pointer-events-auto absolute bottom-4 left-1/2 ${zc.workspace} w-[min(46rem,calc(100%-2rem))] -translate-x-1/2 animate-fade-in`}
     >
       <div className="glass-strong rounded-xl border border-fg/15 shadow-glass-lg">
         {/* Header */}
         <div className="flex items-center gap-2 border-b border-fg/10 px-3 py-2">
           <Mountain className="h-4 w-4 text-accent" />
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-fg/70">Elevation Profile</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-fg/70">{tx('Elevation Profile')}</h2>
           <div className="ml-auto flex items-center gap-3">
             <NumField label="TX" unit="m" value={txH} step={1} min={0} onCommit={(v) => setParams({ txH: v })} />
             <NumField label="RX" unit="m" value={rxH} step={1} min={0} onCommit={(v) => setParams({ rxH: v })} />
             <NumField label="Freq" unit="GHz" value={freq} step={0.1} min={0.1} onCommit={(v) => setParams({ freq: v })} />
             <button
               onClick={clearProfile}
-              aria-label="Close elevation profile"
+              aria-label={tx('Close elevation profile')}
               className="grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
             >
               <X className="h-3.5 w-3.5" />
@@ -141,7 +145,7 @@ export function ElevationProfilePanel() {
           {loading ? (
             <div className="grid h-40 place-items-center gap-2 text-xs text-fg/50">
               <Loader2 className="h-5 w-5 animate-spin text-accent" />
-              Fetching terrain elevation…
+              {tx('Fetching terrain elevation…')}
             </div>
           ) : error ? (
             <div className="grid h-40 place-items-center gap-2 text-center text-xs text-fg/60">
@@ -151,7 +155,7 @@ export function ElevationProfilePanel() {
                 onClick={() => void runProfile()}
                 className="mt-1 flex items-center gap-1.5 rounded-lg border border-fg/15 px-3 py-1.5 text-fg/70 hover:border-accent/40 hover:text-accent"
               >
-                <RefreshCw className="h-3.5 w-3.5" /> Retry
+                <RefreshCw className="h-3.5 w-3.5" /> {tx('Retry')}
               </button>
             </div>
           ) : data ? (

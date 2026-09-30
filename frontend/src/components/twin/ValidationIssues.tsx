@@ -8,10 +8,19 @@ import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-reac
 import type { ValidationIssue } from './twinLogic';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useFeatureText } from '@/i18n/featureText';
 
 export function ValidationIssues({ issues }: { issues: ValidationIssue[] }) {
+  const t = useFeatureText();
   const [open, setOpen] = useState(true);
   const clean = issues.length === 0;
+  const issueText = (message: string) => {
+    const noIp = message.match(/^(.*): interface (.*) has no IP$/);
+    if (noIp) return t('{node}: interface {interface} has no IP', { node: noIp[1]!, interface: noIp[2]! });
+    const noLink = message.match(/^(.*): no links — infer or connect it$/);
+    if (noLink) return t('{node}: no links — infer or connect it', { node: noLink[1]! });
+    return message;
+  };
 
   return (
     <div className={cn('pointer-events-none absolute bottom-4 right-[376px] w-[300px] max-w-[85vw]', zc.workspace)}>
@@ -27,7 +36,7 @@ export function ValidationIssues({ issues }: { issues: ValidationIssue[] }) {
             ) : (
               <AlertTriangle className="h-4 w-4 text-warning" />
             )}
-            Validation issues
+            {t('Validation issues')}
             {!clean && (
               <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] text-warning">
                 {issues.length}
@@ -40,7 +49,7 @@ export function ValidationIssues({ issues }: { issues: ValidationIssue[] }) {
         {open && (
           <div className="max-h-[240px] overflow-y-auto border-t border-fg/10 p-2">
             {clean ? (
-              <p className="px-1 py-2 text-center text-[11px] text-fg/45">No issues detected.</p>
+              <p className="px-1 py-2 text-center text-[11px] text-fg/45">{t('No issues detected.')}</p>
             ) : (
               <ul className="flex flex-col gap-1">
                 {issues.map((issue) => (
@@ -54,7 +63,7 @@ export function ValidationIssues({ issues }: { issues: ValidationIssue[] }) {
                         issue.severity === 'error' ? 'text-danger' : 'text-warning',
                       )}
                     />
-                    <span>{issue.message}</span>
+                    <span>{issueText(issue.message)}</span>
                   </li>
                 ))}
               </ul>

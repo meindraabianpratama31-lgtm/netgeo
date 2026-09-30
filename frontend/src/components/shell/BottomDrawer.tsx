@@ -18,15 +18,19 @@ import { EventLedgerPanel } from '@/components/EventLedgerPanel';
 import { ConfigViewer } from '@/components/ConfigViewer';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useTranslation } from '@/i18n';
+import { useUiText } from '@/i18n/uiText';
 
-const TABS: { id: DrawerTab; label: string; icon: LucideIcon }[] = [
-  { id: 'console', label: 'Console', icon: TerminalSquare },
-  { id: 'diagnostics', label: 'Diagnostics', icon: Activity },
-  { id: 'ledger', label: 'Event Ledger', icon: ListVideo },
-  { id: 'config', label: 'Config', icon: FileCode2 },
+const TABS: { id: DrawerTab; labelKey: 'status.console' | 'status.diagnostics' | 'status.ledger' | 'status.config'; icon: LucideIcon }[] = [
+  { id: 'console', labelKey: 'status.console', icon: TerminalSquare },
+  { id: 'diagnostics', labelKey: 'status.diagnostics', icon: Activity },
+  { id: 'ledger', labelKey: 'status.ledger', icon: ListVideo },
+  { id: 'config', labelKey: 'status.config', icon: FileCode2 },
 ];
 
 export function BottomDrawer() {
+  const { t } = useTranslation();
+  const u = useUiText();
   const open = useUiStore((s) => s.drawerOpen);
   const tab = useUiStore((s) => s.drawerTab);
   const height = useUiStore((s) => s.drawerHeight);
@@ -60,7 +64,7 @@ export function BottomDrawer() {
 
   return (
     <section
-      aria-label="Diagnostics drawer"
+      aria-label={t('status.drawer')}
       className={cn(
         'glass-strong pointer-events-auto absolute inset-x-0 bottom-0 flex flex-col border-t border-fg/15 shadow-glass-lg',
         zc.drawer,
@@ -76,14 +80,14 @@ export function BottomDrawer() {
         className="group absolute inset-x-0 -top-1 h-2 cursor-ns-resize"
         role="separator"
         aria-orientation="horizontal"
-        aria-label="Resize drawer"
+        aria-label={u('Resize drawer')}
       >
         <span className="mx-auto mt-0.5 block h-0.5 w-10 rounded-full bg-fg/20 group-hover:bg-fg/40" />
       </div>
 
       {/* tab strip */}
       <div className="flex shrink-0 items-center gap-1 border-b border-fg/10 px-2 py-1.5">
-        {TABS.map(({ id, label, icon: Icon }) => (
+        {TABS.map(({ id, labelKey, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setDrawerTab(id)}
@@ -94,13 +98,13 @@ export function BottomDrawer() {
             )}
           >
             <Icon className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{label}</span>
+            <span className="hidden sm:inline">{t(labelKey)}</span>
           </button>
         ))}
         <div className="flex-1" />
         <button
           onClick={() => setDrawerOpen(false)}
-          aria-label="Close drawer"
+          aria-label={u('Close drawer')}
           className="grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
         >
           <X className="h-4 w-4" />

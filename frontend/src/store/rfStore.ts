@@ -1,3 +1,5 @@
+import { useLocaleStore } from '@/i18n';
+import { internalText, relocalizeInternal } from '@/i18n/internalText';
 /**
  * RF store — state for the RF Planning workspace: PtP (link budget), PtMP
  * (sector planner, NG-RF-04), and auto product-select (NG-RF-05). Endpoints/AP
@@ -271,8 +273,8 @@ export const useRfStore = create<RfState>((set, get) => ({
       const status = (err as { status?: number })?.status;
       const msg =
         status === 503
-          ? 'Elevation provider unavailable — try again shortly.'
-          : (err as { message?: string })?.message ?? 'Link calculation failed.';
+          ? internalText("Elevation provider unavailable — try again shortly.")
+          : (err as { message?: string })?.message ?? internalText("Link calculation failed.");
       set({ loading: false, error: msg, result: null });
     }
   },
@@ -342,7 +344,7 @@ export const useRfStore = create<RfState>((set, get) => ({
       const result = await rfApi.ptmp(body);
       set({ ptmpResult: result, ptmpLastRequest: body, ptmpLoading: false });
     } catch (err) {
-      set({ ptmpLoading: false, ptmpError: (err as { message?: string })?.message ?? 'Sector calculation failed.', ptmpResult: null });
+      set({ ptmpLoading: false, ptmpError: (err as { message?: string })?.message ?? internalText("Sector calculation failed."), ptmpResult: null });
     }
   },
 
@@ -410,7 +412,7 @@ export const useRfStore = create<RfState>((set, get) => ({
       const result = await rfApi.productSelect(body);
       set({ psResult: result, psLastRequest: body, psLoading: false });
     } catch (err) {
-      set({ psLoading: false, psError: (err as { message?: string })?.message ?? 'Product selection failed.', psResult: null });
+      set({ psLoading: false, psError: (err as { message?: string })?.message ?? internalText("Product selection failed."), psResult: null });
     }
   },
 
@@ -426,7 +428,7 @@ export const useRfStore = create<RfState>((set, get) => ({
       const studies = await rfApi.studies.list(projectId);
       set({ studies });
     } catch (err) {
-      set({ studyError: (err as { message?: string })?.message ?? 'Failed to load saved studies.' });
+      set({ studyError: (err as { message?: string })?.message ?? internalText("Failed to load saved studies.") });
     }
   },
 
@@ -438,7 +440,7 @@ export const useRfStore = create<RfState>((set, get) => ({
       const study = await rfApi.studies.create({ project_id: projectId, kind, name: name ?? '', request, result });
       set((s) => ({ studies: [study, ...s.studies], studyBusy: false }));
     } catch (err) {
-      set({ studyBusy: false, studyError: (err as { message?: string })?.message ?? 'Failed to save study.' });
+      set({ studyBusy: false, studyError: (err as { message?: string })?.message ?? internalText("Failed to save study.") });
     }
   },
 
@@ -492,7 +494,7 @@ export const useRfStore = create<RfState>((set, get) => ({
         set({ studyBusy: false }); // coverage/ptp studies aren't reopened from this panel
       }
     } catch (err) {
-      set({ studyBusy: false, studyError: (err as { message?: string })?.message ?? 'Failed to open study.' });
+      set({ studyBusy: false, studyError: (err as { message?: string })?.message ?? internalText("Failed to open study.") });
     }
   },
 
@@ -502,7 +504,19 @@ export const useRfStore = create<RfState>((set, get) => ({
       await rfApi.studies.remove(id);
       set((s) => ({ studies: s.studies.filter((st) => st.id !== id), studyBusy: false }));
     } catch (err) {
-      set({ studyBusy: false, studyError: (err as { message?: string })?.message ?? 'Failed to delete study.' });
+      set({ studyBusy: false, studyError: (err as { message?: string })?.message ?? internalText("Failed to delete study.") });
     }
   },
 }));
+
+// Keep existing application errors in step with the selected UI language.
+useLocaleStore.subscribe(({ locale }, previous) => {
+  if (locale === previous.locale) return;
+  const state = useRfStore.getState();
+  useRfStore.setState({
+    error: relocalizeInternal(state.error, locale),
+    ptmpError: relocalizeInternal(state.ptmpError, locale),
+    psError: relocalizeInternal(state.psError, locale),
+    studyError: relocalizeInternal(state.studyError, locale),
+  });
+});

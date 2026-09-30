@@ -7,6 +7,7 @@ import { Radio, Smartphone, RadioTower, MapPin, Signal, X, Mountain } from 'luci
 import { useMapStore, calcRssi, rssiColor, type MapDeviceKind } from '@/store/mapStore';
 import { cn } from '@/lib/cn';
 import { Select } from '@/components/ui/Select';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const FREQ_OPTIONS = [
   { value: '2.4', label: '2.4 GHz' },
@@ -30,6 +31,7 @@ const LOS_BADGE: Record<string, { label: string; color: string }> = {
 };
 
 export function MapDevicePanel() {
+  const tx = useSurfaceText();
   const device = useMapStore((s) => s.selectedDevice());
   const updateDevice = useMapStore((s) => s.updateDevice);
   const selectDevice = useMapStore((s) => s.selectDevice);
@@ -63,7 +65,7 @@ export function MapDevicePanel() {
           </div>
           <button
             onClick={() => selectDevice(null)}
-            aria-label="Close panel"
+            aria-label={tx('Close panel')}
             className="grid h-6 w-6 place-items-center rounded-md text-fg/40 hover:bg-fg/10 hover:text-fg"
           >
             <X className="h-3.5 w-3.5" />
@@ -72,7 +74,7 @@ export function MapDevicePanel() {
 
         <div className="ng-scroll max-h-[calc(100vh-200px)] space-y-3 overflow-auto p-4">
           {/* Name */}
-          <Field label="Name">
+          <Field label={tx('Name')}>
             <input
               value={device.name}
               onChange={(e) => patch({ name: e.target.value })}
@@ -91,10 +93,10 @@ export function MapDevicePanel() {
           {/* Signal Settings */}
           <section>
             <h4 className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-fg/40">
-              <Signal className="h-3 w-3" /> Signal Settings
+              <Signal className="h-3 w-3" /> {tx('Signal Settings')}
             </h4>
             <div className="space-y-2.5">
-              <Field label="TX Power (dBm)">
+              <Field label={tx('TX Power (dBm)')}>
                 <div className="flex items-center gap-2">
                   <input
                     type="range" min={0} max={33} step={1}
@@ -108,9 +110,9 @@ export function MapDevicePanel() {
                 </div>
               </Field>
 
-              <Field label="Frequency (GHz)">
+              <Field label={tx('Frequency (GHz)')}>
                 <Select
-                  aria-label="Frequency (GHz)"
+                  aria-label={tx('Frequency (GHz)')}
                   value={String(device.frequency)}
                   onChange={(v) => patch({ frequency: Number(v) })}
                   options={FREQ_OPTIONS}
@@ -118,7 +120,7 @@ export function MapDevicePanel() {
                 />
               </Field>
 
-              <Field label="Coverage Radius (m)">
+              <Field label={tx('Coverage Radius (m)')}>
                 <div className="flex items-center gap-2">
                   <input
                     type="range" min={50} max={5000} step={50}
@@ -137,7 +139,7 @@ export function MapDevicePanel() {
           {/* Antenna Height */}
           <section>
             <h4 className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-fg/40">
-              <Mountain className="h-3 w-3" /> Antenna Height (m AGL)
+              <Mountain className="h-3 w-3" /> {tx('Antenna Height (m AGL)')}
             </h4>
             <div className="flex items-center gap-2">
               <input
@@ -153,7 +155,7 @@ export function MapDevicePanel() {
           </section>
 
           {/* IP Address */}
-          <Field label="IP Address">
+          <Field label={tx('IP Address')}>
             <input
               value={device.ip}
               onChange={(e) => patch({ ip: e.target.value })}
@@ -166,7 +168,7 @@ export function MapDevicePanel() {
           {myLinks.length > 0 && (
             <section>
               <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-fg/40">
-                Connected Links
+                {tx('Connected Links')}
               </h4>
               <ul className="space-y-1.5">
                 {myLinks.map((l) => {
@@ -186,8 +188,8 @@ export function MapDevicePanel() {
                       </div>
                       {(l.rainDb > 0 || l.obstructionDb > 0) && (
                         <div className="text-[10px] text-fg/40 space-y-0.5">
-                          {l.rainDb > 0 && <p>Rain: −{l.rainDb.toFixed(1)} dB</p>}
-                          {l.obstructionDb > 0 && <p>Terrain: −{l.obstructionDb.toFixed(1)} dB</p>}
+                          {l.rainDb > 0 && <p>{tx('Rain')}: −{l.rainDb.toFixed(1)} dB</p>}
+                          {l.obstructionDb > 0 && <p>{tx('Terrain')}: −{l.obstructionDb.toFixed(1)} dB</p>}
                         </div>
                       )}
                       <div className="flex items-center justify-between">

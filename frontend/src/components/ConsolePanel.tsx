@@ -17,6 +17,7 @@ import { useUiStore } from '@/store/uiStore';
 import { configsApi, type ConfigDiff } from '@/api/client';
 import { cn } from '@/lib/cn';
 import { Select } from '@/components/ui/Select';
+import { useUiText } from '@/i18n/uiText';
 
 // Vendors the backend can render/diff to (mirrors configgen._TEMPLATE_MAP; the
 // server is authoritative and 422s on anything it lacks a template for).
@@ -25,6 +26,7 @@ const VENDORS = ['native', 'ios', 'junos', 'eos', 'routeros', 'vyos', 'frr', 'fo
 const VENDOR_OPTIONS = VENDORS.map((v) => ({ value: v, label: v }));
 
 export function ConsolePanel() {
+  const t = useUiText();
   const nodeId = useTopologyStore((s) => s.selectedNodeId);
   const nodes = useTopologyStore((s) => s.nodes);
   const projectId = useUiStore((s) => s.projectId);
@@ -58,8 +60,8 @@ export function ConsolePanel() {
       <div className="grid h-full place-items-center text-center text-fg/40">
         <div className="space-y-2">
           <TerminalSquare className="mx-auto h-8 w-8" />
-          <p className="text-sm">No device console open</p>
-          <p className="text-xs">Select a node, then open the Console tab in the drawer.</p>
+          <p className="text-sm">{t('No device console open')}</p>
+          <p className="text-xs">{t('Select a node, then open the Console tab in the drawer.')}</p>
         </div>
       </div>
     );
@@ -119,7 +121,7 @@ export function ConsolePanel() {
     try {
       setDiff(await configsApi.diff(nodeId, vendor === 'native' ? undefined : vendor));
     } catch (e) {
-      setErr((e as { message?: string })?.message ?? 'Diff failed');
+      setErr((e as { message?: string })?.message ?? t('Diff failed'));
     } finally {
       setBusy(null);
     }
@@ -132,7 +134,7 @@ export function ConsolePanel() {
     try {
       await configsApi.downloadProjectConfigs(projectId, vendor === 'native' ? undefined : vendor);
     } catch (e) {
-      setErr((e as { message?: string })?.message ?? 'Export failed');
+      setErr((e as { message?: string })?.message ?? t('Export failed'));
     } finally {
       setBusy(null);
     }
@@ -146,11 +148,11 @@ export function ConsolePanel() {
 
         <div className="ml-auto flex items-center gap-1.5">
           <label htmlFor="cfg-vendor" className="sr-only">
-            Target vendor for diff/export
+            {t('Target vendor for diff/export')}
           </label>
           <Select
             id="cfg-vendor"
-            aria-label="Target vendor for diff/export"
+            aria-label={t('Target vendor for diff/export')}
             value={vendor}
             onChange={setVendor}
             options={VENDOR_OPTIONS}
@@ -160,19 +162,19 @@ export function ConsolePanel() {
             type="button"
             onClick={showDiff}
             disabled={busy !== null}
-            aria-label="Show config diff for this device"
+            aria-label={t('Show config diff for this device')}
             className="flex h-7 items-center gap-1 rounded px-1.5 text-[11px] text-fg/70 hover:bg-fg/10 disabled:opacity-40"
           >
-            <GitCompareArrows className="h-3.5 w-3.5" /> Diff
+            <GitCompareArrows className="h-3.5 w-3.5" /> {t('Diff')}
           </button>
           <button
             type="button"
             onClick={doExport}
             disabled={busy !== null || !projectId}
-            aria-label="Export all project configs"
+            aria-label={t('Export all project configs')}
             className="flex h-7 items-center gap-1 rounded px-1.5 text-[11px] text-fg/70 hover:bg-fg/10 disabled:opacity-40"
           >
-            <Download className="h-3.5 w-3.5" /> Export
+            <Download className="h-3.5 w-3.5" /> {t('Export')}
           </button>
         </div>
       </div>
@@ -192,7 +194,7 @@ export function ConsolePanel() {
             className="ng-scroll flex-1 overflow-auto px-3 py-2 leading-relaxed text-emerald-200/90"
           >
             {lines.length === 0 ? (
-              <p className="text-fg/30">Connecting to {node?.nos.toUpperCase()} console…</p>
+              <p className="text-fg/30">{t('Connecting to {nos} console…', { nos: node?.nos.toUpperCase() ?? '' })}</p>
             ) : (
               lines.map((l, i) => (
                 <div key={i} className="whitespace-pre-wrap break-words">
@@ -203,7 +205,7 @@ export function ConsolePanel() {
           </div>
 
           <form onSubmit={onSubmit} className="flex items-center gap-2 border-t border-fg/10 px-3 py-2">
-            <span className="shrink-0 text-accent-soft">{prompt || `${node?.name ?? 'device'}>`}</span>
+            <span className="shrink-0 text-accent-soft">{prompt || `${node?.name ?? t('device')}>`}</span>
             <input
               value={cmd}
               onChange={(e) => setCmd(e.target.value)}
@@ -211,9 +213,9 @@ export function ConsolePanel() {
               autoFocus
               spellCheck={false}
               autoComplete="off"
-              aria-label="Console command input"
+              aria-label={t('Console command input')}
               className="w-full bg-transparent text-emerald-100 outline-none placeholder:text-fg/30"
-              placeholder="↑ history · Tab complete · ? help"
+              placeholder={t('↑ history · Tab complete · ? help')}
             />
           </form>
         </>
@@ -225,20 +227,21 @@ export function ConsolePanel() {
 /** Colored unified-diff view. The leading +/- char carries meaning too, so the
  *  diff stays legible without color (WCAG color-not-only). */
 function DiffView({ diff, onClose }: { diff: ConfigDiff; onClose: () => void }) {
+  const t = useUiText();
   const status = !diff.had_stored
-    ? 'no stored config — all lines are new'
+    ? t('no stored config — all lines are new')
     : diff.changed
-      ? 'changes pending'
-      : 'no changes';
+      ? t('changes pending')
+      : t('no changes');
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-2 border-b border-fg/10 px-3 py-1 text-[11px] text-fg/60">
-        <span className="text-fg/70">diff · {diff.vendor}</span>
+        <span className="text-fg/70">{t('Diff')} · {diff.vendor}</span>
         <span className="text-fg/40">{status}</span>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close diff and return to console"
+          aria-label={t('Close diff and return to console')}
           className="ml-auto grid h-6 w-6 place-items-center rounded text-fg/60 hover:bg-fg/10"
         >
           <X className="h-3.5 w-3.5" />
@@ -248,8 +251,8 @@ function DiffView({ diff, onClose }: { diff: ConfigDiff; onClose: () => void }) 
         {!diff.diff ? (
           <p className="text-fg/40">
             {diff.had_stored
-              ? 'Stored config already matches the regenerated config.'
-              : 'No stored config to compare against yet — generate one from the Config viewer first.'}
+              ? t('Stored config already matches the regenerated config.')
+              : t('No stored config to compare against yet — generate one from the Config viewer first.')}
           </p>
         ) : (
           diff.diff.split('\n').map((line, i) => (

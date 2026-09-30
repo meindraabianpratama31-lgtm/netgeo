@@ -9,8 +9,7 @@ import type { GradeCheck, GradeCheckKind } from '@/api/types';
 import { useEduStore } from '@/store/eduStore';
 import { CHECK_KINDS, CHECK_KIND_LABEL, CHECK_KIND_FIELDS } from './eduLogic';
 import { Select } from '@/components/ui/Select';
-
-const CHECK_KIND_OPTIONS = CHECK_KINDS.map((k) => ({ value: k, label: CHECK_KIND_LABEL[k] }));
+import { useFeatureText } from '@/i18n/featureText';
 
 const FIELD_META: Record<
   string,
@@ -25,6 +24,7 @@ const FIELD_META: Record<
 };
 
 export function CheckListEditor() {
+  const t = useFeatureText();
   const checks = useEduStore((s) => s.draft.checks ?? []);
   const addCheck = useEduStore((s) => s.addCheck);
 
@@ -32,21 +32,20 @@ export function CheckListEditor() {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-fg/50">
-          Grading checks
+          {t('Grading checks')}
         </p>
         <button
           onClick={() => addCheck({ kind: 'node_exists', weight: 1 })}
           className="inline-flex items-center gap-1 rounded-md border border-fg/15 px-2 py-1 text-[11px] font-medium text-fg/75 hover:bg-fg/8 hover:text-fg"
         >
           <Plus className="h-3 w-3" />
-          Add check
+          {t('Add check')}
         </button>
       </div>
 
       {checks.length === 0 ? (
         <p className="rounded-lg border border-dashed border-fg/15 px-3 py-4 text-center text-[11px] leading-relaxed text-fg/45">
-          No checks yet. Add weighted assertions (node exists, interface IP, VLAN,
-          OSPF adjacency, reachability) — the grader scores a student against these.
+          {t('No checks yet. Add weighted assertions (node exists, interface IP, VLAN, OSPF adjacency, reachability) — the grader scores a student against these.')}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -60,6 +59,7 @@ export function CheckListEditor() {
 }
 
 function CheckRow({ index, check }: { index: number; check: GradeCheck }) {
+  const t = useFeatureText();
   const updateCheck = useEduStore((s) => s.updateCheck);
   const removeCheck = useEduStore((s) => s.removeCheck);
   const fields = CHECK_KIND_FIELDS[check.kind];
@@ -71,11 +71,11 @@ function CheckRow({ index, check }: { index: number; check: GradeCheck }) {
           aria-label={`Check ${index + 1} kind`}
           value={check.kind}
           onChange={(v) => updateCheck(index, { kind: v as GradeCheckKind })}
-          options={CHECK_KIND_OPTIONS}
+          options={CHECK_KINDS.map((kind) => ({ value: kind, label: t(CHECK_KIND_LABEL[kind]) }))}
           className="flex-1"
         />
         <label className="flex items-center gap-1 rounded-md border border-fg/15 bg-recess/50 px-2 py-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-fg/40">Wt</span>
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-fg/40">{t('Wt')}</span>
           <input
             type="number"
             min={0}
@@ -103,7 +103,7 @@ function CheckRow({ index, check }: { index: number; check: GradeCheck }) {
           return (
             <label key={f as string} className="flex flex-col gap-0.5">
               <span className="text-[9px] font-semibold uppercase tracking-wider text-fg/40">
-                {meta.label}
+                {t(meta.label)}
               </span>
               <input
                 type={meta.type}
@@ -123,11 +123,11 @@ function CheckRow({ index, check }: { index: number; check: GradeCheck }) {
         })}
         <label className="col-span-2 flex flex-col gap-0.5">
           <span className="text-[9px] font-semibold uppercase tracking-wider text-fg/40">
-            Label (optional)
+            {t('Label (optional)')}
           </span>
           <input
             type="text"
-            placeholder="Shown to the student as the objective"
+            placeholder={t('Shown to the student as the objective')}
             value={check.label ?? ''}
             onChange={(e) => updateCheck(index, { label: e.target.value || null })}
             className="rounded-md border border-fg/15 bg-recess/20 px-2 py-1 text-xs text-fg/85 placeholder:text-fg/30 focus:border-accent/50 focus:outline-none"

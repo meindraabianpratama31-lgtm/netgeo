@@ -34,6 +34,7 @@ import { useEffect, useState } from 'react';
 import { Minus, Square, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useIsNativeShell, useIsMaximized } from '@/hooks/useNativeShell';
+import { useUiText } from '@/i18n/uiText';
 
 type ResizeEdge = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 type ButtonKind = 'close' | 'minimize' | 'maximize';
@@ -138,23 +139,24 @@ export function WindowButtons({
   isMaximized,
   toggleMaximize,
 }: Pick<ReturnType<typeof useWindowChrome>, 'api' | 'layout' | 'isMaximized' | 'toggleMaximize'>) {
+  const u = useUiText();
   if (!api) return null;
 
   const buttonProps: Record<ButtonKind, { label: string; icon: React.ReactNode; onClick: () => void; className: string }> = {
     minimize: {
-      label: 'Minimize',
+      label: u('Minimize'),
       icon: <Minus size={14} />,
       onClick: () => api.minimize(),
       className: 'hover:bg-fg/10',
     },
     maximize: {
-      label: isMaximized ? 'Restore' : 'Maximize',
+      label: isMaximized ? u('Restore') : u('Maximize'),
       icon: <Square size={11} />,
       onClick: toggleMaximize,
       className: 'hover:bg-fg/10',
     },
     close: {
-      label: 'Close',
+      label: u('Close'),
       icon: <X size={14} />,
       onClick: () => api.close(),
       className: 'hover:bg-danger/15 hover:text-danger',

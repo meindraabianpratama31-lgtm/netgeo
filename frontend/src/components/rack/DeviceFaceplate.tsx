@@ -30,6 +30,7 @@ import type { DeviceType as CatalogEntry } from '@/api/client';
 import { linkStatusColors } from '@/theme/tokens';
 import { cn } from '@/lib/cn';
 import { resolveDeviceType } from './deviceTypes';
+import { useSurfaceText } from '@/i18n/surfaceText';
 import type { DeviceType, PortType, PortSpec, PortZone } from './deviceTypes';
 
 /** `node.device_type_id` resolved against the caller's already-fetched
@@ -298,6 +299,7 @@ function renderFront(
   cableMode: boolean,
   pendingIface: string | null | undefined,
   onPortClick: ((ifaceId: string) => void) | undefined,
+  tx: (source: string) => string,
 ): React.ReactNode[] {
   const els: React.ReactNode[] = [];
   const panelY0 = H * 0.20;
@@ -368,7 +370,7 @@ function renderFront(
             >
               {portEl}
               {(occupied || isPending) && (
-                <title>{occupied ? 'Port in use — unlink first' : 'Pending — click destination port'}</title>
+                <title>{occupied ? tx('Port in use — unlink first') : tx('Pending — click destination port')}</title>
               )}
               <rect
                 x={r.x - 1}
@@ -641,6 +643,7 @@ export function DeviceFaceplate({
   onPortClick,
   deviceTypesById,
 }: Props) {
+  const tx = useSurfaceText();
   const dt = resolveDeviceType(node.nos, node.kind, node.interfaces, packFor(node, deviceTypesById));
   const H = Math.max(RU_H, span * RU_H);
   const { accent, chassis, label } = dt.brand;
@@ -660,9 +663,9 @@ export function DeviceFaceplate({
       preserveAspectRatio="none"
       className="h-full w-full"
       role="img"
-      aria-label={`${label} ${dt.model} ${face} view${isGenericShape ? ' (approximate shape — no verified physical data for this model)' : ''}`}
+      aria-label={`${label} ${dt.model} ${tx(face === 'front' ? 'front view' : 'back view')}${isGenericShape ? ` (${tx('approximate shape — no verified physical data for this model')})` : ''}`}
     >
-      {isGenericShape && <title>Bentuk perkiraan — data fisik belum diverifikasi untuk model ini</title>}
+      {isGenericShape && <title>{tx('Approximate shape — physical data has not been verified for this model')}</title>}
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={gradTop} />
@@ -735,7 +738,7 @@ export function DeviceFaceplate({
 
       {/* Port field / back blocks */}
       {face === 'front'
-        ? renderFront(dt, H, accent, node, linkStatusByIface, cableMode, pendingIface, onPortClick)
+        ? renderFront(dt, H, accent, node, linkStatusByIface, cableMode, pendingIface, onPortClick, tx)
         : renderBack(dt, H, accent)}
     </svg>
   );

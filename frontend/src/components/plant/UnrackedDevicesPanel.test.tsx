@@ -10,6 +10,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UnrackedDevicesPanel } from './UnrackedDevicesPanel';
 import type { UnrackedNode } from '@/api/types';
+import { useLocaleStore } from '@/i18n';
 
 const updateMock = vi.fn(async (_id: string, _patch: unknown) => ({}));
 vi.mock('@/api/client', () => ({
@@ -25,6 +26,7 @@ afterEach(() => {
   act(() => root.unmount());
   container.remove();
   updateMock.mockClear();
+  useLocaleStore.getState().setLocale('en');
 });
 
 function mount(nodes: UnrackedNode[]) {
@@ -48,6 +50,7 @@ describe('UnrackedDevicesPanel', () => {
   });
 
   it('lists an unracked node and lets its mount type be set', async () => {
+    useLocaleStore.getState().setLocale('id');
     mount([{ id: 'n1', name: 'rru1', mount: null }]);
     // Themed combobox (components/ui/Select), not a native <select> — see
     // slice/ui-edge-fit part B: native <select> options render OS-coloured,
@@ -59,7 +62,7 @@ describe('UnrackedDevicesPanel', () => {
     expect(heightInput.disabled).toBe(true);
 
     act(() => combo.click());
-    const option = Array.from(container.querySelectorAll('[role="option"]')).find((o) => o.textContent === 'pole')!;
+    const option = container.querySelectorAll('[role="option"]')[1] as HTMLElement;
     await act(async () => {
       option.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await Promise.resolve();

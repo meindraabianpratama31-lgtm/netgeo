@@ -19,9 +19,11 @@ import { FirstRunMapSetup } from '@/components/FirstRunMapSetup';
 import { AddressingWizard } from '@/components/lab/AddressingWizard';
 import { IconLibraryModal } from '@/components/icons/IconLibraryModal';
 import { useTranslation } from '@/i18n';
+import { useUiText } from '@/i18n/uiText';
 
 export function ModalLayer() {
   const { t } = useTranslation();
+  const u = useUiText();
   const activeModal = useUiStore((s) => s.activeModal);
   const openModal = useUiStore((s) => s.openModal);
   const closeModal = useUiStore((s) => s.closeModal);
@@ -72,9 +74,9 @@ export function ModalLayer() {
 
   if (activeModal === 'scenarios')
     return (
-      <ModalScrim label="Scenarios" onClose={closeModal} className="max-w-xl">
+      <ModalScrim label={u('Scenarios')} onClose={closeModal} className="max-w-xl">
         <div className="flex items-center gap-2 border-b border-fg/10 px-4 py-3">
-          <h2 className="text-sm font-semibold text-fg/85">Scenarios</h2>
+          <h2 className="text-sm font-semibold text-fg/85">{u('Scenarios')}</h2>
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
           <ScenariosPanel />

@@ -14,6 +14,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ModalScrim } from './ModalScrim';
 import { cn } from '@/lib/cn';
+import { useFeatureText } from '@/i18n/featureText';
 
 export interface ConfirmDialogProps {
   title: string;
@@ -32,13 +33,16 @@ export interface ConfirmDialogProps {
 export function ConfirmDialog({
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   danger = false,
   passwordLabel,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const t = useFeatureText();
+  const resolvedConfirmLabel = confirmLabel ?? t('Confirm');
+  const resolvedCancelLabel = cancelLabel ?? t('Cancel');
   const rootRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -110,7 +114,7 @@ export function ConfirmDialog({
             onClick={onCancel}
             className="rounded-md px-3 py-1.5 text-sm font-medium text-fg/70 hover:bg-fg/10"
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <button
             onClick={() => onConfirm(passwordLabel ? pw : undefined)}
@@ -121,7 +125,7 @@ export function ConfirmDialog({
                 : 'bg-accent text-accent-fg hover:bg-accent-soft',
             )}
           >
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>

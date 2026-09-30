@@ -25,6 +25,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useUiText } from '@/i18n/uiText';
 
 export interface SelectOption {
   value: string;
@@ -65,6 +66,7 @@ export function Select({
   'aria-label': ariaLabel,
   menuPosition = 'bottom',
 }: SelectProps) {
+  const u = useUiText();
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -182,7 +184,7 @@ export function Select({
             zc.popover,
           )}
         >
-          {options.length === 0 && <li className="px-2.5 py-1.5 text-xs text-fg/40">No options</li>}
+          {options.length === 0 && <li className="px-2.5 py-1.5 text-xs text-fg/40">{u('No options')}</li>}
           {options.map((o, i) => (
             <li
               key={o.value}

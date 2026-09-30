@@ -8,6 +8,7 @@
  * band drawn here is a visualisation of the first-zone geometry, not a new check.
  */
 import { Check, Ban, AlertTriangle } from 'lucide-react';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const VB_W = 760;
 const VB_H = 200;
@@ -47,12 +48,13 @@ export function fmtKm(m: number): string {
  * shown wherever a `terrain_source` profile is rendered.
  */
 export function TerrainSourceNotice({ source }: { source: 'dem' | 'flat_fallback' }) {
+  const tx = useSurfaceText();
   if (source !== 'flat_fallback') return null;
   return (
     <div className="flex items-start gap-1.5 rounded-lg border border-warning/25 bg-warning/10 px-2.5 py-1.5 text-[11px] text-fg/70">
       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
       <span>
-        Flat-terrain estimate — the elevation provider is unreachable, so this result assumes flat ground instead of real terrain.
+        {tx('Flat-terrain estimate — the elevation provider is unreachable, so this result assumes flat ground instead of real terrain.')}
       </span>
     </div>
   );
@@ -79,6 +81,7 @@ export function ProfileChart({
   /** Draw the 60% first-Fresnel-zone clearance band around the sight line. */
   fresnelBand?: boolean;
 }) {
+  const tx = useSurfaceText();
   const pts = points;
   const total = totalDistanceM || pts[pts.length - 1]?.distance_m || 1;
 
@@ -134,7 +137,7 @@ export function ProfileChart({
       className="h-auto w-full"
       preserveAspectRatio="xMidYMid meet"
       role="img"
-      aria-label={`Elevation profile over ${fmtKm(total)}. ${v.label}.`}
+      aria-label={`${tx('Elevation profile')} ${fmtKm(total)}. ${tx(v.label)}.`}
     >
       {/* Y grid + labels */}
       {yTicks.map((t) => (
@@ -192,8 +195,8 @@ export function ProfileChart({
       {/* Antenna markers */}
       <circle cx={xOf(0)} cy={yOf(h1)} r={4} fill={v.color} />
       <circle cx={xOf(total)} cy={yOf(h2)} r={4} fill={v.color} />
-      <text x={xOf(0) + 6} y={yOf(h1) - 6} className="fill-fg/70" style={{ fontSize: 10, fontWeight: 600 }}>TX</text>
-      <text x={xOf(total) - 6} y={yOf(h2) - 6} textAnchor="end" className="fill-fg/70" style={{ fontSize: 10, fontWeight: 600 }}>RX</text>
+      <text x={xOf(0) + 6} y={yOf(h1) - 6} className="fill-fg/70" style={{ fontSize: 10, fontWeight: 600 }}>{tx('TX')}</text>
+      <text x={xOf(total) - 6} y={yOf(h2) - 6} textAnchor="end" className="fill-fg/70" style={{ fontSize: 10, fontWeight: 600 }}>{tx('RX')}</text>
     </svg>
   );
 }

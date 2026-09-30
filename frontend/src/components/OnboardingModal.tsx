@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useUiText } from '@/i18n/uiText';
 
 /** localStorage flag — ModalLayer reads it to trigger the first-run wizard once. */
 export const ONBOARDING_KEY = 'netgeo.onboarding.done';
@@ -78,6 +79,7 @@ interface OnboardingModalProps {
 }
 
 export function OnboardingModal({ onClose }: OnboardingModalProps) {
+  const t = useUiText();
   const [step, setStep] = useState(0);
   const current = STEPS[step]!;
   const Icon = current.icon;
@@ -98,7 +100,7 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
         {/* Close */}
         <button
           onClick={onClose}
-          aria-label="Close onboarding"
+          aria-label={t('Close onboarding')}
           className="absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-md text-fg/40 hover:bg-fg/10 hover:text-fg"
         >
           <X className="h-4 w-4" />
@@ -119,17 +121,17 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
           >
             <Icon className="h-7 w-7" />
           </div>
-          <h2 className="text-lg font-semibold text-fg">{current.title}</h2>
+          <h2 className="text-lg font-semibold text-fg">{t(current.title)}</h2>
         </div>
 
         {/* Body */}
         <div className="px-8 pb-2">
           <p className="text-center text-sm leading-relaxed text-fg/70">
-            {current.description}
+            {t(current.description)}
           </p>
           {current.hint && (
             <p className="mt-3 rounded-md border border-fg/10 bg-fg/5 px-3 py-2 text-center text-xs text-fg/50">
-              {current.hint}
+              {t(current.hint)}
             </p>
           )}
         </div>
@@ -140,7 +142,7 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
             <button
               key={i}
               onClick={() => setStep(i)}
-              aria-label={`Go to step ${i + 1}`}
+              aria-label={t('Go to step {step}', { step: i + 1 })}
               className={cn(
                 'h-1.5 rounded-full transition-all duration-std',
                 i === step ? 'w-6 bg-accent' : 'w-1.5 bg-fg/20 hover:bg-fg/40',
@@ -161,7 +163,7 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
                 : 'text-fg/60 hover:bg-fg/10 hover:text-fg',
             )}
           >
-            <ChevronLeft className="h-4 w-4" /> Back
+            <ChevronLeft className="h-4 w-4" /> {t('Back')}
           </button>
 
           {isLast ? (
@@ -169,14 +171,14 @@ export function OnboardingModal({ onClose }: OnboardingModalProps) {
               onClick={onClose}
               className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-1.5 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-soft"
             >
-              Get started
+              {t('Get started')}
             </button>
           ) : (
             <button
               onClick={() => setStep((s) => s + 1)}
               className="flex items-center gap-1.5 rounded-md bg-fg/10 px-3 py-1.5 text-sm text-fg transition-colors hover:bg-fg/15"
             >
-              Next <ChevronRight className="h-4 w-4" />
+              {t('Next')} <ChevronRight className="h-4 w-4" />
             </button>
           )}
         </div>

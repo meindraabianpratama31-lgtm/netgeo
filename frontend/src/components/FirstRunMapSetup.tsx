@@ -24,6 +24,7 @@ import { Check, Globe, HardDrive, Link2, Loader2 } from 'lucide-react';
 import { mapsApi, type ApiError } from '@/api/client';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
+import { useUiText } from '@/i18n/uiText';
 
 type Source = 'online' | 'file' | 'url';
 
@@ -32,6 +33,7 @@ interface FirstRunMapSetupProps {
 }
 
 export function FirstRunMapSetup({ onDone }: FirstRunMapSetupProps) {
+  const u = useUiText();
   const [source, setSource] = useState<Source>('online');
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState('');
@@ -76,7 +78,7 @@ export function FirstRunMapSetup({ onDone }: FirstRunMapSetupProps) {
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-accent/15 text-accent shadow-[0_8px_24px_rgb(var(--ng-accent-rgb)_/_0.25)]">
             <Globe className="h-7 w-7" />
           </div>
-          <h2 className="text-lg font-semibold text-fg">Map source</h2>
+          <h2 className="text-lg font-semibold text-fg">{u('Map source')}</h2>
           <p className="mt-1.5 text-sm leading-relaxed text-fg/70">
             NetGeo can show the map online, or from a region file you already have — useful for
             sites with no reliable internet access.
@@ -87,14 +89,14 @@ export function FirstRunMapSetup({ onDone }: FirstRunMapSetupProps) {
           <SourceOption
             active={source === 'online'}
             icon={Globe}
-            title="Online (default)"
+            title={u('Online (default)')}
             description="Use satellite/street tiles from the internet, same as today."
             onClick={() => setSource('online')}
           />
           <SourceOption
             active={source === 'file'}
             icon={HardDrive}
-            title="Local .mbtiles file"
+            title={u('Local .mbtiles file')}
             description="Point to a region file you already have on this computer."
             onClick={() => setSource('file')}
           >
@@ -120,7 +122,7 @@ export function FirstRunMapSetup({ onDone }: FirstRunMapSetupProps) {
           <SourceOption
             active={source === 'url'}
             icon={Link2}
-            title="URL to a .mbtiles file"
+            title={u('URL to a .mbtiles file')}
             description="Downloaded once and stored on this computer."
             onClick={() => setSource('url')}
           >

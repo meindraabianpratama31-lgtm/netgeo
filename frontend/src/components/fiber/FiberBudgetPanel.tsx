@@ -12,6 +12,7 @@ import { useFiberStore } from '@/store/fiberStore';
 import { useUiStore } from '@/store/uiStore';
 import { fiberApi, type BomItem, type LossBudget } from '@/api/client';
 import { GPON_LABEL, fmtKm } from './fiberLogic';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 function Row({ label, value, strong, tone }: { label: string; value: string; strong?: boolean; tone?: 'ok' | 'bad' }) {
   return (
@@ -32,6 +33,7 @@ function Row({ label, value, strong, tone }: { label: string; value: string; str
 }
 
 function PassChip({ passed }: { passed: boolean }) {
+  const tx = useSurfaceText();
   return (
     <span
       className={cn(
@@ -40,26 +42,27 @@ function PassChip({ passed }: { passed: boolean }) {
       )}
     >
       {passed ? <Check className="h-3.5 w-3.5" /> : <X className="h-3.5 w-3.5" />}
-      {passed ? 'PASS' : 'FAIL'}
+      {passed ? tx('PASS') : tx('FAIL')}
     </span>
   );
 }
 
 function BudgetBody({ budget }: { budget: LossBudget }) {
+  const tx = useSurfaceText();
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-fg/50">Optical Budget</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('Optical Budget')}</p>
         <PassChip passed={budget.passed} />
       </div>
 
       <div className="rounded-lg border border-fg/10 bg-recess/30 px-3 py-1">
-        <Row label="Fiber length" value={fmtKm(budget.total_length_m)} />
-        <Row label="Split" value={`1:${budget.total_split}`} />
-        <Row label="Insertion loss" value={`${budget.total_loss_db.toFixed(2)} dB`} />
-        <Row label="Class budget" value={`${budget.budget_db.toFixed(1)} dB`} />
+        <Row label={tx('Fiber length')} value={fmtKm(budget.total_length_m)} />
+        <Row label={tx('Split')} value={`1:${budget.total_split}`} />
+        <Row label={tx('Insertion loss')} value={`${budget.total_loss_db.toFixed(2)} dB`} />
+        <Row label={tx('Class budget')} value={`${budget.budget_db.toFixed(1)} dB`} />
         <Row
-          label="Margin"
+          label={tx('Margin')}
           value={`${budget.margin_db >= 0 ? '+' : ''}${budget.margin_db.toFixed(2)} dB`}
           strong
           tone={budget.margin_db >= 0 ? 'ok' : 'bad'}
@@ -67,7 +70,7 @@ function BudgetBody({ budget }: { budget: LossBudget }) {
       </div>
 
       <div>
-        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-fg/50">GPON Checks</p>
+        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('GPON Checks')}</p>
         <ul className="space-y-1.5">
           {budget.checks.map((c, i) => (
             <li key={i} className="flex items-start gap-2 text-xs leading-relaxed text-fg/70">
@@ -86,6 +89,7 @@ function BudgetBody({ budget }: { budget: LossBudget }) {
 }
 
 function OtherPaths() {
+  const tx = useSurfaceText();
   const paths = useFiberStore((s) => s.paths);
   const budgets = useFiberStore((s) => s.budgets);
   const selectedId = useFiberStore((s) => s.selectedId);
@@ -99,7 +103,7 @@ function OtherPaths() {
 
   return (
     <div className="mt-5">
-      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-fg/50">Other ODPs</p>
+      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('Other ODPs')}</p>
       <ul className="space-y-1">
         {others.map((p) => {
           const b = budgets[p.id];
@@ -127,6 +131,7 @@ function OtherPaths() {
 }
 
 export function FiberBudgetPanel() {
+  const tx = useSurfaceText();
   const projectId = useFiberStore((s) => s.projectId);
   const path = useFiberStore((s) => s.paths.find((p) => p.id === s.selectedId));
   const budget = useFiberStore((s) => (s.selectedId ? s.budgets[s.selectedId] : undefined));
@@ -165,12 +170,12 @@ export function FiberBudgetPanel() {
   return (
     <aside
       role="region"
-      aria-label="Optical Budget"
+      aria-label={tx('Optical Budget')}
       className={cn('glass-strong pointer-events-auto absolute right-0 top-0 flex h-full w-[380px] max-w-[85vw] flex-col border-l border-fg/12 shadow-glass-lg', zc.workspace)}
     >
       <div className="flex items-center gap-2 border-b border-fg/10 px-4 py-3">
         <Cable className="h-4 w-4 text-accent" />
-        <h2 className="truncate text-sm font-semibold text-fg/85">{path ? path.name : 'Optical Budget'}</h2>
+        <h2 className="truncate text-sm font-semibold text-fg/85">{path ? path.name : tx('Optical Budget')}</h2>
         {path && (
           <span className="ml-auto rounded-full bg-fg/8 px-2 py-0.5 font-mono text-[10px] text-fg/60">
             {GPON_LABEL[path.gpon_class]}
@@ -180,13 +185,13 @@ export function FiberBudgetPanel() {
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         {!path ? (
-          <p className="py-10 text-center text-xs text-fg/50">Select a fiber path to see its budget.</p>
+          <p className="py-10 text-center text-xs text-fg/50">{tx('Select a fiber path to see its budget.')}</p>
         ) : busy && !budget ? (
           <div className="grid place-items-center gap-2 py-10 text-xs text-fg/55">
-            <Loader2 className="h-5 w-5 animate-spin text-accent" /> Computing budget…
+            <Loader2 className="h-5 w-5 animate-spin text-accent" /> {tx('Computing budget…')}
           </div>
         ) : !budget ? (
-          <p className="py-10 text-center text-xs text-fg/50">No budget available for this path.</p>
+          <p className="py-10 text-center text-xs text-fg/50">{tx('No budget available for this path.')}</p>
         ) : (
           <>
             <BudgetBody budget={budget} />
@@ -214,7 +219,7 @@ export function FiberBudgetPanel() {
           disabled={!projectId}
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg hover:bg-accent-soft disabled:opacity-40"
         >
-          <FileText className="h-3.5 w-3.5" /> Report
+          <FileText className="h-3.5 w-3.5" /> {tx('Report')}
         </button>
       </div>
       {actErr && <p className="px-4 pb-2 text-[11px] text-danger">{actErr}</p>}
@@ -233,12 +238,13 @@ function BomModal({
   error: string | null;
   onClose: () => void;
 }) {
+  const tx = useSurfaceText();
   return (
     <div
       className={cn('fixed inset-0 grid place-items-center bg-black/50 p-4', zc.modal)}
       role="dialog"
       aria-modal="true"
-      aria-label="Bill of materials"
+      aria-label={tx('Bill of materials')}
       onClick={onClose}
     >
       <div
@@ -247,10 +253,10 @@ function BomModal({
       >
         <div className="flex items-center gap-2 border-b border-fg/10 px-4 py-3">
           <ListTree className="h-4 w-4 text-accent" />
-          <h3 className="text-sm font-semibold text-fg/85">Bill of Materials</h3>
+          <h3 className="text-sm font-semibold text-fg/85">{tx('Bill of Materials')}</h3>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tx('Close')}
             className="ml-auto grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
           >
             <X className="h-4 w-4" />
@@ -266,15 +272,15 @@ function BomModal({
               <Loader2 className="h-5 w-5 animate-spin text-accent" /> Loading…
             </div>
           ) : items.length === 0 ? (
-            <p className="py-8 text-center text-xs text-fg/50">No materials yet — add plant and fiber paths.</p>
+            <p className="py-8 text-center text-xs text-fg/50">{tx('No materials yet — add plant and fiber paths.')}</p>
           ) : (
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="text-[10px] uppercase tracking-wide text-fg/40">
-                  <th className="py-1 pr-2 font-medium">Category</th>
-                  <th className="py-1 pr-2 font-medium">Item</th>
-                  <th className="py-1 pr-2 text-right font-medium">Qty</th>
-                  <th className="py-1 font-medium">Unit</th>
+                  <th className="py-1 pr-2 font-medium">{tx('Category')}</th>
+                  <th className="py-1 pr-2 font-medium">{tx('Item')}</th>
+                  <th className="py-1 pr-2 text-right font-medium">{tx('Qty')}</th>
+                  <th className="py-1 font-medium">{tx('Unit')}</th>
                 </tr>
               </thead>
               <tbody>

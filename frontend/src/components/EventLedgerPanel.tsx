@@ -16,6 +16,7 @@ import { useTopologyStore } from '@/store/topologyStore';
 import { useTopoUiStore } from '@/store/topoUiStore';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 const TYPE_STYLES: Record<string, string> = {
   PACKET_TX: 'text-sky-300/90',
@@ -24,6 +25,7 @@ const TYPE_STYLES: Record<string, string> = {
 };
 
 export function EventLedgerPanel() {
+  const t = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const nodes = useTopologyStore((s) => s.nodes);
   const select = useTopologyStore((s) => s.select);
@@ -109,11 +111,11 @@ export function EventLedgerPanel() {
             simMode ? 'bg-accent/25 text-accent' : 'bg-fg/10 text-fg/60',
           )}
         >
-          {simMode ? 'Simulation' : 'Realtime'}
+          {simMode ? t('Simulation') : t('Realtime')}
         </span>
         <span className="font-mono text-[11px] text-fg/50">
-          t={q.data ? q.data.sim_time.toFixed(6) : '—'}s · event {total}
-          {q.data ? ` · ${q.data.pending_events} queued` : ''}
+          t={q.data ? q.data.sim_time.toFixed(6) : '—'}s · {t('event {count}', { count: total })}
+          {q.data ? ` · ${t('{count} queued', { count: q.data.pending_events })}` : ''}
         </span>
 
         <div className="relative ml-1">
@@ -121,8 +123,8 @@ export function EventLedgerPanel() {
           <input
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            placeholder="Filter events…"
-            aria-label="Filter events"
+            placeholder={t('Filter events…')}
+            aria-label={t('Filter events')}
             className="w-40 rounded-md border border-fg/10 bg-fg/5 py-1 pl-6 pr-2 text-[11px] outline-none placeholder:text-fg/30 focus:border-accent"
           />
         </div>
@@ -130,17 +132,17 @@ export function EventLedgerPanel() {
         <div className="flex-1" />
 
         <LedgerButton
-          label="Step back"
+          label={t('Step back')}
           disabled={busy || total === 0}
           onClick={() => seek.mutate(Math.max(0, total - 1))}
         >
           <StepBack className="h-3.5 w-3.5" />
         </LedgerButton>
-        <LedgerButton label="Step 1 event" disabled={busy} onClick={() => step.mutate({ events: 1 })}>
+        <LedgerButton label={t('Step 1 event')} disabled={busy} onClick={() => step.mutate({ events: 1 })}>
           <StepForward className="h-3.5 w-3.5" />
         </LedgerButton>
         <LedgerButton
-          label="Step 10 events"
+          label={t('Step 10 events')}
           disabled={busy}
           onClick={() => step.mutate({ events: 10 })}
         >
@@ -148,7 +150,7 @@ export function EventLedgerPanel() {
           <span className="text-[10px]">10</span>
         </LedgerButton>
         <LedgerButton
-          label="Run 1 sim-second"
+          label={t('Run 1 sim-second')}
           disabled={busy}
           onClick={() => step.mutate({ duration: 1.0 })}
         >
@@ -160,12 +162,12 @@ export function EventLedgerPanel() {
           <input
             value={seekTo}
             onChange={(e) => setSeekTo(e.target.value.replace(/\D/g, ''))}
-            placeholder="seek #"
-            aria-label="Seek to event"
+            placeholder={t('seek #')}
+            aria-label={t('Seek to event')}
             className="w-[64px] rounded-md border border-fg/10 bg-fg/5 px-1.5 py-1 font-mono text-[11px] outline-none placeholder:text-fg/30 focus:border-accent"
           />
           <LedgerButton
-            label="Seek to event"
+            label={t('Seek to event')}
             disabled={busy || seekTo === ''}
             onClick={() => seek.mutate(Number(seekTo))}
           >
@@ -178,22 +180,22 @@ export function EventLedgerPanel() {
       <div className="ng-scroll min-h-0 flex-1 overflow-auto text-[11px] leading-relaxed">
         {records.length === 0 ? (
           <p className="p-3 font-mono text-fg/35">
-            No events yet — switch to simulation mode, launch a ping, then step.
+            {t('No events yet — switch to simulation mode, launch a ping, then step.')}
           </p>
         ) : filtered.length === 0 ? (
-          <p className="p-3 font-mono text-fg/35">No events match “{filter}”.</p>
+          <p className="p-3 font-mono text-fg/35">{t('No events match “{query}”.', { query: filter })}</p>
         ) : (
           <table className="w-full border-collapse">
             <thead className="sticky top-0 z-10">
               <tr className="glass-strong text-left font-display text-[9px] uppercase tracking-wider text-fg/45">
-                <th className="px-2 py-1.5 font-medium">Time</th>
-                <th className="px-1 py-1.5 font-medium">Device</th>
-                <th className="px-1 py-1.5 font-medium">Layer</th>
-                <th className="px-1 py-1.5 font-medium">Event</th>
-                <th className="px-1 py-1.5 font-medium">Source</th>
-                <th className="px-1 py-1.5 font-medium">Destination</th>
-                <th className="px-1 py-1.5 font-medium">Proto</th>
-                <th className="px-2 py-1.5 font-medium">Result</th>
+                <th className="px-2 py-1.5 font-medium">{t('Time')}</th>
+                <th className="px-1 py-1.5 font-medium">{t('Device')}</th>
+                <th className="px-1 py-1.5 font-medium">{t('Layer')}</th>
+                <th className="px-1 py-1.5 font-medium">{t('Event')}</th>
+                <th className="px-1 py-1.5 font-medium">{t('Source')}</th>
+                <th className="px-1 py-1.5 font-medium">{t('Destination')}</th>
+                <th className="px-1 py-1.5 font-medium">{t('Proto')}</th>
+                <th className="px-2 py-1.5 font-medium">{t('Result')}</th>
               </tr>
             </thead>
             <tbody className="font-mono">
@@ -204,6 +206,7 @@ export function EventLedgerPanel() {
                   nodeName={nodeName}
                   onPick={() => pick(r)}
                   onJump={() => seek.mutate(r.seq)}
+                  rowTitle={t('Click: locate & highlight · Double-click: rewind to this event')}
                 />
               ))}
             </tbody>
@@ -212,8 +215,8 @@ export function EventLedgerPanel() {
       </div>
 
       <p className="border-t border-fg/10 px-2 py-1 text-[10px] text-fg/35">
-        Deterministic replay: double-click any row to rewind the lab to that exact event.
-        Ledger hash {q.data ? q.data.hash.slice(0, 12) : '—'}…
+        {t('Deterministic replay: double-click any row to rewind the lab to that exact event.')}{' '}
+        {t('Ledger hash')} {q.data ? q.data.hash.slice(0, 12) : '—'}…
       </p>
     </div>
   );
@@ -224,11 +227,13 @@ function LedgerRow({
   nodeName,
   onPick,
   onJump,
+  rowTitle,
 }: {
   r: LedgerRecord;
   nodeName: (id: string) => string;
   onPick: () => void;
   onJump: () => void;
+  rowTitle: string;
 }) {
   const c = parseLedgerInfo(r.info);
   const dim = 'text-fg/25';
@@ -236,7 +241,7 @@ function LedgerRow({
     <tr
       onClick={onPick}
       onDoubleClick={onJump}
-      title={`Click: locate & highlight · Double-click: rewind to this event\n${r.info ?? ''}`}
+      title={`${rowTitle}\n${r.info ?? ''}`}
       className="cursor-pointer border-b border-fg/5 hover:bg-fg/8"
     >
       <td className="whitespace-nowrap px-2 py-0.5 tabular-nums text-fg/40">{r.t.toFixed(6)}</td>

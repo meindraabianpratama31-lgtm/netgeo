@@ -6,6 +6,7 @@
  */
 import { useTopoUiStore, type OverlayKey } from '@/store/topoUiStore';
 import { cn } from '@/lib/cn';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const CHIPS: { key: OverlayKey; label: string; dot: string }[] = [
   { key: 'ospf', label: 'OSPF', dot: 'bg-accent' },
@@ -15,11 +16,12 @@ const CHIPS: { key: OverlayKey; label: string; dot: string }[] = [
 ];
 
 export function OverlayChips() {
+  const tx = useSurfaceText();
   const overlays = useTopoUiStore((s) => s.overlays);
   const toggle = useTopoUiStore((s) => s.toggleOverlay);
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Canvas overlays">
+    <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={tx('Canvas overlays')}>
       {CHIPS.map(({ key, label, dot }) => {
         const active = overlays[key];
         return (
@@ -37,7 +39,7 @@ export function OverlayChips() {
           >
             <span className={cn('h-1.5 w-1.5 rounded-full', active ? dot : 'bg-fg/25')} aria-hidden />
             {label}
-            {active && key !== 'l3' && <span className="text-[9px] text-accent/70">Active</span>}
+            {active && key !== 'l3' && <span className="text-[9px] text-accent/70">{tx('Active')}</span>}
           </button>
         );
       })}

@@ -12,6 +12,7 @@ import { nodesApi } from '@/api/client';
 import type { NodeMountType, UnrackedNode } from '@/api/types';
 import { Select } from '@/components/ui/Select';
 import { cn } from '@/lib/cn';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const MOUNT_TYPES: NodeMountType[] = ['pole', 'wall', 'strand', 'ground', 'ceiling'];
 
@@ -25,6 +26,7 @@ export function UnrackedDevicesPanel({
   projectId: string;
   nodes: UnrackedNode[];
 }) {
+  const tx = useSurfaceText();
   const queryClient = useQueryClient();
   const patchMount = useMutation({
     mutationFn: (v: { nodeId: string; type: NodeMountType | ''; heightAglM: number | null }) =>
@@ -43,14 +45,14 @@ export function UnrackedDevicesPanel({
     <div className="border-b border-fg/10 px-3 py-1.5 text-xs" data-testid="unracked-devices-panel">
       <div className="mb-1 flex items-center gap-1.5 text-fg-muted">
         <RadioIcon className="size-3.5" />
-        Penempatan luar rak ({nodes.length})
+        {tx('Outdoor placement')} ({nodes.length})
       </div>
       <div className="flex flex-col gap-1">
         {nodes.map((n) => (
           <div key={n.id} className="flex flex-wrap items-center gap-1.5">
             <span className="min-w-0 flex-1 truncate text-fg">{n.name}</span>
             <Select
-              aria-label={`Tipe mount untuk ${n.name}`}
+              aria-label={`${tx('Mount type for')} ${n.name}`}
               className="w-28"
               value={n.mount?.type ?? ''}
               onChange={(v) => {
@@ -58,14 +60,14 @@ export function UnrackedDevicesPanel({
                 patchMount.mutate({ nodeId: n.id, type, heightAglM: n.mount?.height_agl_m ?? null });
               }}
               options={[
-                { value: '', label: '(belum dipasang)' },
-                ...MOUNT_TYPES.map((t) => ({ value: t, label: t })),
+                { value: '', label: tx('(not mounted)') },
+                ...MOUNT_TYPES.map((t) => ({ value: t, label: tx(t) })),
               ]}
             />
             <input
               type="number"
-              aria-label={`Tinggi AGL (m) untuk ${n.name}`}
-              placeholder="tinggi (m)"
+              aria-label={`${tx('Height AGL (m) for')} ${n.name}`}
+              placeholder={tx('height (m)')}
               disabled={!n.mount}
               className={cn(fieldCls, 'w-24 disabled:cursor-not-allowed disabled:opacity-40')}
               value={n.mount?.height_agl_m ?? ''}

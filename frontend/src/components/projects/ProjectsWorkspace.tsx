@@ -26,6 +26,8 @@ import { useUiStore } from '@/store/uiStore';
 import { WorkspaceEmptyState } from '@/components/shell/WorkspaceEmptyState';
 import { ConfirmDialog } from '@/components/shell/ConfirmDialog';
 import { cn } from '@/lib/cn';
+import { useTranslation } from '@/i18n';
+import { useUiText } from '@/i18n/uiText';
 
 const RECENT_KEY = 'netgeo.recentProjects';
 
@@ -76,6 +78,7 @@ function useCounts(id: string): { nodes: number; links: number } | null {
 }
 
 export function ProjectsWorkspace() {
+  const { t } = useTranslation();
   const setProject = useUiStore((s) => s.setProject);
   const setViewMode = useUiStore((s) => s.setViewMode);
   const qc = useQueryClient();
@@ -119,7 +122,7 @@ export function ProjectsWorkspace() {
       await qc.invalidateQueries({ queryKey: ['projects'] });
       open(project.id);
     } catch (e) {
-      setError(e instanceof SyntaxError ? 'Invalid JSON file.' : errorMessage(e, 'Import failed.'));
+      setError(e instanceof SyntaxError ? t('projects.invalidJson') : errorMessage(e, t('projects.importFailed')));
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -137,7 +140,7 @@ export function ProjectsWorkspace() {
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
-      setError(errorMessage(e, 'Export failed.'));
+      setError(errorMessage(e, t('projects.exportFailed')));
     }
   };
 
@@ -155,7 +158,7 @@ export function ProjectsWorkspace() {
       qc.removeQueries({ queryKey: ['topology', deleting.id] });
       setDeleting(null);
     } catch (e) {
-      setError(errorMessage(e, 'Delete failed.'));
+      setError(errorMessage(e, t('projects.deleteFailed')));
       setDeleting(null);
     } finally {
       setBusy(false);
@@ -176,19 +179,19 @@ export function ProjectsWorkspace() {
           it needs a real gutter instead of rendering under the rail. */}
       <div className="w-full pt-4 pr-6 pb-6 pl-[116px]">
         <div className="glass mb-4 inline-flex flex-wrap items-center gap-2 rounded-xl border border-fg/12 p-1.5 shadow-glass">
-            <input ref={inputRef} type="file" accept=".json,application/json" className="hidden" aria-label="Import project archive" onChange={(e) => void importProject(e.target.files?.[0])} />
+            <input ref={inputRef} type="file" accept=".json,application/json" className="hidden" aria-label={t('projects.importArchive')} onChange={(e) => void importProject(e.target.files?.[0])} />
             <button onClick={() => inputRef.current?.click()} disabled={busy} className="flex h-9 items-center gap-2 rounded-lg px-3 text-sm text-fg/80 hover:bg-fg/10 disabled:opacity-40">
-              <Upload className="h-4 w-4" aria-hidden /> Import project
+              <Upload className="h-4 w-4" aria-hidden /> {t('projects.import')}
             </button>
             <button
               onClick={() => setCreating(true)}
               className="flex h-9 items-center gap-2 rounded-lg bg-accent px-3 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-soft"
             >
-              <Plus className="h-4 w-4" aria-hidden /> New project
+              <Plus className="h-4 w-4" aria-hidden /> {t('projects.new')}
             </button>
         </div>
 
-        {(error || listError || createMut.error) && <p role="alert" className="mb-4 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">{error || errorMessage(listError || createMut.error, 'Could not load projects.')}</p>}
+        {(error || listError || createMut.error) && <p role="alert" className="mb-4 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">{error || errorMessage(listError || createMut.error, t('projects.loadFailed'))}</p>}
 
         {isLoading ? (
           <div className="grid h-[50vh] place-items-center text-fg/50">
@@ -198,9 +201,9 @@ export function ProjectsWorkspace() {
           <div className="relative h-[60vh]">
             <WorkspaceEmptyState
               icon={FolderKanban}
-              title="No projects yet"
-              hint="A project holds one network topology and its simulations. Create your first to start designing."
-              action={{ label: 'New project', onClick: () => setCreating(true) }}
+              title={t('projects.emptyTitle')}
+              hint={t('projects.emptyHint')}
+              action={{ label: t('projects.new'), onClick: () => setCreating(true) }}
             />
           </div>
         ) : (
@@ -228,15 +231,15 @@ export function ProjectsWorkspace() {
 
             {recentProjects.length > 0 && (
               <section className="mb-4">
-                <h2 className="mb-4 font-display text-lg font-semibold text-fg">Recently opened</h2>
+                <h2 className="mb-4 font-display text-lg font-semibold text-fg">{t('projects.recent')}</h2>
                 <div className="overflow-x-auto rounded-xl border border-fg/10 bg-panel">
                   <table className="w-full border-collapse text-left">
                     <thead className="border-b border-fg/10 bg-recess/20">
                       <tr>
-                        <Th>Name</Th>
-                        <Th className="w-24">Nodes</Th>
-                        <Th className="w-24">Links</Th>
-                        <Th className="w-32">Created</Th>
+                        <Th>{t('projects.name')}</Th>
+                        <Th className="w-24">{t('projects.nodes')}</Th>
+                        <Th className="w-24">{t('projects.links')}</Th>
+                        <Th className="w-32">{t('projects.created')}</Th>
                       </tr>
                     </thead>
                     <tbody>
@@ -251,12 +254,13 @@ export function ProjectsWorkspace() {
           </>
         )}
       </div>
-      {deleting && <ConfirmDialog title="Delete project?" message={`Delete “${deleting.name}” and all its saved network data? This cannot be undone.`} confirmLabel={busy ? 'Deleting…' : 'Delete project'} danger onConfirm={() => void removeProject()} onCancel={() => !busy && setDeleting(null)} />}
+      {deleting && <ConfirmDialog title={t('projects.deleteTitle')} message={t('projects.deleteMessage', { name: deleting.name })} confirmLabel={busy ? t('projects.deleting') : t('projects.delete')} danger onConfirm={() => void removeProject()} onCancel={() => !busy && setDeleting(null)} />}
     </div>
   );
 }
 
 function ProjectCard({ project, onOpen, onExport, onDelete }: { project: Project; onOpen: () => void; onExport: () => void; onDelete: () => void }) {
+  const u = useUiText();
   const counts = useCounts(project.id);
   return (
     <div className="group relative flex flex-col gap-4 rounded-xl border border-fg/10 bg-panel-2 p-5 text-left shadow-soft transition-colors hover:border-accent/40">
@@ -264,27 +268,27 @@ function ProjectCard({ project, onOpen, onExport, onDelete }: { project: Project
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-fg/10 bg-recess/30">
           <Network className="h-4 w-4 text-accent" aria-hidden />
         </span>
-        <button onClick={onOpen} className="min-w-0 flex-1 truncate text-left font-medium text-fg hover:text-accent" aria-label={`Open ${project.name}`}>{project.name}</button>
+        <button onClick={onOpen} className="min-w-0 flex-1 truncate text-left font-medium text-fg hover:text-accent" aria-label={u('Open {name}', { name: project.name })}>{project.name}</button>
         <details className="relative">
-          <summary className="grid h-8 w-8 cursor-pointer list-none place-items-center rounded-lg text-fg/60 hover:bg-fg/10" aria-label={`Actions for ${project.name}`}><MoreHorizontal className="h-4 w-4" /></summary>
+          <summary className="grid h-8 w-8 cursor-pointer list-none place-items-center rounded-lg text-fg/60 hover:bg-fg/10" aria-label={u('Actions for {name}', { name: project.name })}><MoreHorizontal className="h-4 w-4" /></summary>
           <div className="glass-strong absolute right-0 top-9 z-20 w-36 rounded-lg border border-fg/15 p-1 shadow-glass-lg">
-            <button onClick={onExport} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-fg hover:bg-fg/10"><Download className="h-3.5 w-3.5" /> Export</button>
-            <button onClick={onDelete} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-danger hover:bg-danger/10">Delete</button>
+            <button onClick={onExport} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-fg hover:bg-fg/10"><Download className="h-3.5 w-3.5" /> {u('Export')}</button>
+            <button onClick={onDelete} className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-danger hover:bg-danger/10">{u('Delete')}</button>
           </div>
         </details>
       </div>
 
       {/* Schematic preview placeholder — no thumbnails are generated server-side. */}
-      <button onClick={onOpen} aria-label={`Open ${project.name} workspace`} className="relative grid h-28 place-items-center overflow-hidden rounded-lg border border-fg/10 bg-recess/25">
+      <button onClick={onOpen} aria-label={u('Open {name} workspace', { name: project.name })} className="relative grid h-28 place-items-center overflow-hidden rounded-lg border border-fg/10 bg-recess/25">
         <Network className="h-8 w-8 text-fg/10" aria-hidden />
         <span className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded border border-fg/10 bg-surface px-2 py-0.5 backdrop-blur-sm">
           <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
-          <span className="font-mono text-[11px] text-success">Active</span>
+          <span className="font-mono text-[11px] text-success">{u('Active')}</span>
         </span>
         {/* Hover / focus affordance for the card's Open action. */}
         <span className="pointer-events-none absolute inset-0 grid place-items-center bg-recess/70 opacity-0 backdrop-blur-[1px] transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
           <span className="flex items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg">
-            <ExternalLink className="h-4 w-4" aria-hidden /> Open workspace
+            <ExternalLink className="h-4 w-4" aria-hidden /> {u('Open workspace')}
           </span>
         </span>
       </button>
@@ -335,6 +339,7 @@ function NewProjectCard({
   onSubmit: () => void;
   onCancel: () => void;
 }) {
+  const u = useUiText();
   return (
     <form
       onSubmit={(e) => {
@@ -347,7 +352,7 @@ function NewProjectCard({
         htmlFor="new-project-name"
         className="font-mono text-[10px] uppercase tracking-wide text-fg/45"
       >
-        New project name
+        {u('New project name')}
       </label>
       <input
         id="new-project-name"
@@ -367,14 +372,14 @@ function NewProjectCard({
           className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-soft disabled:opacity-40"
         >
           {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
-          Create
+          {u('Create')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border border-fg/10 px-3 py-2 text-sm text-fg/70 transition-colors hover:bg-fg/5"
         >
-          Cancel
+          {u('Cancel')}
         </button>
       </div>
     </form>

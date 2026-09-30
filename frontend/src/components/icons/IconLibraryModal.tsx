@@ -12,10 +12,12 @@ import { useTopologyStore } from '@/store/topologyStore';
 import { useUiStore } from '@/store/uiStore';
 import { nodesApi } from '@/api/client';
 import { cn } from '@/lib/cn';
+import { useFeatureText } from '@/i18n/featureText';
 
 const MAX_BYTES = 256 * 1024; // 256 KB
 
 export function IconLibraryModal() {
+  const t = useFeatureText();
   const closeModal = useUiStore((s) => s.closeModal);
   const { icons, addIcon, removeIcon } = useIconStore();
   const node = useTopologyStore((s) => s.selectedNode());
@@ -42,7 +44,7 @@ export function IconLibraryModal() {
     setError(null);
     Array.from(files).forEach((file) => {
       if (file.size > MAX_BYTES) {
-        setError(`"${file.name}" exceeds 256 KB limit — skipped.`);
+        setError(t('File {name} exceeds 256 KB limit — skipped.', { name: file.name }));
         return;
       }
       const reader = new FileReader();
@@ -58,11 +60,11 @@ export function IconLibraryModal() {
   }
 
   return (
-    <ModalScrim label="Icon Library" onClose={closeModal} className="max-w-lg">
+    <ModalScrim label={t('Icon Library')} onClose={closeModal} className="max-w-lg">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-fg/10 px-4 py-3">
         <ImagePlus className="h-4 w-4 text-fg/50" />
-        <h2 className="text-sm font-semibold text-fg/85">Icon Library</h2>
+        <h2 className="text-sm font-semibold text-fg/85">{t('Icon Library')}</h2>
         <span className="ml-auto rounded-full bg-fg/8 px-2 py-0.5 text-[10px] text-fg/50">
           {icons.length}
         </span>
@@ -79,7 +81,7 @@ export function IconLibraryModal() {
           >
             <ImagePlus className="h-5 w-5 text-fg/35" />
             <span className="text-xs text-fg/50">
-              Click to import SVG, PNG, or JPEG &mdash; max 256 KB each
+              {t('Click to import SVG, PNG, or JPEG — max 256 KB each')}
             </span>
             <input
               ref={fileRef}
@@ -98,7 +100,7 @@ export function IconLibraryModal() {
         {/* Icon grid */}
         {icons.length === 0 ? (
           <p className="rounded-md border border-dashed border-fg/10 p-4 text-center text-xs text-fg/35">
-            No custom icons yet. Import an SVG or PNG above.
+            {t('No custom icons yet. Import an SVG or PNG above.')}
           </p>
         ) : (
           <div className="grid grid-cols-4 gap-2">
@@ -117,10 +119,10 @@ export function IconLibraryModal() {
                   {/* Thumbnail */}
                   <button
                     onClick={() => node && setNodeIcon(isAssigned ? undefined : icon.id)}
-                    title={node ? (isAssigned ? 'Clear icon' : 'Assign to selected node') : icon.name}
+                    title={node ? (isAssigned ? t('Clear icon') : t('Assign to selected node')) : icon.name}
                     disabled={!node}
                     className="h-10 w-10 shrink-0 disabled:cursor-default"
-                    aria-label={`${isAssigned ? 'Clear' : 'Assign'} icon ${icon.name}`}
+                    aria-label={isAssigned ? t('Clear icon {name}', { name: icon.name }) : t('Assign icon {name}', { name: icon.name })}
                   >
                     <img
                       src={icon.dataUrl}
@@ -148,7 +150,7 @@ export function IconLibraryModal() {
                       if (isAssigned) setNodeIcon(undefined);
                       removeIcon(icon.id);
                     }}
-                    aria-label={`Remove icon ${icon.name}`}
+                    aria-label={t('Remove icon {name}', { name: icon.name })}
                     className="absolute left-1 top-1 grid h-5 w-5 place-items-center rounded text-fg/0 transition-colors group-hover:text-fg/40 hover:!text-danger"
                   >
                     <Trash2 className="h-3 w-3" />
@@ -163,7 +165,7 @@ export function IconLibraryModal() {
         {node && (
           <div className="rounded-lg border border-fg/10 bg-fg/4 px-3 py-2.5 space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-fg/45">
-              Selected node
+              {t('Selected node')}
             </p>
             <div className="flex items-center justify-between gap-2">
               <span className="truncate text-sm text-fg/85">{node.name}</span>
@@ -172,13 +174,13 @@ export function IconLibraryModal() {
                   onClick={() => setNodeIcon(undefined)}
                   className="shrink-0 rounded-md border border-fg/10 px-2 py-1 text-[11px] text-fg/50 transition-colors hover:border-danger/40 hover:text-danger"
                 >
-                  Clear icon
+                  {t('Clear icon')}
                 </button>
               )}
             </div>
             {!assignedIconId && icons.length > 0 && (
               <p className="text-[11px] text-fg/40">
-                Click an icon above to assign it to this node.
+                {t('Click an icon above to assign it to this node.')}
               </p>
             )}
           </div>

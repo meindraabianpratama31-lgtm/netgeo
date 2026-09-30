@@ -12,8 +12,10 @@ import type { NodeModel } from '@/api/types';
 import { cn } from '@/lib/cn';
 import { zc } from '@/theme/z';
 import { Select } from '@/components/ui/Select';
+import { useFeatureText } from '@/i18n/featureText';
 
 export function ReachabilityBar({ nodes }: { nodes: NodeModel[] }) {
+  const t = useFeatureText();
   const projectId = useUiStore((s) => s.projectId);
   const [src, setSrc] = useState('');
   const [dst, setDst] = useState('');
@@ -32,24 +34,24 @@ export function ReachabilityBar({ nodes }: { nodes: NodeModel[] }) {
   return (
     <div className={cn('pointer-events-none absolute bottom-4 left-0 right-[360px] flex justify-center px-4', zc.workspace)}>
       <div className="glass pointer-events-auto flex items-center gap-2 rounded-full border border-fg/10 px-3 py-2 shadow-glass">
-        <span className="pl-1 text-xs text-fg/50">Can</span>
+        <span className="pl-1 text-xs text-fg/50">{t('Can')}</span>
         <Select
           value={src}
           onChange={setSrc}
-          aria-label="Source device"
-          placeholder="source…"
+          aria-label={t('Source device')}
+          placeholder={t('source…')}
           options={nodes.map((n) => ({ value: n.name, label: n.name }))}
           className="max-w-[130px]"
           menuPosition="top"
         />
-        <span className="text-xs text-fg/50">reach</span>
+        <span className="text-xs text-fg/50">{t('reach')}</span>
         <input
           value={dst}
           onChange={(e) => setDst(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && run()}
           list="twin-reach-dst"
-          placeholder="device or IP"
-          aria-label="Destination device or IP"
+          placeholder={t('device or IP')}
+          aria-label={t('Destination device or IP')}
           className="w-[140px] rounded-md border border-fg/10 bg-fg/5 px-2 py-1 text-xs text-fg/85 outline-none placeholder:text-fg/30 focus:border-accent/60"
         />
         <datalist id="twin-reach-dst">
@@ -63,10 +65,10 @@ export function ReachabilityBar({ nodes }: { nodes: NodeModel[] }) {
           className="flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg transition-colors hover:bg-accent-soft disabled:opacity-40"
         >
           {q.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Radar className="h-3.5 w-3.5" />}
-          Analyze
+          {t('Analyze')}
         </button>
 
-        {err && <span className="pr-1 text-xs text-danger">{err.message || 'Query failed'}</span>}
+        {err && <span className="pr-1 text-xs text-danger">{err.message || t('Query failed')}</span>}
         {res && !err && (
           <span
             className={cn(
@@ -75,10 +77,10 @@ export function ReachabilityBar({ nodes }: { nodes: NodeModel[] }) {
             )}
           >
             {res.reachable ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
-            {res.reachable ? 'Reachable' : 'Unreachable'}
+            {res.reachable ? t('Reachable') : t('Unreachable')}
             {res.reachable && (
               <span className="text-fg/50">
-                · {res.path.length} hop{res.path.length === 1 ? '' : 's'}
+                · {t('{count} hops', { count: res.path.length })}
                 {res.rtt_avg_ms != null && ` · ${res.rtt_avg_ms} ms`}
               </span>
             )}

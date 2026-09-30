@@ -16,6 +16,7 @@ import type { NodeKind } from '@/api/types';
 import { deployAt } from '@/lib/mapDeploy';
 import { useUiStore } from '@/store/uiStore';
 import { useMapStore } from '@/store/mapStore';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 interface Props {
   /** Pixel position (MapLibre `e.point` from the map click event). */
@@ -46,6 +47,7 @@ const CABLED_PRESETS: PresetItem[] = [
 ];
 
 export function MapDeployMenu({ px, lat, lon, onClose, siteId }: Props) {
+  const tx = useSurfaceText();
   const projectId = useUiStore((s) => s.projectId);
   const flashNotice = useMapStore((s) => s.flashNotice);
   const [busy, setBusy] = useState(false);
@@ -73,7 +75,7 @@ export function MapDeployMenu({ px, lat, lon, onClose, siteId }: Props) {
     try {
       await deployAt(projectId, kind, lat, lon, (msg) => flashNotice(msg), siteId);
     } catch {
-      flashNotice('Deploy failed — check backend.');
+      flashNotice(tx('Deploy failed — check backend.'));
     } finally {
       setBusy(false);
       onClose();
@@ -97,16 +99,16 @@ export function MapDeployMenu({ px, lat, lon, onClose, siteId }: Props) {
         zc.popover,
       )}
       role="menu"
-      aria-label="Deploy device"
+      aria-label={tx('Deploy device')}
     >
       {/* Header */}
       <div className="mb-1.5 flex items-center justify-between px-1">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-fg/50">
-          Deploy device here
+          {tx('Deploy device here')}
         </span>
         <button
           onClick={onClose}
-          aria-label="Close"
+          aria-label={tx('Close')}
           className="grid h-5 w-5 place-items-center rounded text-fg/40 hover:text-fg"
         >
           <X className="h-3 w-3" />
@@ -119,8 +121,8 @@ export function MapDeployMenu({ px, lat, lon, onClose, siteId }: Props) {
         onClick={() => void deploy('ap')}
         className="mb-0.5 w-full rounded-lg border border-accent/20 bg-accent/10 px-3 py-2 text-left transition-colors hover:bg-accent/20 disabled:opacity-50"
       >
-        <p className="text-xs font-semibold text-accent">Wireless</p>
-        <p className="text-[10px] text-fg/50">AP / CPE radio</p>
+        <p className="text-xs font-semibold text-accent">{tx('Wireless')}</p>
+        <p className="text-[10px] text-fg/50">{tx('AP / CPE radio')}</p>
       </button>
 
       {/* Cabled category */}
@@ -129,14 +131,14 @@ export function MapDeployMenu({ px, lat, lon, onClose, siteId }: Props) {
         onClick={() => void deploy('switch')}
         className="mb-2 w-full rounded-lg border border-info/20 bg-info/10 px-3 py-2 text-left transition-colors hover:bg-info/20 disabled:opacity-50"
       >
-        <p className="text-xs font-semibold text-info">Cabled</p>
-        <p className="text-[10px] text-fg/50">OLT / switch / router fiber</p>
+        <p className="text-xs font-semibold text-info">{tx('Cabled')}</p>
+        <p className="text-[10px] text-fg/50">{tx('OLT / switch / router fiber')}</p>
       </button>
 
       {/* Separator + presets */}
       <div className="border-t border-fg/10 pt-1.5">
         <p className="mb-1 px-1 text-[9px] font-semibold uppercase tracking-wider text-fg/35">
-          Preset
+          {tx('Preset')}
         </p>
         <div className="grid grid-cols-3 gap-1">
           {[...WIRELESS_PRESETS, ...CABLED_PRESETS].map(({ kind, label, icon: Icon }) => (
@@ -160,7 +162,7 @@ export function MapDeployMenu({ px, lat, lon, onClose, siteId }: Props) {
           onClick={onClose}
           className="text-[10px] text-fg/45 hover:text-fg/80"
         >
-          Cancel
+          {tx('Cancel')}
         </button>
         {busy && <Loader className="h-3.5 w-3.5 animate-spin text-fg/50" />}
       </div>

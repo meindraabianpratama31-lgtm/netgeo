@@ -38,6 +38,7 @@ import { fiberApi } from '@/api/client';
 import { useUiStore } from '@/store/uiStore';
 import { WorkspaceEmptyState } from '@/components/shell/WorkspaceEmptyState';
 import { cn } from '@/lib/cn';
+import { useUiText } from '@/i18n/uiText';
 
 type ReportId = 'bom' | 'summary' | 'linkBudget' | 'rfCoverage';
 
@@ -80,6 +81,7 @@ const REPORTS: ReportType[] = [
 ];
 
 export function ReportsWorkspace() {
+  const u = useUiText();
   const projectId = useUiStore((s) => s.projectId);
   const [selected, setSelected] = useState<ReportId>('bom');
 
@@ -101,7 +103,7 @@ export function ReportsWorkspace() {
       <div className="absolute inset-0">
         <WorkspaceEmptyState
           icon={FileText}
-          title="No project open"
+          title={u('No project open')}
           hint="Open a project from the Projects portal to generate its engineering reports."
         />
       </div>
@@ -109,7 +111,9 @@ export function ReportsWorkspace() {
   }
 
   const downloadHtml = async () => {
-    const html = selected === 'summary' ? reportQ.data : bomToHtml(bomQ.data ?? []);
+    const html = selected === 'summary' ? reportQ.data : bomToHtml(bomQ.data ?? [], {
+      title: u('Bill of Materials'), item: u('Item'), category: u('Category'), qty: u('Qty'), unit: u('Unit'), notes: u('Notes'),
+    });
     if (!html) return;
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -127,10 +131,10 @@ export function ReportsWorkspace() {
     <div
       className="absolute inset-0 flex flex-col gap-3 bg-surface p-3 pl-[116px]"
       role="region"
-      aria-label="Reports Center"
+      aria-label={u('Reports Center')}
     >
       <header className="glass-strong flex min-h-14 shrink-0 items-center gap-3 overflow-x-auto rounded-xl border border-fg/15 px-3 shadow-glass">
-        <div className="flex shrink-0 items-center gap-1 rounded-full border border-fg/10 bg-surface p-1" role="tablist" aria-label="Report type">
+        <div className="flex shrink-0 items-center gap-1 rounded-full border border-fg/10 bg-surface p-1" role="tablist" aria-label={u('Report type')}>
           {REPORTS.map(({ id, title, icon: Icon, available, disabledHint }) => (
             <button
               key={id}
@@ -228,6 +232,7 @@ function PreviewGate({
 }
 
 function SummaryPreview({ loading, error, html }: { loading: boolean; error: unknown; html?: string }) {
+  const u = useUiText();
   return (
     <PreviewGate
       loading={loading}
@@ -239,7 +244,7 @@ function SummaryPreview({ loading, error, html }: { loading: boolean; error: unk
           bg-paper (not a theme token): this preview renders a document meant
           to be printed on paper, so it stays white even in dark mode. */}
       <iframe
-        title="Project report preview"
+        title={u('Project report preview')}
         sandbox=""
         srcDoc={html}
         className="mx-auto block h-[1100px] w-full max-w-[720px] rounded-sm border border-fg/10 bg-paper shadow-glass-lg"
@@ -267,6 +272,7 @@ function BomPreview({
   rows: BomRow[];
   title: string;
 }) {
+  const u = useUiText();
   return (
     <PreviewGate
       loading={loading}
@@ -285,11 +291,11 @@ function BomPreview({
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-[#a38c85]/50 font-mono text-[11px] text-[#494740]">
-              <th className="py-2 pr-4 font-medium">Item</th>
-              <th className="py-2 px-4 font-medium">Category</th>
-              <th className="py-2 px-4 text-right font-medium">Qty</th>
-              <th className="py-2 px-4 font-medium">Unit</th>
-              <th className="py-2 pl-4 font-medium">Notes</th>
+              <th className="py-2 pr-4 font-medium">{u('Item')}</th>
+              <th className="py-2 px-4 font-medium">{u('Category')}</th>
+              <th className="py-2 px-4 text-right font-medium">{u('Qty')}</th>
+              <th className="py-2 px-4 font-medium">{u('Unit')}</th>
+              <th className="py-2 pl-4 font-medium">{u('Notes')}</th>
             </tr>
           </thead>
           <tbody className="font-mono text-[12px]">
@@ -311,7 +317,7 @@ function BomPreview({
 
 /** Minimal standalone HTML for the BOM "Download HTML" action (no backend BOM
  *  report endpoint exists — the summary report has its own server HTML). */
-function bomToHtml(rows: BomRow[]): string {
+function bomToHtml(rows: BomRow[], labels: { title: string; item: string; category: string; qty: string; unit: string; notes: string }): string {
   const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c);
   const body = rows
     .map(
@@ -321,5 +327,5 @@ function bomToHtml(rows: BomRow[]): string {
         )}</td><td>${esc(r.notes)}</td></tr>`,
     )
     .join('');
-  return `<!doctype html><meta charset="utf-8"><title>NetGeo Bill of Materials</title><style>body{font:14px system-ui;margin:40px;color:#1F1E1D}table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #ccc;padding:6px 10px;text-align:left}th{font-size:12px;color:#494740}</style><h1>NetGeo — Bill of Materials</h1><table><thead><tr><th>Item</th><th>Category</th><th>Qty</th><th>Unit</th><th>Notes</th></tr></thead><tbody>${body}</tbody></table>`;
+  return `<!doctype html><meta charset="utf-8"><title>NetGeo ${esc(labels.title)}</title><style>body{font:14px system-ui;margin:40px;color:#1F1E1D}table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #ccc;padding:6px 10px;text-align:left}th{font-size:12px;color:#494740}</style><h1>NetGeo — ${esc(labels.title)}</h1><table><thead><tr><th>${esc(labels.item)}</th><th>${esc(labels.category)}</th><th>${esc(labels.qty)}</th><th>${esc(labels.unit)}</th><th>${esc(labels.notes)}</th></tr></thead><tbody>${body}</tbody></table>`;
 }

@@ -18,6 +18,7 @@ import { LinkInferencePanel } from './LinkInferencePanel';
 import { ReachabilityBar } from './ReachabilityBar';
 import { ValidationIssues } from './ValidationIssues';
 import { ImportConfigModal } from './ImportConfigModal';
+import { useFeatureText } from '@/i18n/featureText';
 import {
   deriveProposals,
   deriveStepIndex,
@@ -25,6 +26,7 @@ import {
 } from './twinLogic';
 
 export function TwinWorkspace() {
+  const t = useFeatureText();
   const nodes = useTopologyStore((s) => s.nodes);
   const links = useTopologyStore((s) => s.links);
   const importOpen = useUiStore((s) => s.activeModal === 'importConfig');
@@ -61,9 +63,9 @@ export function TwinWorkspace() {
       {nodeList.length === 0 && (
         <WorkspaceEmptyState
           icon={Network}
-          title="Import a device config to build your digital twin"
-          hint="Links and reachability are inferred from the imported interfaces."
-          action={{ label: 'Import Config', onClick: openImport }}
+          title={t('Import a device config to build your digital twin')}
+          hint={t('Links and reachability are inferred from the imported interfaces.')}
+          action={{ label: t('Import Config'), onClick: openImport }}
         />
       )}
 

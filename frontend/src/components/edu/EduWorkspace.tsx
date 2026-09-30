@@ -18,6 +18,7 @@ import { cn } from '@/lib/cn';
 import { ActivityListPanel } from './ActivityListPanel';
 import { ActivityAuthorPanel } from './ActivityAuthorPanel';
 import { ActivityStudentPanel } from './ActivityStudentPanel';
+import { useTranslation } from '@/i18n';
 
 export function EduWorkspace() {
   const mode = useEduStore((s) => s.mode);
@@ -50,6 +51,7 @@ export function EduWorkspace() {
  *  stacks above the canvas's own overlay-chips/toolbar row instead of a
  *  second absolutely-positioned layer landing in the same corner. */
 function EduModeBar() {
+  const { t } = useTranslation();
   const mode = useEduStore((s) => s.mode);
   const selectedId = useEduStore((s) => s.selectedId);
   const toBrowse = useEduStore((s) => s.toBrowse);
@@ -64,18 +66,18 @@ function EduModeBar() {
     <div className="flex items-center gap-2">
       <button
         onClick={handleBack}
-        aria-label="Back to activities"
+        aria-label={t('edu.backActivities')}
         className="glass-strong inline-flex items-center gap-1.5 rounded-lg border border-fg/15 px-2.5 py-1.5 text-xs font-medium text-fg/80 shadow-glass hover:text-fg"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Activities</span>
+        <span className="hidden sm:inline">{t('edu.activities')}</span>
       </button>
 
       {confirmLeave && (
         <ConfirmDialog
-          title="Discard unsaved activity?"
-          message="This activity draft has unsaved changes. Leaving now will discard them."
-          confirmLabel="Discard"
+          title={t('edu.discardTitle')}
+          message={t('edu.discardMessage')}
+          confirmLabel={t('edu.discard')}
           danger
           onConfirm={() => {
             setConfirmLeave(false);
@@ -88,11 +90,11 @@ function EduModeBar() {
       {selectedId && (
         <div
           role="group"
-          aria-label="Education mode"
+          aria-label={t('edu.mode')}
           className="glass-strong flex items-center rounded-lg border border-fg/15 p-0.5 shadow-glass"
         >
-          <SegButton active={mode === 'author'} onClick={() => selectForAuthor(selectedId)} icon={PenLine} label="Author" />
-          <SegButton active={mode === 'student'} onClick={() => selectForStudent(selectedId)} icon={GraduationCap} label="Student" />
+          <SegButton active={mode === 'author'} onClick={() => selectForAuthor(selectedId)} icon={PenLine} label={t('edu.author')} />
+          <SegButton active={mode === 'student'} onClick={() => selectForStudent(selectedId)} icon={GraduationCap} label={t('edu.student')} />
         </div>
       )}
     </div>

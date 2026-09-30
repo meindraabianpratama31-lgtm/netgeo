@@ -17,6 +17,7 @@ import { GPON_LABEL } from './fiberLogic';
 import { FiberCanvas } from './FiberCanvas';
 import { FiberBudgetPanel } from './FiberBudgetPanel';
 import { FiberToolbar } from './FiberToolbar';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const SEG_CHIPS: { key: SegKey; label: string }[] = [
   { key: 'feeder', label: 'Feeder' },
@@ -25,6 +26,7 @@ const SEG_CHIPS: { key: SegKey; label: string }[] = [
 ];
 
 export function FiberWorkspace() {
+  const tx = useSurfaceText();
   const projectId = useUiStore((s) => s.projectId);
   const load = useFiberStore((s) => s.load);
   const hasPaths = useFiberStore((s) => s.paths.length > 0);
@@ -45,9 +47,9 @@ export function FiberWorkspace() {
       {!loading && !hasPaths && (
         <WorkspaceEmptyState
           icon={Cable}
-          title="No fiber paths yet"
-          hint="A GPON path runs OLT → feeder → splitter → distribution → ODP. Create your first ODP to start planning the optical budget."
-          action={{ label: 'New fiber path', onClick: () => void createPath('ODP-1', 'c_plus') }}
+          title={tx('No fiber paths yet')}
+          hint={tx('A GPON path runs OLT → feeder → splitter → distribution → ODP. Create your first ODP to start planning the optical budget.')}
+          action={{ label: tx('New fiber path'), onClick: () => void createPath('ODP-1', 'c_plus') }}
         />
       )}
     </div>
@@ -55,6 +57,7 @@ export function FiberWorkspace() {
 }
 
 function FilterBar() {
+  const tx = useSurfaceText();
   const seg = useFiberStore((s) => s.seg);
   const toggleSeg = useFiberStore((s) => s.toggleSeg);
   const search = useFiberStore((s) => s.search);
@@ -67,8 +70,8 @@ function FilterBar() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search paths…"
-          aria-label="Search fiber paths"
+          placeholder={tx('Search paths…')}
+          aria-label={tx('Search fiber paths')}
           className="w-40 bg-transparent text-xs text-fg/85 placeholder:text-fg/35 focus:outline-none"
         />
       </div>
@@ -83,7 +86,7 @@ function FilterBar() {
               seg[c.key] ? 'bg-accent/20 text-accent' : 'text-fg/45 hover:bg-fg/8 hover:text-fg/70',
             )}
           >
-            {c.label}
+            {tx(c.label)}
           </button>
         ))}
       </div>
@@ -92,6 +95,7 @@ function FilterBar() {
 }
 
 function StatusStrip() {
+  const tx = useSurfaceText();
   const projectId = useFiberStore((s) => s.projectId);
   const paths = useFiberStore((s) => s.paths);
   const budgets = useFiberStore((s) => s.budgets);
@@ -108,14 +112,14 @@ function StatusStrip() {
     <div className={cn('pointer-events-none absolute bottom-0 left-0 flex items-center gap-3 px-4 py-1.5 font-mono text-[11px] text-fg/55', zc.workspace)}>
       {loading ? (
         <span className="flex items-center gap-1.5">
-          <Loader2 className="h-3 w-3 animate-spin" /> Loading fiber paths…
+          <Loader2 className="h-3 w-3 animate-spin" /> {tx('Loading fiber paths…')}
         </span>
       ) : error ? (
         <span className="flex items-center gap-1.5 text-danger">
           <AlertTriangle className="h-3 w-3" /> {error}
         </span>
       ) : !projectId ? (
-        <span>No project open</span>
+        <span>{tx('No project open')}</span>
       ) : (
         <>
           <span>
@@ -123,11 +127,11 @@ function StatusStrip() {
           </span>
           <span className="text-fg/25">|</span>
           <span>
-            Budget <span className="text-fg/80">{budgetDb != null ? `${budgetDb.toFixed(0)} dB` : '—'}</span>
+            {tx('Budget')} <span className="text-fg/80">{budgetDb != null ? `${budgetDb.toFixed(0)} dB` : '—'}</span>
           </span>
           <span className="text-fg/25">|</span>
           <span>
-            <span className="text-success">{pass} PASS</span> / <span className="text-danger">{fail} FAIL</span>
+            <span className="text-success">{pass} {tx('PASS')}</span> / <span className="text-danger">{fail} {tx('FAIL')}</span>
           </span>
         </>
       )}

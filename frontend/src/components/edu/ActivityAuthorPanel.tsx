@@ -19,12 +19,14 @@ import {
 import { useEduStore } from '@/store/eduStore';
 import { zc } from '@/theme/z';
 import { CheckListEditor } from './CheckListEditor';
+import { useFeatureText } from '@/i18n/featureText';
 
 function isCaptured(env: Record<string, unknown> | undefined): boolean {
   return !!env && Object.keys(env).length > 0;
 }
 
 export function ActivityAuthorPanel() {
+  const t = useFeatureText();
   const draft = useEduStore((s) => s.draft);
   const saving = useEduStore((s) => s.saving);
   const error = useEduStore((s) => s.error);
@@ -37,17 +39,17 @@ export function ActivityAuthorPanel() {
 
   return (
     <aside
-      aria-label="Author activity"
+      aria-label={t('Author activity')}
       // top-36 clears the canvas's own top-left column (mode bar + overlay
       // chips + toolbar row, now stacked together — see TopologyCanvas
       // topLeftExtra), not just the mode bar alone.
       className={`glass-strong pointer-events-auto absolute left-3 top-36 bottom-3 ${zc.workspace} flex w-[360px] max-w-[calc(100vw-5rem)] flex-col rounded-2xl border border-fg/12 shadow-glass-lg`}
     >
       <header className="flex items-center gap-2 border-b border-fg/10 px-4 py-3">
-        <h2 className="text-sm font-semibold text-fg/90">Author activity</h2>
+        <h2 className="text-sm font-semibold text-fg/90">{t('Author activity')}</h2>
         <button
           onClick={toBrowse}
-          aria-label="Close author"
+          aria-label={t('Close author')}
           className="ml-auto grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
         >
           <X className="h-4 w-4" />
@@ -55,7 +57,7 @@ export function ActivityAuthorPanel() {
       </header>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto ng-scroll px-4 py-4">
-        <Field label="Name" required>
+        <Field label={t('Name')} required>
           <input
             type="text"
             value={draft.name}
@@ -65,17 +67,17 @@ export function ActivityAuthorPanel() {
           />
         </Field>
 
-        <Field label="Instructions">
+        <Field label={t('Instructions')}>
           <textarea
             value={draft.instructions ?? ''}
             onChange={(e) => updateDraft({ instructions: e.target.value })}
             rows={5}
-            placeholder="What should the student build? Plain text — line breaks are preserved."
+            placeholder={t('What should the student build? Plain text — line breaks are preserved.')}
             className="w-full resize-y rounded-md border border-fg/15 bg-recess/20 px-2.5 py-1.5 text-xs leading-relaxed text-fg/85 placeholder:text-fg/30 focus:border-accent/50 focus:outline-none"
           />
         </Field>
 
-        <Field label="Time limit (minutes)" hint="Leave blank for an untimed activity.">
+        <Field label={t('Time limit (minutes)')} hint={t('Leave blank for an untimed activity.')}>
           <input
             type="number"
             min={1}
@@ -91,13 +93,13 @@ export function ActivityAuthorPanel() {
 
         <div className="grid grid-cols-2 gap-2">
           <CaptureButton
-            label="Initial network"
+            label={t('Initial network')}
             captured={isCaptured(draft.initial)}
             onClick={() => void captureNetwork('initial')}
             disabled={saving}
           />
           <CaptureButton
-            label="Answer network"
+            label={t('Answer network')}
             captured={isCaptured(draft.answer)}
             onClick={() => void captureNetwork('answer')}
             disabled={saving}
@@ -123,7 +125,7 @@ export function ActivityAuthorPanel() {
           className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-fg transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Save activity
+          {t('Save activity')}
         </button>
       </footer>
     </aside>
@@ -164,6 +166,7 @@ function CaptureButton({
   onClick: () => void;
   disabled?: boolean;
 }) {
+  const t = useFeatureText();
   return (
     <button
       onClick={onClick}
@@ -184,7 +187,7 @@ function CaptureButton({
         {label}
       </span>
       <span className="text-[10px] text-fg/45">
-        {captured ? 'Captured — click to re-capture' : 'Capture current canvas'}
+        {captured ? t('Captured — click to re-capture') : t('Capture current canvas')}
       </span>
     </button>
   );

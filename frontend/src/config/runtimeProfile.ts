@@ -1,3 +1,4 @@
+import { internalText } from '@/i18n/internalText';
 export type DistributionMode =
   | 'native-offline'
   | 'native-google'
@@ -50,25 +51,25 @@ export function modeForEngine(mode: DistributionMode, remote: boolean): Distribu
 
 export async function checkRemoteEngine(origin: string): Promise<string> {
   const normalized = normalizeRemoteOrigin(origin);
-  if (!normalized) throw new Error('Enter a valid http:// or https:// server origin.');
+  if (!normalized) throw new Error(internalText("Enter a valid http:// or https:// server origin."));
   let response: Response;
   try {
     response = await fetch(`${normalized}/api/health`, { signal: AbortSignal.timeout(5000) });
   } catch (cause) {
     if (cause instanceof Error && cause.name === 'TimeoutError') {
-      throw new Error('Server did not respond within 5 seconds. Check its address and network connection.');
+      throw new Error(internalText("Server did not respond within 5 seconds. Check its address and network connection."));
     }
-    throw new Error('Could not reach the server. Check its address, HTTPS compatibility, and whether it allows this app origin through CORS.');
+    throw new Error(internalText("Could not reach the server. Check its address, HTTPS compatibility, and whether it allows this app origin through CORS."));
   }
   if (response.status === 401 || response.status === 403) {
-    throw new Error('Server denied the health check. Check its authentication or proxy configuration.');
+    throw new Error(internalText("Server denied the health check. Check its authentication or proxy configuration."));
   }
-  if (!response.ok) throw new Error(`Server health check failed (${response.status}).`);
+  if (!response.ok) throw new Error(internalText("Server health check failed ({status}).", { status: response.status }));
   const health = await response.json() as { status?: string; app?: string; version?: string };
   if (health.status !== 'ok' || health.app !== 'NetGeo') {
-    throw new Error('This server did not identify itself as a healthy NetGeo backend.');
+    throw new Error(internalText("This server did not identify itself as a healthy NetGeo backend."));
   }
-  return health.version ?? 'unknown version';
+  return health.version ?? internalText("unknown version");
 }
 
 export function readRuntimeProfile(): RuntimeProfile {
@@ -86,8 +87,8 @@ export function readRuntimeProfile(): RuntimeProfile {
 export function saveRuntimeProfile(profile: RuntimeProfile): void {
   const remoteOrigin = normalizeRemoteOrigin(profile.remoteOrigin) ?? '';
   const localOrigin = profile.localOrigin?.trim() ? normalizeLocalOrigin(profile.localOrigin) : '';
-  if (readsRemoteBackend(profile.mode) && !remoteOrigin) throw new Error('A valid remote server origin is required.');
-  if (localOrigin === null) throw new Error('Local engine must use a loopback HTTP(S) address and a port from 1 to 65535.');
+  if (readsRemoteBackend(profile.mode) && !remoteOrigin) throw new Error(internalText("A valid remote server origin is required."));
+  if (localOrigin === null) throw new Error(internalText("Local engine must use a loopback HTTP(S) address and a port from 1 to 65535."));
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify({ ...profile, remoteOrigin, localOrigin }),

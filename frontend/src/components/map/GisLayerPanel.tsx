@@ -15,8 +15,10 @@ import { Layers, ChevronRight, X, Lock, WifiOff } from 'lucide-react';
 import { useMapStore } from '@/store/mapStore';
 import { GIS_GROUPS, GIS_LAYERS, type GisLayerGroup } from '@/config/gisLayers';
 import { cn } from '@/lib/cn';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 export function GisLayerPanel() {
+  const tx = useSurfaceText();
   const open = useMapStore((s) => s.gisPanelOpen);
   const togglePanel = useMapStore((s) => s.toggleGisPanel);
   const gisLayers = useMapStore((s) => s.gisLayers);
@@ -67,7 +69,7 @@ export function GisLayerPanel() {
   return (
     <aside
       role="region"
-      aria-label="GIS layers"
+      aria-label={tx('GIS layers')}
       className="pointer-events-auto w-72 animate-fade-in"
     >
       <div
@@ -79,11 +81,11 @@ export function GisLayerPanel() {
         <div className="flex items-center gap-2 border-b border-fg/10 px-3 py-2">
           <Layers className="h-4 w-4 text-accent" />
           <h2 className="text-xs font-semibold uppercase tracking-wider text-fg/70">
-            GIS Layers
+            {tx('GIS Layers')}
           </h2>
           <button
             onClick={() => togglePanel(false)}
-            aria-label="Close layer panel"
+            aria-label={tx('Close layer panel')}
             className="ml-auto grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
           >
             <X className="h-3.5 w-3.5" />
@@ -109,7 +111,7 @@ export function GisLayerPanel() {
                       !isCollapsed && 'rotate-90',
                     )}
                   />
-                  <span className="uppercase tracking-wide">{label}</span>
+                  <span className="uppercase tracking-wide">{tx(label)}</span>
                   {visibleCount > 0 && (
                     <span className="ml-auto rounded-full bg-accent/25 px-1.5 text-[9px] font-medium text-accent">
                       {visibleCount}
@@ -132,7 +134,7 @@ export function GisLayerPanel() {
                                 ? 'cursor-not-allowed text-fg/30'
                                 : 'cursor-pointer text-fg/75 hover:bg-fg/5',
                             )}
-                            title={layer.description ?? layer.label}
+                            title={tx(layer.description ?? layer.label)}
                           >
                             <input
                               type="checkbox"
@@ -140,23 +142,23 @@ export function GisLayerPanel() {
                               disabled={planned}
                               onChange={() => toggleLayer(layer.id)}
                               className="h-3 w-3 accent-accent"
-                              aria-label={layer.label}
+                              aria-label={tx(layer.label)}
                             />
-                            <span className="flex-1 truncate">{layer.label}</span>
+                            <span className="flex-1 truncate">{tx(layer.label)}</span>
                             {layer.requiresInternet && (
                               <span
                                 className="flex items-center text-fg/30"
-                                title="Requires internet — fetches from a public API, fails silently offline"
+                                title={tx('Requires internet — fetches from a public API, fails silently offline')}
                               >
-                                <WifiOff className="h-2.5 w-2.5" aria-label="Requires internet" />
+                                <WifiOff className="h-2.5 w-2.5" aria-label={tx('Requires internet')} />
                               </span>
                             )}
                             {planned && (
                               <span
                                 className="flex items-center gap-0.5 text-[8px] uppercase text-fg/25"
-                                title="Spec'd — provider not yet wired"
+                                title={tx("Spec'd — provider not yet wired")}
                               >
-                                <Lock className="h-2.5 w-2.5" /> soon
+                                <Lock className="h-2.5 w-2.5" /> {tx('soon')}
                               </span>
                             )}
                           </label>
@@ -173,7 +175,7 @@ export function GisLayerPanel() {
                                 onChange={(e) =>
                                   setOpacity(layer.id, Number(e.target.value) / 100)
                                 }
-                                aria-label={`${layer.label} opacity`}
+                                aria-label={`${tx(layer.label)} ${tx('opacity')}`}
                                 className="h-1 flex-1 accent-accent"
                               />
                               <span className="w-7 text-right font-mono text-[9px] text-fg/40">
@@ -192,7 +194,7 @@ export function GisLayerPanel() {
         </div>
 
         <p className="border-t border-fg/10 px-3 py-1.5 text-[9px] text-fg/30">
-          Layers stack above the basemap. Disabled rows await a data provider.
+          {tx('Layers stack above the basemap. Disabled rows await a data provider.')}
         </p>
       </div>
     </aside>

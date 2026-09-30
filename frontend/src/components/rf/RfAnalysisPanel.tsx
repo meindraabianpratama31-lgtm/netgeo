@@ -35,6 +35,7 @@ import type {
   RadioCatalogEntry,
   RfStudyKind,
 } from '@/api/client';
+import { useSurfaceText } from '@/i18n/surfaceText';
 
 const TABS: { id: RfTab; label: string }[] = [
   { id: 'summary', label: 'Summary' },
@@ -57,6 +58,7 @@ function chartPoints(res: PtpResult): ChartPoint[] {
 /* Small building blocks                                                       */
 /* -------------------------------------------------------------------------- */
 function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  const tx = useSurfaceText();
   return (
     <div
       className={
@@ -64,16 +66,17 @@ function StatCard({ label, value, highlight }: { label: string; value: string; h
         (highlight ? 'border-accent/40 bg-accent/10' : 'border-fg/10 bg-recess/40')
       }
     >
-      <p className="text-[10px] uppercase tracking-wide text-fg/40">{label}</p>
+      <p className="text-[10px] uppercase tracking-wide text-fg/40">{tx(label)}</p>
       <p className={'mt-0.5 font-mono text-sm ' + (highlight ? 'text-accent' : 'text-fg/85')}>{value}</p>
     </div>
   );
 }
 
 function BudgetRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  const tx = useSurfaceText();
   return (
     <div className={'flex items-center justify-between py-1.5 ' + (strong ? 'border-t border-fg/15' : '')}>
-      <span className={'text-xs ' + (strong ? 'font-medium text-fg/80' : 'text-fg/55')}>{label}</span>
+      <span className={'text-xs ' + (strong ? 'font-medium text-fg/80' : 'text-fg/55')}>{tx(label)}</span>
       <span className={'font-mono text-xs ' + (strong ? 'text-fg/90' : 'text-fg/75')}>{value}</span>
     </div>
   );
@@ -96,9 +99,11 @@ function FieldInput({
   step?: number;
   min?: number;
 }) {
+  const tx = useSurfaceText();
+  const translatedLabel = tx(label);
   return (
     <label className="block rounded-lg border border-fg/10 bg-recess/40 px-2.5 py-2">
-      <span className="text-[10px] uppercase tracking-wide text-fg/40">{label}</span>
+      <span className="text-[10px] uppercase tracking-wide text-fg/40">{translatedLabel}</span>
       <div className="mt-0.5 flex items-center gap-1">
         <input
           type="number"
@@ -107,7 +112,7 @@ function FieldInput({
           min={min}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          aria-label={label}
+          aria-label={translatedLabel}
           className="w-full min-w-0 bg-transparent font-mono text-sm text-fg/85 focus:outline-none"
         />
         {suffix && <span className="shrink-0 text-[10px] text-fg/40">{suffix}</span>}
@@ -130,16 +135,17 @@ function CatalogPicker({
   onSelect: (r: RadioCatalogEntry) => void;
   label?: string;
 }) {
+  const tx = useSurfaceText();
   if (radios.length === 0) return null;
   return (
     <Select
-      aria-label={label}
+      aria-label={tx(label)}
       value=""
       onChange={(v) => {
         const r = radios.find((x) => x.id === v);
         if (r) onSelect(r);
       }}
-      placeholder={`${label}…`}
+      placeholder={`${tx(label)}…`}
       options={radios.map((r) => ({ value: r.id, label: r.eol ? `${r.name} (EOL)` : r.name }))}
       className="w-full"
     />
@@ -147,6 +153,7 @@ function CatalogPicker({
 }
 
 function StatusChip({ res }: { res: PtpResult }) {
+  const tx = useSurfaceText();
   const status = marginStatus(res.fade_margin_db);
   const color = STATUS_COLOR[status];
   return (
@@ -156,10 +163,10 @@ function StatusChip({ res }: { res: PtpResult }) {
         style={{ color, backgroundColor: `${color}22` }}
       >
         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
-        {STATUS_LABEL[status]}
+        {tx(STATUS_LABEL[status])}
       </span>
       <span className="text-xs text-fg/55">
-        Reliability: <span className="font-mono text-fg/85">{reliabilityPct(res.fade_margin_db).toFixed(3)}%</span>
+        {tx('Reliability')}: <span className="font-mono text-fg/85">{reliabilityPct(res.fade_margin_db).toFixed(3)}%</span>
       </span>
     </div>
   );
@@ -169,6 +176,7 @@ function StatusChip({ res }: { res: PtpResult }) {
 /* Tab bodies                                                                  */
 /* -------------------------------------------------------------------------- */
 function SummaryTab({ res }: { res: PtpResult }) {
+  const tx = useSurfaceText();
   const { freqGhz, bwMhz, aId, bId } = useRfStore();
   const nodes = useTopologyStore((s) => s.nodes);
   const a = aId ? nodes.get(aId) : undefined;
@@ -179,7 +187,7 @@ function SummaryTab({ res }: { res: PtpResult }) {
       <StatusChip res={res} />
 
       <div>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">RF Parameters</p>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('RF Parameters')}</p>
         <div className="grid grid-cols-2 gap-2">
           <StatCard label="Distance" value={fmtKm(res.distance_m)} />
           <StatCard label="Frequency" value={`${freqGhz} GHz`} />
@@ -194,7 +202,7 @@ function SummaryTab({ res }: { res: PtpResult }) {
 
       {res.profile && (
         <div>
-          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-fg/50">Elevation Profile</p>
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('Elevation Profile')}</p>
           <TerrainSourceNotice source={res.profile.terrain_source} />
           <div className="mt-1.5">
             <ProfileChart
@@ -231,23 +239,25 @@ function BudgetTab({ res }: { res: PtpResult }) {
 }
 
 function VerdictBadge({ ok, okLabel, badLabel }: { ok: boolean; okLabel: string; badLabel: string }) {
+  const tx = useSurfaceText();
   const color = ok ? STATUS_COLOR.excellent : STATUS_COLOR.poor;
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
       style={{ color, backgroundColor: `${color}22` }}
     >
-      {ok ? okLabel : badLabel}
+      {tx(ok ? okLabel : badLabel)}
     </span>
   );
 }
 
 function TerrainTab({ res }: { res: PtpResult }) {
+  const tx = useSurfaceText();
   const { freqGhz, aId, bId } = useRfStore();
   const nodes = useTopologyStore((s) => s.nodes);
   const a = aId ? nodes.get(aId) : undefined;
   const b = bId ? nodes.get(bId) : undefined;
-  if (!res.profile) return <p className="text-xs text-fg/50">No terrain profile in the last result.</p>;
+  if (!res.profile) return <p className="text-xs text-fg/50">{tx('No terrain profile in the last result.')}</p>;
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -269,7 +279,7 @@ function TerrainTab({ res }: { res: PtpResult }) {
         <StatCard label="Distance" value={fmtKm(res.distance_m)} />
         <StatCard
           label="Worst Obstruction"
-          value={res.worst_obstruction_m > 0 ? `${res.worst_obstruction_m.toFixed(1)} m` : 'none'}
+          value={res.worst_obstruction_m > 0 ? `${res.worst_obstruction_m.toFixed(1)} m` : tx('none')}
         />
       </div>
     </div>
@@ -277,6 +287,7 @@ function TerrainTab({ res }: { res: PtpResult }) {
 }
 
 function FresnelTab({ res }: { res: PtpResult }) {
+  const tx = useSurfaceText();
   const { freqGhz, aId, bId } = useRfStore();
   const nodes = useTopologyStore((s) => s.nodes);
   const a = aId ? nodes.get(aId) : undefined;
@@ -286,7 +297,7 @@ function FresnelTab({ res }: { res: PtpResult }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between rounded-lg border border-fg/10 bg-recess/40 px-3 py-2.5">
         <div>
-          <p className="text-[10px] uppercase tracking-wide text-fg/40">Min Fresnel Clearance</p>
+          <p className="text-[10px] uppercase tracking-wide text-fg/40">{tx('Min Fresnel Clearance')}</p>
           <p className="mt-0.5 font-mono text-xl text-fg/90">{pct}%</p>
         </div>
         <VerdictBadge ok={res.fresnel_clear} okLabel="Clear" badLabel="Obstructed" />
@@ -312,13 +323,14 @@ function FresnelTab({ res }: { res: PtpResult }) {
 }
 
 function FresnelLegend() {
+  const tx = useSurfaceText();
   return (
     <div className="flex items-center gap-4 text-[10px] text-fg/50">
       <span className="flex items-center gap-1.5">
-        <span className="inline-block h-0.5 w-4 rounded bg-fg/60" /> LOS Beam
+        <span className="inline-block h-0.5 w-4 rounded bg-fg/60" /> {tx('LOS Beam')}
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="inline-block h-0.5 w-4 rounded border-t border-dashed border-fg/50" /> 60% Fresnel Clearance
+        <span className="inline-block h-0.5 w-4 rounded border-t border-dashed border-fg/50" /> {tx('60% Fresnel Clearance')}
       </span>
     </div>
   );
@@ -336,6 +348,7 @@ function StudySaveLoad({
   request: Record<string, unknown> | null;
   result: Record<string, unknown> | null;
 }) {
+  const tx = useSurfaceText();
   const allStudies = useRfStore((s) => s.studies);
   const studyBusy = useRfStore((s) => s.studyBusy);
   const saveStudy = useRfStore((s) => s.saveStudy);
@@ -345,12 +358,12 @@ function StudySaveLoad({
 
   return (
     <div className="rounded-lg border border-fg/10 bg-recess/30 p-2.5">
-      <p className="mb-1.5 text-[10px] uppercase tracking-wide text-fg/40">Saved Studies</p>
+      <p className="mb-1.5 text-[10px] uppercase tracking-wide text-fg/40">{tx('Saved Studies')}</p>
       <Select
-        aria-label="Open saved study"
+        aria-label={tx('Open saved study')}
         value=""
         onChange={(v) => v && void openStudy(v)}
-        placeholder={studies.length ? 'Open a saved study…' : 'No saved studies yet'}
+        placeholder={studies.length ? tx('Open a saved study…') : tx('No saved studies yet')}
         options={studies.map((s) => ({ value: s.id, label: s.name || s.id.slice(0, 8) }))}
         className="w-full"
       />
@@ -358,8 +371,8 @@ function StudySaveLoad({
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Study name (optional)"
-          aria-label="Study name"
+          placeholder={tx('Study name (optional)')}
+          aria-label={tx('Study name')}
           className="min-w-0 flex-1 rounded-md border border-fg/15 bg-recess/50 px-2 py-1 text-xs text-fg/85 placeholder:text-fg/35 focus:border-accent/50 focus:outline-none"
         />
         <button
@@ -371,7 +384,7 @@ function StudySaveLoad({
           disabled={!result || studyBusy}
           className="shrink-0 rounded-md bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-fg hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Save
+          {tx('Save')}
         </button>
       </div>
     </div>
@@ -382,12 +395,13 @@ function StudySaveLoad({
 /* PtMP sector planner (NG-RF-04)                                              */
 /* -------------------------------------------------------------------------- */
 function CpeRow({ cpe, onRemove }: { cpe: PtmpCpeInput; onRemove: () => void }) {
+  const tx = useSurfaceText();
   return (
     <div className="flex items-center justify-between gap-2 rounded-md border border-fg/10 bg-recess/30 px-2 py-1 text-xs">
       <span className="truncate text-fg/75">{cpe.name}</span>
       <button
         onClick={onRemove}
-        aria-label={`Remove ${cpe.name}`}
+        aria-label={tx('Remove {name}', { name: cpe.name })}
         className="shrink-0 text-fg/40 hover:text-warning"
       >
         <X className="h-3 w-3" />
@@ -397,10 +411,11 @@ function CpeRow({ cpe, onRemove }: { cpe: PtmpCpeInput; onRemove: () => void }) 
 }
 
 function PtmpResultView({ res }: { res: PtmpResult }) {
+  const tx = useSurfaceText();
   return (
     <div className="space-y-3">
       <div>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">Sector Roll-up</p>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('Sector Roll-up')}</p>
         <div className="grid grid-cols-3 gap-2">
           <StatCard label="Served" value={`${res.served_count}/${res.cpes.length}`} highlight />
           <StatCard label="Sum PHY" value={`${res.sum_phy_mbps.toFixed(0)} Mbps`} />
@@ -408,7 +423,7 @@ function PtmpResultView({ res }: { res: PtmpResult }) {
         </div>
       </div>
       <div>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">Per-CPE</p>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('Per-CPE')}</p>
         <div className="space-y-1.5">
           {res.cpes.map((c) => (
             <div key={c.cpe_id} className="rounded-lg border border-fg/10 bg-recess/40 px-2.5 py-1.5">
@@ -430,6 +445,7 @@ function PtmpResultView({ res }: { res: PtmpResult }) {
 }
 
 function PtmpBody() {
+  const tx = useSurfaceText();
   const {
     ptmpApId, ptmpAzimuthDeg, ptmpBeamwidthDeg, ptmpDowntiltDeg, ptmpFreqMhz, ptmpBandwidthMhz,
     ptmpTxPowerDbm, ptmpTxGainDbi, ptmpRxSensitivityDbm, ptmpModelId, ptmpCpes, ptmpResult,
@@ -456,8 +472,8 @@ function PtmpBody() {
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">Sector</p>
-        <EndpointSelect value={ptmpApId} onChange={setPtmpApId} options={apOptions} label="AP / Tower site" />
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('Sector')}</p>
+        <EndpointSelect value={ptmpApId} onChange={setPtmpApId} options={apOptions} label={tx('AP / Tower site')} />
         <div className="mt-2">
           <CatalogPicker
             radios={apRadios}
@@ -480,11 +496,11 @@ function PtmpBody() {
           <FieldInput label="RX Sens." value={ptmpRxSensitivityDbm} onChange={setPtmpRxSens} suffix="dBm" step={1} />
         </div>
         <label className="mt-2 block rounded-lg border border-fg/10 bg-recess/40 px-2.5 py-2">
-          <span className="text-[10px] uppercase tracking-wide text-fg/40">Model</span>
+          <span className="text-[10px] uppercase tracking-wide text-fg/40">{tx('Model')}</span>
           <Select
             value={ptmpModelId}
             onChange={setPtmpModel}
-            aria-label="Propagation model"
+            aria-label={tx('Propagation model')}
             options={
               models.length === 0
                 ? [{ value: ptmpModelId, label: ptmpModelId }]
@@ -503,14 +519,14 @@ function PtmpBody() {
           {ptmpCpes.map((c) => (
             <CpeRow key={c.id} cpe={c} onRemove={() => removeCpe(c.id)} />
           ))}
-          {ptmpCpes.length === 0 && <p className="text-xs text-fg/40">No CPEs added yet.</p>}
+          {ptmpCpes.length === 0 && <p className="text-xs text-fg/40">{tx('No CPEs added yet.')}</p>}
         </div>
         <div className="mt-2">
           <EndpointSelect
             value={null}
             onChange={(id) => id && addCpeFromDevice(id)}
             options={cpeOptions}
-            label="Add placed CPE"
+            label={tx('Add placed CPE')}
           />
         </div>
         <div className="mt-1.5 flex items-center gap-1.5">
@@ -518,7 +534,7 @@ function PtmpBody() {
             value={manualLat}
             onChange={(e) => setManualLat(e.target.value)}
             placeholder="lat"
-            aria-label="Manual CPE latitude"
+            aria-label={tx('Manual CPE latitude')}
             inputMode="decimal"
             className="w-0 flex-1 rounded-md border border-fg/15 bg-recess/50 px-2 py-1 text-xs text-fg/85 placeholder:text-fg/35 focus:border-accent/50 focus:outline-none"
           />
@@ -526,7 +542,7 @@ function PtmpBody() {
             value={manualLon}
             onChange={(e) => setManualLon(e.target.value)}
             placeholder="lon"
-            aria-label="Manual CPE longitude"
+            aria-label={tx('Manual CPE longitude')}
             inputMode="decimal"
             className="w-0 flex-1 rounded-md border border-fg/15 bg-recess/50 px-2 py-1 text-xs text-fg/85 placeholder:text-fg/35 focus:border-accent/50 focus:outline-none"
           />
@@ -541,7 +557,7 @@ function PtmpBody() {
               }
             }}
             disabled={!manualLat || !manualLon}
-            aria-label="Add manual CPE"
+            aria-label={tx('Add manual CPE')}
             className="shrink-0 grid h-7 w-7 place-items-center rounded-md border border-fg/15 text-fg/60 hover:border-accent/50 hover:text-accent disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -554,7 +570,7 @@ function PtmpBody() {
         disabled={!canCalc}
         className="w-full rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {ptmpLoading ? 'Computing…' : 'Calculate sector'}
+        {ptmpLoading ? tx('Computing…') : tx('Calculate sector')}
       </button>
 
       {ptmpError && (
@@ -589,18 +605,19 @@ function CandidateRow({
   onChange: (patch: Partial<RadioCandidate>) => void;
   onRemove: () => void;
 }) {
+  const tx = useSurfaceText();
   return (
     <div className="rounded-lg border border-fg/10 bg-recess/40 px-2.5 py-2">
       <div className="flex items-center gap-2">
         <input
           value={candidate.name}
           onChange={(e) => onChange({ name: e.target.value })}
-          aria-label="Candidate name"
+          aria-label={tx('Candidate name')}
           className="min-w-0 flex-1 bg-transparent text-xs font-medium text-fg/85 focus:outline-none"
         />
         <button
           onClick={onRemove}
-          aria-label={`Remove ${candidate.name}`}
+          aria-label={tx('Remove {name}', { name: candidate.name })}
           className="shrink-0 text-fg/40 hover:text-warning"
         >
           <X className="h-3.5 w-3.5" />
@@ -631,15 +648,16 @@ function CandidateRow({
 }
 
 function MiniField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  const tx = useSurfaceText();
   return (
     <label className="flex items-center justify-between gap-1 rounded border border-fg/10 bg-recess/50 px-1.5 py-0.5">
-      <span className="text-[9px] uppercase text-fg/40">{label}</span>
+      <span className="text-[9px] uppercase text-fg/40">{tx(label)}</span>
       <input
         type="number"
         inputMode="decimal"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={label}
+        aria-label={tx(label)}
         className="w-12 min-w-0 bg-transparent text-right font-mono text-[11px] text-fg/85 focus:outline-none"
       />
     </label>
@@ -647,10 +665,11 @@ function MiniField({ label, value, onChange }: { label: string; value: number; o
 }
 
 function ProductSelectResultView({ res }: { res: ProductSelectResult }) {
+  const tx = useSurfaceText();
   return (
     <div>
       <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">
-        Ranked (best margin/cost first)
+        {tx('Ranked (best margin/cost first)')}
       </p>
       <div className="space-y-1.5">
         {res.ranked.map((r) => (
@@ -661,9 +680,9 @@ function ProductSelectResultView({ res }: { res: ProductSelectResult }) {
             </div>
             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[11px] text-fg/55">
               <span>{r.rssi_dbm.toFixed(1)} dBm</span>
-              <span>margin {r.margin_db.toFixed(1)} dB</span>
+              <span>{tx('margin')} {r.margin_db.toFixed(1)} dB</span>
               <span>{r.predicted_throughput_mbps.toFixed(0)} Mbps</span>
-              <span>cost {r.cost}</span>
+              <span>{tx('cost')} {r.cost}</span>
               <span>{r.margin_per_cost.toFixed(3)}/cost</span>
             </div>
           </div>
@@ -674,6 +693,7 @@ function ProductSelectResultView({ res }: { res: ProductSelectResult }) {
 }
 
 function ProductSelectBody() {
+  const tx = useSurfaceText();
   const {
     psDistanceM, psFreqMhz, psTargetMbps, psTxHeightM, psRxHeightM, psMiscLossDb, psModelId,
     psCandidates, psResult, psLastRequest, psLoading, psError, models, result: ptpResult, radios,
@@ -689,7 +709,7 @@ function ProductSelectBody() {
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">Link Requirement</p>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg/50">{tx('Link Requirement')}</p>
         <div className="grid grid-cols-2 gap-2">
           <FieldInput label="Distance" value={psDistanceM} onChange={setPsDistance} suffix="m" step={10} min={1} />
           <FieldInput label="Frequency" value={psFreqMhz} onChange={setPsFreq} suffix="MHz" step={100} min={1} />
@@ -699,11 +719,11 @@ function ProductSelectBody() {
           <FieldInput label="RX Height" value={psRxHeightM} onChange={setPsRxHeight} suffix="m" step={1} min={0.1} />
         </div>
         <label className="mt-2 block rounded-lg border border-fg/10 bg-recess/40 px-2.5 py-2">
-          <span className="text-[10px] uppercase tracking-wide text-fg/40">Model</span>
+          <span className="text-[10px] uppercase tracking-wide text-fg/40">{tx('Model')}</span>
           <Select
             value={psModelId}
             onChange={setPsModel}
-            aria-label="Propagation model"
+            aria-label={tx('Propagation model')}
             options={
               models.length === 0
                 ? [{ value: psModelId, label: psModelId }]
@@ -717,7 +737,7 @@ function ProductSelectBody() {
             onClick={fillFromPtp}
             className="mt-2 text-[11px] font-medium text-accent hover:underline"
           >
-            Use last PtP link's distance + frequency
+            {tx("Use last PtP link's distance + frequency")}
           </button>
         )}
       </div>
@@ -741,7 +761,7 @@ function ProductSelectBody() {
           onClick={addCandidate}
           className="mt-1.5 inline-flex items-center gap-1 rounded-md border border-fg/15 bg-recess/50 px-2.5 py-1 text-xs font-medium text-fg/80 hover:border-accent/50 hover:text-fg"
         >
-          <Plus className="h-3 w-3" /> Add candidate
+          <Plus className="h-3 w-3" /> {tx('Add candidate')}
         </button>
       </div>
 
@@ -775,6 +795,7 @@ function ProductSelectBody() {
 /* Panel shell                                                                 */
 /* -------------------------------------------------------------------------- */
 export function RfAnalysisPanel() {
+  const tx = useSurfaceText();
   const mode = useRfStore((s) => s.mode);
   const setMode = useRfStore((s) => s.setMode);
   const tab = useRfStore((s) => s.tab);
@@ -790,17 +811,17 @@ export function RfAnalysisPanel() {
   return (
     <aside
       role="region"
-      aria-label="RF Planning"
+      aria-label={tx('RF Planning')}
       className={`glass-strong pointer-events-auto absolute right-0 top-0 ${zc.workspace} flex h-full w-[380px] max-w-[85vw] flex-col border-l border-fg/12 shadow-glass-lg`}
     >
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-fg/10 px-4 py-3">
         <RadioTower className="h-4 w-4 text-accent" />
-        <h2 className="text-sm font-semibold text-fg/85">RF Planning</h2>
+        <h2 className="text-sm font-semibold text-fg/85">{tx('RF Planning')}</h2>
         {mode === 'ptp' && (
           <button
             onClick={clear}
-            aria-label="Clear analysis"
+            aria-label={tx('Clear analysis')}
             className="ml-auto grid h-6 w-6 place-items-center rounded text-fg/50 hover:bg-fg/10 hover:text-fg"
           >
             <X className="h-4 w-4" />
@@ -809,7 +830,7 @@ export function RfAnalysisPanel() {
       </div>
 
       {/* Mode selector */}
-      <div role="tablist" aria-label="RF planning mode" className="flex gap-1 border-b border-fg/10 px-2 py-1.5">
+      <div role="tablist" aria-label={tx('RF planning mode')} className="flex gap-1 border-b border-fg/10 px-2 py-1.5">
         {MODES.map((m) => (
           <button
             key={m.id}
@@ -821,14 +842,14 @@ export function RfAnalysisPanel() {
               (mode === m.id ? 'bg-accent/20 text-accent' : 'text-fg/55 hover:bg-fg/8 hover:text-fg/85')
             }
           >
-            {m.label}
+            {tx(m.label)}
           </button>
         ))}
       </div>
 
       {/* PtP sub-tabs (Summary / Link Budget / Terrain / Fresnel) */}
       {mode === 'ptp' && (
-        <div role="tablist" aria-label="Link analysis views" className="flex gap-1 border-b border-fg/10 px-2 py-1.5">
+        <div role="tablist" aria-label={tx('Link analysis views')} className="flex gap-1 border-b border-fg/10 px-2 py-1.5">
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -840,7 +861,7 @@ export function RfAnalysisPanel() {
                 (tab === t.id ? 'bg-accent/20 text-accent' : 'text-fg/55 hover:bg-fg/8 hover:text-fg/85')
               }
             >
-              {t.label}
+              {tx(t.label)}
             </button>
           ))}
         </div>
@@ -860,7 +881,7 @@ export function RfAnalysisPanel() {
         ) : loading ? (
           <div className="grid place-items-center gap-2 py-10 text-xs text-fg/55">
             <Loader2 className="h-5 w-5 animate-spin text-accent" />
-            Computing link budget…
+            {tx('Computing link budget…')}
           </div>
         ) : !result ? (
           <EmptyState endpointCount={endpointCount} />
